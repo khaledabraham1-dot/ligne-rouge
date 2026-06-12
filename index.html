@@ -216,9 +216,23 @@
         .nl-form button:hover{background:var(--red2)}
         .nl-note{font-size:.75rem;color:rgba(255,255,255,.5)}
 
+        /* FOOTER NEWSLETTER BAND */
+        .footer-nl-band{padding:44px 0;border-bottom:1px solid var(--border);margin-bottom:56px}
+        .footer-nl-inner{display:flex;align-items:center;gap:40px;flex-wrap:wrap}
+        .footer-nl-text{flex:1;min-width:200px}
+        .footer-nl-title{font-family:var(--font-h);font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:4px}
+        .footer-nl-sub{font-size:.85rem;color:var(--text2)}
+        .footer-nl-form{display:flex;gap:10px;flex:1;min-width:260px;max-width:440px}
+        .footer-nl-form input{flex:1;padding:11px 16px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-b);font-size:.88rem;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s}
+        .footer-nl-form input:focus{border-color:var(--red)}
+        .footer-nl-form button{padding:0 22px;background:var(--navy);color:#fff;border-radius:var(--radius);font-weight:700;font-size:.88rem;white-space:nowrap;transition:background .15s;cursor:pointer;border:none}
+        .footer-nl-form button:hover{background:var(--red)}
+        body.dark .footer-nl-form input{background:#374151;border-color:#4B5563;color:#F9FAFB}
+        body.dark .footer-nl-title{color:#F9FAFB}
+
         /* FOOTER */
         footer{background:var(--white);border-top:1px solid var(--border);padding:80px 0 40px}
-        .footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;margin-bottom:60px}
+        .footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;margin-bottom:0}
         .footer-brand{font-family:var(--font-h);font-size:1.6rem;font-weight:800;color:var(--navy);margin-bottom:20px;display:flex;align-items:center;gap:4px}
         .footer-brand .logo-rouge{color:var(--red)}
         .footer-desc{font-size:.9rem;color:var(--text2);margin-bottom:24px}
@@ -474,7 +488,7 @@
                 <div class="container">
                     <div class="section-header">
                         <h2 class="section-title">À la une</h2>
-                        <button class="section-link" onclick="filterCategory('all')" aria-label="Voir tous les articles">Tout voir →</button>
+                        <button class="section-link" onclick="filterCategory('all',null,'Accueil')" aria-label="Voir tous les articles">Tout voir →</button>
                     </div>
                     <div class="trending-grid" id="trending-grid">
                         <!-- Skeleton trending x4 -->
@@ -600,12 +614,12 @@
                 <div>
                     <h3 class="footer-col-title">Rubriques</h3>
                     <nav class="footer-col-links">
-                        <div class="footer-col-link" onclick="filterCategory('Actualité')">Actualité</div>
-                        <div class="footer-col-link" onclick="filterCategory('Politique')">Politique</div>
-                        <div class="footer-col-link" onclick="filterCategory('Sport')">Sport</div>
-                        <div class="footer-col-link" onclick="filterCategory('Société')">Société</div>
-                        <div class="footer-col-link" onclick="filterCategory('International')">International</div>
-                        <div class="footer-col-link" onclick="filterCategory('Culture')">Culture</div>
+                        <div class="footer-col-link" onclick="filterCategory('Actualité',null,'Actualité')">Actualité</div>
+                        <div class="footer-col-link" onclick="filterCategory('Politique',null,'Politique')">Politique</div>
+                        <div class="footer-col-link" onclick="filterCategory('Sport',null,'Sport')">Sport</div>
+                        <div class="footer-col-link" onclick="filterCategory('Société',null,'Société')">Société</div>
+                        <div class="footer-col-link" onclick="filterCategory('International',null,'International')">International</div>
+                        <div class="footer-col-link" onclick="filterCategory('Culture',null,'Culture')">Culture</div>
                     </nav>
                 </div>
                 <div>
@@ -618,10 +632,24 @@
                 <div>
                     <h3 class="footer-col-title">Contact</h3>
                     <nav class="footer-col-links">
-                        <div class="footer-col-link" onclick="showNotif('Contact bientôt disponible')">Nous écrire</div>
+                        <div class="footer-col-link" onclick="window.location.href='mailto:redaction@lignerougemedia.com?subject=Contact%20Ligne%20Rouge'">Nous écrire</div>
                     </nav>
                 </div>
             </div>
+
+            <div class="footer-nl-band">
+                <div class="footer-nl-inner">
+                    <div class="footer-nl-text">
+                        <div class="footer-nl-title">Newsletter Ligne Rouge</div>
+                        <div class="footer-nl-sub">Recevez l'actualité directement dans votre boîte mail.</div>
+                    </div>
+                    <form class="footer-nl-form" onsubmit="event.preventDefault(); subscribeNewsletter('fn-email')">
+                        <input type="email" id="fn-email" placeholder="votre@email.com" required aria-label="Email newsletter">
+                        <button type="submit">S'abonner</button>
+                    </form>
+                </div>
+            </div>
+
             <div class="footer-bottom">
                 <span>© 2026 <strong>Ligne Rouge</strong>. Tous droits réservés.</span>
                 <span>Média indépendant — Afrique francophone</span>
@@ -808,7 +836,17 @@
             document.querySelectorAll('.nav-cat').forEach(b => { b.classList.remove('active'); b.removeAttribute('aria-current'); });
             if (btn) { btn.classList.add('active'); btn.setAttribute('aria-current', 'page'); }
         }
-        function filterCategory(cat, btn) { setNavActive(btn); UI.showPage('page-home'); renderHome(cat); }
+        function filterCategory(cat, btn, label) {
+            if (btn) {
+                setNavActive(btn);
+            } else {
+                const text = label || (cat === 'all' ? 'Accueil' : cat);
+                const navBtn = [...document.querySelectorAll('.nav-cat')].find(b => b.textContent.trim() === text);
+                setNavActive(navBtn || null);
+            }
+            UI.showPage('page-home');
+            renderHome(cat);
+        }
 
         function openArticle(id) {
             const articles = getArticles();
@@ -981,7 +1019,20 @@
             document.querySelectorAll('.fade-up:not(.visible)').forEach(el => obs.observe(el));
         }
 
-        function subscribeNewsletter() { UI.showNotif('Merci pour votre inscription !'); document.getElementById('nl-email').value = ''; }
+        function subscribeNewsletter(inputId) {
+            const emailEl = document.getElementById(inputId || 'nl-email');
+            if (!emailEl) return;
+            const email = emailEl.value.trim().toLowerCase();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                UI.showNotif('Adresse email invalide.'); return;
+            }
+            const subs = JSON.parse(localStorage.getItem('lr_subscribers') || '[]');
+            if (subs.includes(email)) { UI.showNotif('Vous êtes déjà abonné(e) !'); emailEl.value = ''; return; }
+            subs.push(email);
+            localStorage.setItem('lr_subscribers', JSON.stringify(subs));
+            emailEl.value = '';
+            UI.showNotif('Merci ! Vous recevrez nos prochaines actualités.');
+        }
         function toggleSearch() {
             const o = document.getElementById('search-overlay');
             o.classList.toggle('open');

@@ -183,6 +183,7 @@
             <button class="nav-item" data-sec="new" onclick="nav('new')"><span class="nav-icon">＋</span>Nouvel article</button>
             <button class="nav-item" data-sec="comments" onclick="nav('comments')"><span class="nav-icon">✉</span>Commentaires<span class="nav-badge show" id="badge-cmts" style="background:var(--warning)"></span></button>
             <button class="nav-item" data-sec="audit" onclick="nav('audit')"><span class="nav-icon">📋</span>Journal d'audit</button>
+            <button class="nav-item" data-sec="subscribers" onclick="nav('subscribers')"><span class="nav-icon">✉</span>Abonnés<span class="nav-badge" id="badge-subs"></span></button>
             <button class="nav-item" data-sec="settings" onclick="nav('settings')"><span class="nav-icon">⚙</span>Réglages</button>
         </nav>
         <div class="sb-footer">
@@ -205,6 +206,7 @@
                     <div class="stat-card accent"><div class="stat-value" id="st-pub">0</div><div class="stat-label">Publiés</div></div>
                     <div class="stat-card"><div class="stat-value" id="st-cmts">0</div><div class="stat-label">Commentaires en attente</div></div>
                     <div class="stat-card"><div class="stat-value" id="st-views">0</div><div class="stat-label">Vues totales</div></div>
+                    <div class="stat-card" style="cursor:pointer" onclick="nav('subscribers')"><div class="stat-value" id="st-subs">0</div><div class="stat-label">Abonnés newsletter</div></div>
                 </div>
                 <div class="dash-grid">
                     <div class="card">
@@ -315,6 +317,21 @@
                         <tbody id="audit-tbody"></tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- SUBSCRIBERS -->
+            <div id="sec-subscribers" class="sec">
+                <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+                    <h2>Abonnés newsletter</h2>
+                    <button class="btn btn-primary" onclick="exportSubscribers()">⬇ Exporter CSV</button>
+                </div>
+                <div class="card" style="padding:0;overflow:hidden">
+                    <table class="table" style="margin-bottom:0">
+                        <thead><tr><th>#</th><th>Email</th><th>Actions</th></tr></thead>
+                        <tbody id="subs-tbody"></tbody>
+                    </table>
+                </div>
+                <p id="subs-empty" style="text-align:center;color:var(--text3);padding:40px;display:none">Aucun abonné pour l'instant.</p>
             </div>
 
             <!-- SETTINGS -->
@@ -467,7 +484,7 @@ const INTEGRITY = {
 };
 
 const KEY = 'lr_';
-const SECTION_NAMES = {dashboard:'Tableau de bord',articles:'Articles',new:'Nouvel article',comments:'Commentaires',audit:'Journal d\'audit',settings:'Réglages'};
+const SECTION_NAMES = {dashboard:'Tableau de bord',articles:'Articles',new:'Nouvel article',comments:'Commentaires',audit:'Journal d\'audit',subscribers:'Abonnés newsletter',settings:'Réglages'};
 
 const DEFAULT_ARTS = [
     {id:'d1',cat:'Politique',title:'Nouveaux enjeux géopolitiques en Afrique de l\'Ouest',subtitle:'Une analyse profonde des changements récents.',date:'12 Juin 2026',read:'6 min',views:12450,status:'published',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop',body:'<p>L\'Afrique de l\'Ouest traverse une période de transformation politique majeure, marquée par de nouvelles alliances et des reconfigurations du pouvoir.</p>',createdAt:1718150400000},
@@ -580,6 +597,7 @@ function nav(sec) {
     else if (sec === 'articles') renderArts();
     else if (sec === 'comments') renderCmts(cmtFilter);
     else if (sec === 'audit') renderAudit();
+    else if (sec === 'subscribers') renderSubscribers();
     else if (sec === 'new') { editId = null; resetForm(); }
 }
 
@@ -596,6 +614,42 @@ function renderAudit() {
     `).join('') || '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:28px">Aucune action enregistrée</td></tr>';
 }
 
+// ---- SUBSCRIBERS ----
+function getSubscribers() {
+    return JSON.parse(localStorage.getItem('lr_subscribers') || '[]');
+}
+function renderSubscribers() {
+    const subs = getSubscribers();
+    const tbody = document.getElementById('subs-tbody');
+    const empty = document.getElementById('subs-empty');
+    if (!subs.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    tbody.innerHTML = subs.map((email, i) => `
+        <tr>
+            <td style="color:var(--text3);width:40px">${i + 1}</td>
+            <td>${Sec.esc(email)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="removeSubscriber(${i})">Supprimer</button></td>
+        </tr>
+    `).join('');
+}
+function removeSubscriber(idx) {
+    const subs = getSubscribers();
+    subs.splice(idx, 1);
+    localStorage.setItem('lr_subscribers', JSON.stringify(subs));
+    renderSubscribers();
+    updateBadges();
+}
+function exportSubscribers() {
+    const subs = getSubscribers();
+    if (!subs.length) { notif('Aucun abonné à exporter.', true); return; }
+    const csv = 'Email\n' + subs.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'abonnes-lignerougecia-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+}
+
 // ---- BADGES ----
 function updateBadges() {
     const arts = DB.arts.all();
@@ -603,6 +657,10 @@ function updateBadges() {
     const badge = document.getElementById('badge-cmts');
     badge.textContent = pending;
     badge.className = 'nav-badge' + (pending > 0 ? ' show' : '');
+    const subsBadge = document.getElementById('badge-subs');
+    const subsCount = getSubscribers().length;
+    subsBadge.textContent = subsCount;
+    subsBadge.className = 'nav-badge' + (subsCount > 0 ? ' show' : '');
 }
 
 // ---- DASHBOARD ----
@@ -616,6 +674,7 @@ function renderDash() {
     document.getElementById('st-pub').textContent = pub.length;
     document.getElementById('st-cmts').textContent = pend.length;
     document.getElementById('st-views').textContent = views.toLocaleString('fr-FR');
+    document.getElementById('st-subs').textContent = getSubscribers().length;
 
     document.getElementById('dash-arts').innerHTML = arts.slice(0,5).map(a => `
         <tr>
