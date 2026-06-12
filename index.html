@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ligne Rouge | Média numérique premium</title>
+    <meta name="description" content="Ligne Rouge — Plateforme d'information indépendante. Actualité, Politique, Sport, Société, International, Culture.">
+
+    <meta property="og:title" content="Ligne Rouge | Média numérique premium">
+    <meta property="og:description" content="Plateforme d'information indépendante. Actualité, Politique, Sport, Société, International, Culture.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="Ligne Rouge">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsMediaOrganization",
+      "name": "Ligne Rouge",
+      "description": "Plateforme d'information indépendante en Afrique francophone.",
+      "editor": {
+        "@type": "Person",
+        "name": "Alassane Ibrahima",
+        "jobTitle": "Rédacteur en chef"
+      }
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Source+Sans+3:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#F2F1EE;
+            --bg2:#ECEAE6;
+            --white:#FFFFFF;
+            --navy:#0D1B2A;
+            --navy2:#162233;
+            --red:#C01D35;
+            --red2:#A01728;
+            --text:#1A1A1A;
+            --text2:#4A4A4A;
+            --text3:#7A7A7A;
+            --border:#DEDBD4;
+            --border2:#CCCAC3;
+            --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.06);
+            --shadow2:0 2px 8px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.08);
+            --radius:4px;
+            --radius2:8px;
+            --font-h:'Playfair Display',Georgia,serif;
+            --font-b:'Source Sans 3',system-ui,sans-serif;
+            --font-s:'Source Serif 4',Georgia,serif;
+            --nav-h:64px;
+            --ticker-h:40px;
+            --max:1320px;
+        }
+        html{scroll-behavior:smooth;font-size:16px}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-b);line-height:1.6;-webkit-font-smoothing:antialiased}
+        a{color:inherit;text-decoration:none}
+        img{display:block;max-width:100%;height:auto}
+        button{cursor:pointer;font-family:var(--font-b);border:none;background:none}
+        .page{display:none}.page.active{display:block}
+        .container{max-width:var(--max);margin:0 auto;padding:0 24px}
+
+        /* TICKER */
+        #ticker{background:var(--navy);height:var(--ticker-h);display:flex;align-items:center;overflow:hidden;position:relative;z-index:100}
+        .ticker-label{background:var(--red);color:#fff;font-family:var(--font-b);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 14px;white-space:nowrap;flex-shrink:0;height:100%;display:flex;align-items:center}
+        .ticker-track{display:flex;align-items:center;overflow:hidden;flex:1;height:100%}
+        .ticker-inner{display:flex;white-space:nowrap;animation:tickerScroll 40s linear infinite}
+        .ticker-inner:hover{animation-play-state:paused}
+        .ticker-item{color:#E8E4DC;font-size:.8rem;font-weight:500;padding:0 48px;display:inline-flex;align-items:center;gap:8px}
+        .ticker-dot{width:4px;height:4px;background:var(--red);border-radius:50%;flex-shrink:0}
+        @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+        /* NAV */
+        #nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;height:var(--nav-h)}
+        .nav-inner{display:flex;align-items:center;height:100%;gap:0;position:relative}
+        .nav-logo{font-family:var(--font-h);font-size:1.6rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;flex-shrink:0;cursor:pointer;display:flex;align-items:center;gap:4px}
+        .nav-logo .logo-ligne{color:var(--navy)}
+        .nav-logo .logo-rouge{color:var(--red)}
+        .nav-divider{width:1px;height:28px;background:var(--border2);margin:0 20px;flex-shrink:0}
+        .nav-cats{display:flex;align-items:center;gap:2px;flex:1}
+        .nav-cat{font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text2);padding:8px 12px;border-radius:var(--radius);transition:color .15s,background .15s;white-space:nowrap;cursor:pointer}
+        .nav-cat:hover,.nav-cat.active{color:var(--navy);background:var(--bg)}
+        .nav-cat.active{border-bottom:2px solid var(--red);border-radius:0}
+        .nav-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+        .nav-search-btn{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:500;color:var(--text2);background:var(--bg);border:1px solid var(--border);padding:7px 14px;border-radius:20px;transition:all .15s}
+        .nav-search-btn:hover{border-color:var(--border2);color:var(--text)}
+        .nav-hamburger{display:none;flex-direction:column;gap:5px;padding:6px;cursor:pointer}
+        .nav-hamburger span{width:22px;height:2px;background:var(--text);transition:all .25s;display:block}
+
+        /* SEARCH OVERLAY */
+        #search-overlay{position:fixed;inset:0;background:rgba(13,27,42,.85);z-index:500;display:none;align-items:flex-start;justify-content:center;padding-top:80px;backdrop-filter:blur(4px)}
+        #search-overlay.open{display:flex}
+        .search-box{background:var(--white);border-radius:var(--radius2);padding:24px;width:100%;max-width:680px;margin:0 24px}
+        .search-input-wrap{display:flex;align-items:center;border:2px solid var(--border2);border-radius:var(--radius);overflow:hidden;transition:border-color .15s}
+        .search-input-wrap:focus-within{border-color:var(--navy)}
+        .search-input-wrap input{flex:1;border:none;outline:none;font-size:1.05rem;font-family:var(--font-b);padding:12px 16px;background:transparent;color:var(--text)}
+        .search-input-wrap button{background:var(--navy);color:#fff;padding:12px 20px;font-size:.9rem;font-weight:600;transition:background .15s}
+        .search-input-wrap button:hover{background:var(--navy2)}
+        .search-close{color:var(--text3);font-size:.85rem;margin-top:14px;cursor:pointer;display:flex;align-items:center;gap:6px;width:fit-content;padding:4px 0;transition:color .15s}
+        .search-close:hover{color:var(--text)}
+        .search-results{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+        .search-result-item{padding:12px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:border-color .15s,background .15s}
+        .search-result-item:hover{border-color:var(--border2);background:var(--bg)}
+        .sri-title{font-family:var(--font-h);font-size:1rem;font-weight:600;color:var(--text);line-height:1.3}
+
+        /* HERO */
+        .hero{padding:40px 0 48px;background:var(--white);border-bottom:1px solid var(--border)}
+        .hero-grid{display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start}
+        .hero-main{position:relative;overflow:hidden;border-radius:var(--radius);cursor:pointer}
+        .hero-main img{width:100%;height:480px;object-fit:cover;transition:transform .5s ease;display:block}
+        .hero-main:hover img{transform:scale(1.02)}
+        .hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,27,42,.9) 0%,rgba(13,27,42,.3) 50%,transparent 100%)}
+        .hero-content{position:absolute;bottom:0;left:0;right:0;padding:28px}
+        .hero-cat-badge{display:inline-flex;background:var(--red);color:#fff;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:2px;margin-bottom:12px}
+        .hero-title{font-family:var(--font-h);font-size:2rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:10px}
+        .hero-sub{font-size:.9rem;color:rgba(255,255,255,.82);line-height:1.5;margin-bottom:16px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .hero-meta{display:flex;align-items:center;gap:16px;font-size:.75rem;color:rgba(255,255,255,.7)}
+        .hero-sidebar{display:flex;flex-direction:column;gap:16px}
+        .hero-side-item{display:flex;gap:14px;cursor:pointer;padding:14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);transition:all .2s}
+        .hero-side-item:hover{border-color:var(--border2);background:var(--white);box-shadow:var(--shadow)}
+        .hero-side-img{width:90px;height:72px;object-fit:cover;border-radius:var(--radius);flex-shrink:0}
+        .hero-side-cat{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:4px}
+        .hero-side-title{font-family:var(--font-h);font-size:0.92rem;font-weight:600;line-height:1.3;color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+        /* SECTION HEADERS */
+        .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+        .section-title{font-family:var(--font-h);font-size:1.25rem;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:10px}
+        .section-title::before{content:'';width:3px;height:20px;background:var(--red);border-radius:2px;display:block;flex-shrink:0}
+        .section-link{font-size:.75rem;font-weight:600;color:var(--text3);letter-spacing:.03em;border:1px solid var(--border);padding:6px 14px;border-radius:20px;transition:all .15s;cursor:pointer}
+        .section-link:hover{color:var(--navy);border-color:var(--navy)}
+
+        /* TRENDING */
+        .trending{padding:40px 0;background:var(--white)}
+        .trending-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+        .trend-card{cursor:pointer;transition:transform .2s}
+        .trend-card:hover{transform:translateY(-3px)}
+        .trend-img{width:100%;height:190px;object-fit:cover;border-radius:var(--radius);margin-bottom:12px}
+        .trend-num{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+        .trend-title{font-family:var(--font-h);font-size:1rem;font-weight:700;line-height:1.3;color:var(--text);margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+        .trend-meta{font-size:.72rem;color:var(--text3)}
+
+        /* ABOUT / BIOGRAPHIE */
+        .about-section{padding:80px 0;background:var(--white);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+        .bio-card{display:grid;grid-template-columns:320px 1fr;gap:56px;align-items:start;background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;padding:0}
+        .bio-photo-col{background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:40px 32px;min-height:420px}
+        .bio-photo{width:180px;height:220px;object-fit:cover;object-position:top center;border-radius:8px;border:4px solid rgba(255,255,255,.15);margin-bottom:20px}
+        .bio-photo-name{font-family:var(--font-h);font-size:1.25rem;font-weight:700;color:#fff;text-align:center;margin-bottom:6px}
+        .bio-photo-role{font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--red);text-align:center;margin-bottom:20px}
+        .bio-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(192,29,53,.15);border:1px solid rgba(192,29,53,.3);color:rgba(255,255,255,.85);font-size:.72rem;font-weight:600;padding:5px 12px;border-radius:20px}
+        .bio-text-col{padding:40px 40px 40px 0}
+        .bio-quote{font-family:var(--font-s);font-size:1.35rem;font-style:italic;color:var(--navy);line-height:1.5;margin-bottom:32px;padding-left:20px;border-left:3px solid var(--red)}
+        .bio-section-label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:12px}
+        .bio-paragraph{font-size:.97rem;color:var(--text2);line-height:1.8;margin-bottom:20px}
+        .bio-timeline{display:flex;flex-direction:column;gap:16px;margin-top:8px}
+        .bio-timeline-item{display:flex;gap:16px;align-items:flex-start}
+        .bio-year{font-size:.78rem;font-weight:700;color:var(--red);min-width:42px;padding-top:3px}
+        .bio-event{font-size:.9rem;color:var(--text2);line-height:1.5}
+        .bio-event strong{color:var(--navy);font-weight:600}
+        .bio-values{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+        .bio-value-item{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+        .bio-value-icon{font-size:1.2rem;margin-bottom:6px}
+        .bio-value-title{font-size:.82rem;font-weight:700;color:var(--navy);margin-bottom:4px}
+        .bio-value-text{font-size:.78rem;color:var(--text3);line-height:1.4}
+
+        /* NEWSLETTER */
+        .newsletter{padding:80px 0;background:var(--navy);color:#fff;text-align:center}
+        .newsletter-inner{max-width:600px;margin:0 auto;padding:0 24px}
+        .nl-tag{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:16px}
+        .nl-title{font-family:var(--font-h);font-size:2.2rem;font-weight:700;line-height:1.2;margin-bottom:16px}
+        .nl-sub{font-size:1rem;color:rgba(255,255,255,.7);margin-bottom:32px}
+        .nl-form{display:flex;gap:12px;max-width:480px;margin:0 auto 16px}
+        .nl-form input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius);padding:14px 20px;color:#fff;font-family:var(--font-b);outline:none;transition:border-color .15s}
+        .nl-form input:focus{border-color:var(--red)}
+        .nl-form button{background:var(--red);color:#fff;font-weight:700;padding:0 28px;border-radius:var(--radius);transition:background .15s}
+        .nl-form button:hover{background:var(--red2)}
+        .nl-note{font-size:.75rem;color:rgba(255,255,255,.5)}
+
+        /* FOOTER */
+        footer{background:var(--white);border-top:1px solid var(--border);padding:80px 0 40px}
+        .footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:48px;margin-bottom:60px}
+        .footer-brand{font-family:var(--font-h);font-size:1.6rem;font-weight:800;color:var(--navy);margin-bottom:20px;display:flex;align-items:center;gap:4px}
+        .footer-brand .logo-rouge{color:var(--red)}
+        .footer-desc{font-size:.9rem;color:var(--text2);margin-bottom:24px}
+        .footer-social{display:flex;gap:12px}
+        .social-btn{width:36px;height:36px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--navy);transition:all .15s;cursor:pointer}
+        .social-btn:hover{background:var(--navy);color:#fff}
+        .footer-col-title{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);margin-bottom:24px}
+        .footer-col-links{display:flex;flex-direction:column;gap:12px}
+        .footer-col-link{font-size:.88rem;color:var(--text2);cursor:pointer;transition:color .15s}
+        .footer-col-link:hover{color:var(--red)}
+        .footer-bottom{padding-top:32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--text3)}
+
+        /* ARTICLE PAGE */
+        .art-hero{padding:60px 0;background:var(--white)}
+        .art-container{max-width:820px;margin:0 auto;padding:0 24px}
+        .art-cat{display:inline-block;color:var(--red);font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+        .art-title{font-family:var(--font-h);font-size:3rem;font-weight:800;line-height:1.1;color:var(--navy);margin-bottom:24px}
+        .art-subtitle{font-family:var(--font-s);font-size:1.35rem;color:var(--text2);line-height:1.4;margin-bottom:32px;font-style:italic}
+        .art-meta-top{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:40px}
+        .art-author{display:flex;align-items:center;gap:12px}
+        .author-img{width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:top center;background:var(--bg2)}
+        .author-name{font-weight:700;font-size:.9rem}
+        .author-date{font-size:.8rem;color:var(--text3)}
+        .art-main-img-wrap{margin-bottom:48px}
+        .art-main-img-wrap img{width:100%;border-radius:var(--radius2)}
+        .art-body{font-family:var(--font-s);font-size:1.2rem;line-height:1.75;color:var(--text)}
+        .art-body p{margin-bottom:28px}
+
+        .notification{position:fixed;bottom:30px;right:30px;background:var(--navy);color:#fff;padding:16px 24px;border-radius:var(--radius2);box-shadow:var(--shadow2);display:flex;align-items:center;gap:12px;transform:translateY(100px);opacity:0;transition:all .4s cubic-bezier(.175,.885,.32,1.275);z-index:1000}
+        .notification.show{transform:translateY(0);opacity:1}
+
+        @media (max-width:1024px){
+            .hero-grid{grid-template-columns:1fr}
+            .hero-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+            .bio-card{grid-template-columns:1fr}
+            .bio-photo-col{min-height:auto;flex-direction:row;gap:24px;align-items:center;padding:32px}
+            .bio-text-col{padding:0 32px 32px}
+        }
+        @media (max-width:768px){
+            .nav-cats,.nav-divider{display:none}
+            .nav-hamburger{display:flex}
+            .hero-sidebar{grid-template-columns:1fr}
+            .trending-grid{grid-template-columns:1fr 1fr}
+            .footer-grid{grid-template-columns:1fr 1fr}
+            .art-title{font-size:2.2rem}
+            .nl-form{flex-direction:column}
+            .bio-values{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#main-content" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;" onfocus="this.style.left='0';this.style.top='0';this.style.background='var(--red)';this.style.color='#fff';this.style.padding='10px';this.style.zIndex='1001'">Aller au contenu principal</a>
+
+    <div id="ticker" role="marquee" aria-label="Actualités défilantes">
+        <div class="ticker-label">Flash Info</div>
+        <div class="ticker-track"><div class="ticker-inner" id="ticker-inner"></div></div>
+    </div>
+
+    <nav id="nav" role="navigation" aria-label="Menu principal">
+        <div class="container nav-inner">
+            <div class="nav-logo" onclick="showPage('page-home')" role="link" aria-label="Retour à l'accueil">
+                <span class="logo-ligne">LIGNE</span>&nbsp;<span class="logo-rouge">ROUGE</span>
+            </div>
+            <div class="nav-divider" aria-hidden="true"></div>
+            <div class="nav-cats">
+                <button class="nav-cat active" onclick="filterCategory('all')" aria-current="page">Accueil</button>
+                <button class="nav-cat" onclick="filterCategory('Actualité')">Actualité</button>
+                <button class="nav-cat" onclick="filterCategory('Politique')">Politique</button>
+                <button class="nav-cat" onclick="filterCategory('Sport')">Sport</button>
+                <button class="nav-cat" onclick="filterCategory('Société')">Société</button>
+                <button class="nav-cat" onclick="filterCategory('International')">International</button>
+                <button class="nav-cat" onclick="filterCategory('Culture')">Culture</button>
+                <button class="nav-cat" onclick="showPage('page-about')">À propos</button>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-search-btn" onclick="toggleSearch()" aria-label="Ouvrir la recherche">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <span>Rechercher</span>
+                </button>
+                <button class="nav-hamburger" onclick="openMobileMenu()" aria-label="Ouvrir le menu mobile">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="search-overlay" onclick="closeSearch(event)" role="dialog" aria-modal="true" aria-label="Recherche d'articles">
+        <div class="search-box">
+            <div class="search-input-wrap">
+                <input type="text" placeholder="Rechercher un article..." id="search-input" oninput="searchArticles(this.value)" aria-label="Terme de recherche">
+                <button onclick="searchArticles(document.getElementById('search-input').value)">Chercher</button>
+            </div>
+            <div class="search-close" onclick="toggleSearch()" role="button" tabindex="0">✕ Fermer la recherche</div>
+            <div class="search-results" id="search-results"></div>
+        </div>
+    </div>
+
+    <main id="main-content">
+
+        <!-- PAGE ACCUEIL -->
+        <div id="page-home" class="page active">
+            <section class="hero">
+                <div class="container"><div class="hero-grid" id="hero-grid"></div></div>
+            </section>
+            <section class="trending">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">À la une</h2>
+                        <button class="section-link" onclick="filterCategory('all')" aria-label="Voir tous les articles">Tout voir →</button>
+                    </div>
+                    <div class="trending-grid" id="trending-grid"></div>
+                </div>
+            </section>
+            <section class="newsletter">
+                <div class="newsletter-inner">
+                    <div class="nl-tag">Newsletter</div>
+                    <h2 class="nl-title">L'information, directement chez vous</h2>
+                    <p class="nl-sub">Recevez chaque matin les articles les plus importants sélectionnés par la rédaction de <strong>Ligne Rouge</strong>.</p>
+                    <form class="nl-form" onsubmit="event.preventDefault(); subscribeNewsletter();">
+                        <input type="email" placeholder="Votre adresse email" id="nl-email" required aria-label="Votre adresse email">
+                        <button type="submit">S'abonner</button>
+                    </form>
+                    <p class="nl-note">Pas de spam. Désabonnement en un clic.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAGE À PROPOS / BIOGRAPHIE -->
+        <div id="page-about" class="page">
+            <div style="padding:60px 0;background:var(--white);border-bottom:1px solid var(--border);">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">Rédacteur en chef</h2>
+                    </div>
+
+                    <div class="bio-card">
+                        <!-- Colonne photo -->
+                        <div class="bio-photo-col">
+                            <img
+                                src="Capture d'écran 2026-05-15 220637.png"
+                                alt="Alassane Ibrahima, Rédacteur en chef de Ligne Rouge"
+                                class="bio-photo"
+                            >
+                            <div class="bio-photo-name">Alassane Ibrahima</div>
+                            <div class="bio-photo-role">Rédacteur en chef</div>
+                            <div class="bio-badge">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                Ligne Rouge
+                            </div>
+                        </div>
+
+                        <!-- Colonne texte -->
+                        <div class="bio-text-col">
+                            <blockquote class="bio-quote">
+                                « Informer avec rigueur, servir la vérité, amplifier les voix qui comptent. »
+                            </blockquote>
+
+                            <div class="bio-section-label">Biographie</div>
+                            <p class="bio-paragraph">
+                                Né le <strong>11 avril 1985 à Kouandé</strong>, au nord du Bénin, Alassane Ibrahima grandit dans une région où l'accès à l'information est un enjeu quotidien. C'est dans cet environnement qu'il développe très tôt une sensibilité particulière pour la parole publique et le récit des réalités locales.
+                            </p>
+                            <p class="bio-paragraph">
+                                Après des études primaires et secondaires à <strong>Kouandé</strong>, il obtient son Baccalauréat au prestigieux <strong>Lycée Saint Augustin de Natitingou</strong>, établissement reconnu pour son excellence académique dans la région des Atacora.
+                            </p>
+                            <p class="bio-paragraph">
+                                Fort de cette formation rigoureuse, il oriente sa carrière vers le journalisme et la communication, animé par la conviction que l'information de qualité est un pilier fondamental de la démocratie et du développement en Afrique francophone.
+                            </p>
+
+                            <div class="bio-section-label" style="margin-top:28px;">Parcours</div>
+                            <div class="bio-timeline">
+                                <div class="bio-timeline-item">
+                                    <span class="bio-year">1985</span>
+                                    <span class="bio-event">Naissance à <strong>Kouandé</strong>, Bénin</span>
+                                </div>
+                                <div class="bio-timeline-item">
+                                    <span class="bio-year">Scol.</span>
+                                    <span class="bio-event">Études primaires et secondaires à <strong>Kouandé</strong></span>
+                                </div>
+                                <div class="bio-timeline-item">
+                                    <span class="bio-year">Bac</span>
+                                    <span class="bio-event">Baccalauréat au <strong>Lycée Saint Augustin</strong>, Natitingou</span>
+                                </div>
+                                <div class="bio-timeline-item">
+                                    <span class="bio-year">Actuel</span>
+                                    <span class="bio-event">Rédacteur en chef de <strong>Ligne Rouge</strong></span>
+                                </div>
+                            </div>
+
+                            <div class="bio-section-label" style="margin-top:32px;">Ses engagements éditoriaux</div>
+                            <div class="bio-values">
+                                <div class="bio-value-item">
+                                    <div class="bio-value-icon">&#9999;</div>
+                                    <div class="bio-value-title">Indépendance</div>
+                                    <div class="bio-value-text">Une ligne éditoriale libre de toute pression politique ou commerciale</div>
+                                </div>
+                                <div class="bio-value-item">
+                                    <div class="bio-value-icon">&#128269;</div>
+                                    <div class="bio-value-title">Rigueur factuelle</div>
+                                    <div class="bio-value-text">Chaque information vérifiée, sourcée et contextualisée</div>
+                                </div>
+                                <div class="bio-value-item">
+                                    <div class="bio-value-icon">&#127758;</div>
+                                    <div class="bio-value-title">Ancrage local</div>
+                                    <div class="bio-value-text">L'actualité de l'Afrique francophone au cœur des priorités</div>
+                                </div>
+                                <div class="bio-value-item">
+                                    <div class="bio-value-icon">&#128101;</div>
+                                    <div class="bio-value-title">Impact citoyen</div>
+                                    <div class="bio-value-text">Des reportages qui enrichissent le débat public et servent les citoyens</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section Ligne Rouge -->
+                    <div style="margin-top:60px;text-align:center;">
+                        <div style="font-family:var(--font-h);font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:16px;">Le média</div>
+                        <h3 style="font-family:var(--font-h);font-size:2rem;font-weight:800;color:var(--navy);margin-bottom:16px;">
+                            <span style="color:var(--navy)">Ligne</span> <span style="color:var(--red)">Rouge</span>
+                        </h3>
+                        <p style="font-size:1rem;color:var(--text2);max-width:640px;margin:0 auto;line-height:1.8;">
+                            Plateforme d'information indépendante dédiée à l'actualité rigoureuse et à l'impact citoyen en Afrique francophone. Fondée sur les valeurs d'éthique, de transparence et d'excellence journalistique.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE ARTICLE -->
+        <div id="page-article" class="page"><article id="article-content"></article></div>
+
+    </main>
+
+    <footer role="contentinfo">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-brand"><span>Ligne</span>&nbsp;<span class="logo-rouge">Rouge</span></div>
+                    <p class="footer-desc">Plateforme d'information indépendante dédiée à l'actualité rigoureuse en Afrique francophone.</p>
+                    <div class="footer-social">
+                        <button class="social-btn" onclick="showNotif('Bientôt disponible')" aria-label="Twitter">𝕏</button>
+                        <button class="social-btn" onclick="showNotif('Bientôt disponible')" aria-label="Facebook">f</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="footer-col-title">Rubriques</h3>
+                    <nav class="footer-col-links">
+                        <div class="footer-col-link" onclick="filterCategory('Actualité')">Actualité</div>
+                        <div class="footer-col-link" onclick="filterCategory('Politique')">Politique</div>
+                        <div class="footer-col-link" onclick="filterCategory('Sport')">Sport</div>
+                        <div class="footer-col-link" onclick="filterCategory('Société')">Société</div>
+                        <div class="footer-col-link" onclick="filterCategory('International')">International</div>
+                        <div class="footer-col-link" onclick="filterCategory('Culture')">Culture</div>
+                    </nav>
+                </div>
+                <div>
+                    <h3 class="footer-col-title">Le média</h3>
+                    <nav class="footer-col-links">
+                        <div class="footer-col-link" onclick="showPage('page-about')">À propos</div>
+                        <div class="footer-col-link" onclick="showPage('page-about')">Rédacteur en chef</div>
+                    </nav>
+                </div>
+                <div>
+                    <h3 class="footer-col-title">Contact</h3>
+                    <nav class="footer-col-links">
+                        <div class="footer-col-link" onclick="showNotif('Contact bientôt disponible')">Nous écrire</div>
+                    </nav>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 <strong>Ligne Rouge</strong>. Tous droits réservés.</span>
+                <span>Média indépendant — Afrique francophone</span>
+            </div>
+        </div>
+    </footer>
+
+    <div id="notif" class="notification" role="alert" aria-live="polite"><span id="notif-msg"></span></div>
+
+    <script>
+        const IMGS = [
+            "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=800&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=800&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop"
+        ];
+
+        let articles = [
+            { id: 1, cat: 'Politique', title: 'Nouveaux enjeux géopolitiques en Afrique de l\'Ouest', subtitle: 'Une analyse profonde des changements récents.', date: '12 Juin 2026', read: '6 min', views: 12450, img: IMGS[1], body: '<p>L\'Afrique de l\'Ouest traverse une période de transformation politique majeure...</p>' },
+            { id: 2, cat: 'Sport', title: 'Lions de la Téranga : Préparatifs pour la Coupe du Monde', subtitle: 'Le Sénégal affine sa stratégie.', date: '11 Juin 2026', read: '4 min', views: 8900, img: IMGS[2], body: '<p>L\'équipe nationale du Sénégal se prépare intensivement...</p>' },
+            { id: 3, cat: 'Actualité', title: 'Innovation technologique : Le hub numérique de Dakar', subtitle: 'La capitale sénégalaise s\'affirme comme leader tech.', date: '10 Juin 2026', read: '5 min', views: 5600, img: IMGS[0], body: '<p>Dakar continue d\'attirer les investissements technologiques...</p>' },
+            { id: 4, cat: 'Culture', title: 'Biennale de Dakar : Un succès retentissant', subtitle: 'L\'art contemporain africain à l\'honneur.', date: '09 Juin 2026', read: '7 min', views: 4200, img: IMGS[4], body: '<p>L\'édition de cette année a battu tous les records d\'affluence...</p>' },
+            { id: 5, cat: 'International', title: 'Sommet sur le climat : Les engagements de l\'Afrique', subtitle: 'Vers une transition énergétique durable.', date: '08 Juin 2026', read: '8 min', views: 3100, img: IMGS[3], body: '<p>Les dirigeants africains ont porté une voix unie lors du sommet...</p>' }
+        ];
+
+        const UI = {
+            showPage(id) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                const target = document.getElementById(id);
+                if (target) { target.classList.add('active'); window.scrollTo(0, 0); }
+            },
+            showNotif(msg) {
+                const el = document.getElementById('notif');
+                document.getElementById('notif-msg').textContent = msg;
+                el.classList.add('show');
+                setTimeout(() => el.classList.remove('show'), 3500);
+            }
+        };
+
+        function showPage(id) { UI.showPage(id); }
+        function showNotif(msg) { UI.showNotif(msg); }
+        function filterCategory(cat) { UI.showPage('page-home'); renderHome(cat); }
+
+        function openArticle(id) {
+            const art = articles.find(a => a.id === id);
+            if (!art) return;
+            document.getElementById('article-content').innerHTML = `
+                <div class="art-hero"><div class="art-container">
+                    <span class="art-cat">${art.cat}</span>
+                    <h1 class="art-title">${art.title}</h1>
+                    <p class="art-subtitle">${art.subtitle}</p>
+                    <div class="art-meta-top">
+                        <div class="art-author">
+                            <img src="Capture d'écran 2026-05-15 220637.png" alt="Alassane Ibrahima" class="author-img" width="44" height="44">
+                            <div><div class="author-name">Alassane Ibrahima</div><div class="author-date">${art.date} · ${art.read}</div></div>
+                        </div>
+                        <button onclick="showPage('page-home')" style="font-size:.8rem;color:var(--text3);border:1px solid var(--border);padding:6px 14px;border-radius:20px;cursor:pointer;">← Retour</button>
+                    </div>
+                    <div class="art-main-img-wrap"><img src="${art.img}" alt="${art.title}" style="width:100%;border-radius:8px;"></div>
+                    <div class="art-body">${art.body}</div>
+                </div></div>
+            `;
+            UI.showPage('page-article');
+        }
+
+        function renderHome(filter = 'all') {
+            const filtered = filter === 'all' ? articles : articles.filter(a => a.cat === filter);
+            const heroGrid = document.getElementById('hero-grid');
+            if (filtered.length > 0) {
+                const main = filtered[0];
+                const side = filtered.slice(1, 4);
+                heroGrid.innerHTML = `
+                    <div class="hero-main" onclick="openArticle(${main.id})">
+                        <img src="${main.img}" alt="${main.title}" style="width:100%;height:480px;object-fit:cover;">
+                        <div class="hero-overlay"></div>
+                        <div class="hero-content">
+                            <span class="hero-cat-badge">${main.cat}</span>
+                            <h2 class="hero-title">${main.title}</h2>
+                            <p class="hero-sub">${main.subtitle}</p>
+                            <div class="hero-meta">${main.date}</div>
+                        </div>
+                    </div>
+                    <div class="hero-sidebar">${side.map(a => `
+                        <div class="hero-side-item" onclick="openArticle(${a.id})">
+                            <img src="${a.img}" alt="${a.title}" class="hero-side-img" width="90" height="72">
+                            <div><div class="hero-side-cat">${a.cat}</div><h3 class="hero-side-title">${a.title}</h3></div>
+                        </div>`).join('')}
+                    </div>
+                `;
+            }
+            document.getElementById('trending-grid').innerHTML = filtered.slice(0, 4).map((a, i) => `
+                <div class="trend-card" onclick="openArticle(${a.id})">
+                    <img src="${a.img}" alt="${a.title}" class="trend-img" width="300" height="190">
+                    <div class="trend-num">#${i + 1}</div>
+                    <h3 class="trend-title">${a.title}</h3>
+                    <div class="trend-meta">${a.date}</div>
+                </div>
+            `).join('');
+            document.getElementById('ticker-inner').innerHTML = articles.map(a =>
+                `<div class="ticker-item"><div class="ticker-dot"></div> ${a.title}</div>`
+            ).join('').repeat(2);
+        }
+
+        function subscribeNewsletter() { UI.showNotif('Merci pour votre inscription !'); document.getElementById('nl-email').value = ''; }
+        function toggleSearch() {
+            const o = document.getElementById('search-overlay');
+            o.classList.toggle('open');
+            if (o.classList.contains('open')) setTimeout(() => document.getElementById('search-input').focus(), 100);
+        }
+        function closeSearch(e) { if (e.target === document.getElementById('search-overlay')) toggleSearch(); }
+        function searchArticles(q) {
+            const res = document.getElementById('search-results');
+            if (!q || q.length < 2) { res.innerHTML = ''; return; }
+            const hits = articles.filter(a => a.title.toLowerCase().includes(q.toLowerCase()));
+            res.innerHTML = hits.length
+                ? hits.map(a => `<div class="search-result-item" onclick="openArticle(${a.id});toggleSearch()"><div class="sri-title">${a.title}</div></div>`).join('')
+                : '<p style="padding:12px;color:var(--text3)">Aucun résultat trouvé</p>';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => renderHome());
+    </script>
+</body>
+</html>
