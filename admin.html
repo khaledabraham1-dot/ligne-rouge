@@ -95,6 +95,10 @@
         .btn-sm.btn-success{background:var(--success);color:#fff;border-color:var(--success)}
         .btn-sm.btn-warning{background:var(--warning);color:#fff;border-color:var(--warning)}
         .btn-sm.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+        .btn-loading,.btn-sm.btn-loading{opacity:.55;pointer-events:none;cursor:default}
+        .btn-spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:btnSpin .55s linear infinite;flex-shrink:0;vertical-align:middle}
+        .btn-sm .btn-spinner{width:11px;height:11px}
+        @keyframes btnSpin{to{transform:rotate(360deg)}}
         .w-full{width:100%}
 
         /* FORMS */
@@ -251,8 +255,8 @@
                                 </select>
                             </div>
                             <div class="pub-actions">
-                                <button class="btn btn-outline w-full" onclick="saveArticle('draft')">💾 Enregistrer brouillon</button>
-                                <button class="btn btn-publish w-full" onclick="saveArticle('published')">🚀 Publier sur le site</button>
+                                <button class="btn btn-outline w-full" onclick="saveArticle('draft',this)">💾 Enregistrer brouillon</button>
+                                <button class="btn btn-publish w-full" onclick="saveArticle('published',this)">🚀 Publier sur le site</button>
                             </div>
                         </div>
                         <div class="card">
@@ -320,7 +324,7 @@
                             <p style="font-size:.72rem;color:var(--text3);margin-top:5px">8 car. min · 1 majuscule · 1 chiffre · 1 caractère spécial</p>
                         </div>
                         <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" id="set-pass2"></div>
-                        <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder</button>
+                        <button class="btn btn-primary" onclick="saveSettings(this)">Sauvegarder</button>
                     </div>
                     <div class="card">
                         <h4>Zone de danger</h4>
@@ -726,12 +730,22 @@ function compressImg(file, maxW = 1200, q = 0.78) {
     });
 }
 
-function saveArticle(status) {
+function btnLoad(btn) {
+    if (!btn) return () => {};
+    btn.disabled = true;
+    btn.classList.add('btn-loading');
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<span class="btn-spinner"></span>${orig}`;
+    return () => { btn.disabled = false; btn.classList.remove('btn-loading'); btn.innerHTML = orig; };
+}
+
+function saveArticle(status, btn) {
     if (!_checkSession()) return;
     const title = Sec.txt(document.getElementById('art-title').value.trim(), 200);
     if (!title) { notif('Le titre est obligatoire !', true); return; }
     const bodyRaw = Sec.txt(document.getElementById('art-body').value.trim(), 20000);
     if (!bodyRaw) { notif('Le contenu est obligatoire !', true); return; }
+    const reset = btnLoad(btn);
 
     const htmlBody = bodyRaw.split(/\n\s*\n/).filter(p => p.trim()).map(p => `<p>${p.trim().replace(/\n/g,' ')}</p>`).join('');
     const words = bodyRaw.split(/\s+/).length;
@@ -761,7 +775,7 @@ function saveArticle(status) {
     editId = null;
     Audit.log(status==='published'?'PUBLISH_ARTICLE':'SAVE_DRAFT', Sec.txt(title,100));
     notif(status === 'published' ? '🚀 Article publié sur le site !' : '💾 Brouillon enregistré');
-    setTimeout(() => nav('articles'), 800);
+    setTimeout(() => { reset(); nav('articles'); }, 800);
 }
 
 // ---- COMMENTS ----
@@ -778,20 +792,22 @@ function renderCmts(filter) {
             <td style="font-size:.8rem;color:var(--text3);white-space:nowrap">${c.date || ''}</td>
             <td><span class="badge badge-${c.status === 'approved' ? 'approved' : c.status === 'rejected' ? 'rejected' : 'pending'}">${c.status === 'approved' ? 'Approuvé' : c.status === 'rejected' ? 'Rejeté' : 'En attente'}</span></td>
             <td style="white-space:nowrap">
-                ${c.status !== 'approved' ? `<button class="btn-sm btn-success" onclick="cAction('${c.id}','approved')">✓ Approuver</button>` : ''}
-                ${c.status !== 'rejected' ? `<button class="btn-sm btn-warning" onclick="cAction('${c.id}','rejected')">✕ Rejeter</button>` : ''}
+                ${c.status !== 'approved' ? `<button class="btn-sm btn-success" onclick="cAction('${c.id}','approved',this)">✓ Approuver</button>` : ''}
+                ${c.status !== 'rejected' ? `<button class="btn-sm btn-warning" onclick="cAction('${c.id}','rejected',this)">✕ Rejeter</button>` : ''}
                 <button class="btn-sm btn-danger" onclick="delCmt('${c.id}')">🗑</button>
             </td>
         </tr>
     `).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:28px">Aucun commentaire</td></tr>';
 }
 
-function cAction(id, status) {
+function cAction(id, status, btn) {
     if (!_checkSession()) return;
-    const c = DB.cmts.find(Sec.txt(id,50)); if (!c) return;
-    c.status = status; DB.cmts.upsert(c); renderCmts(cmtFilter); updateBadges();
+    const reset = btnLoad(btn);
+    const c = DB.cmts.find(Sec.txt(id,50)); if (!c) { reset(); return; }
+    c.status = status; DB.cmts.upsert(c);
     Audit.log(status==='approved'?'APPROVE_COMMENT':'REJECT_COMMENT', 'Auteur: '+Sec.txt(c.author,50));
     notif(status === 'approved' ? 'Commentaire approuvé !' : 'Commentaire rejeté');
+    setTimeout(() => { reset(); renderCmts(cmtFilter); updateBadges(); }, 600);
 }
 
 function delCmt(id) {
@@ -803,7 +819,7 @@ function delCmt(id) {
 }
 
 // ---- SETTINGS ----
-async function saveSettings() {
+async function saveSettings(btn) {
     if (!_checkSession()) return;
     const u = Sec.txt(document.getElementById('set-user').value.trim(), 50);
     if (!u || u.length < 3) { notif('Nom d\'utilisateur requis (3 car. min)', true); return; }
@@ -811,22 +827,20 @@ async function saveSettings() {
     const p2 = document.getElementById('set-pass2').value;
 
     if (p1) {
-        // Politique mot de passe
-        if (!Sec.pwdOk(p1)) {
-            notif('Mot de passe : 8 car. min, 1 majuscule, 1 chiffre, 1 spécial', true);
-            return;
-        }
+        if (!Sec.pwdOk(p1)) { notif('Mot de passe : 8 car. min, 1 majuscule, 1 chiffre, 1 spécial', true); return; }
         if (p1 !== p2) { notif('Les mots de passe ne correspondent pas', true); return; }
     }
 
+    const reset = btnLoad(btn);
     const cfg = DB.cfg.get();
     cfg.username = u;
-    if (p1) cfg.password = await Sec.sha256(p1); // Stockage du HASH uniquement
+    if (p1) cfg.password = await Sec.sha256(p1);
     DB.cfg.save(cfg);
     document.getElementById('topbar-user').textContent = Sec.esc(u);
     document.getElementById('set-pass').value = '';
     document.getElementById('set-pass2').value = '';
     Audit.log('SETTINGS_UPDATE','Compte mis à jour: '+u);
+    reset();
     notif('Réglages sauvegardés !');
 }
 
