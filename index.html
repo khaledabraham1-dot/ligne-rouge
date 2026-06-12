@@ -103,8 +103,9 @@
         .ticker-dot{width:4px;height:4px;background:var(--red);border-radius:50%;flex-shrink:0}
         @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-        /* NAV */
-        #nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;height:var(--nav-h)}
+        /* NAV — glassmorphism */
+        #nav{background:rgba(255,255,255,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(222,219,212,.5);position:sticky;top:0;z-index:200;height:var(--nav-h)}
+        body.dark #nav{background:rgba(17,24,39,.88);border-bottom-color:rgba(255,255,255,.06)}
         .nav-inner{display:flex;align-items:center;height:100%;gap:0;position:relative}
         .nav-logo{font-family:var(--font-h);font-size:1.6rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;flex-shrink:0;cursor:pointer;display:flex;align-items:center;gap:4px}
         .nav-logo .logo-ligne{color:var(--navy)}
@@ -251,6 +252,31 @@
         .art-body{font-family:var(--font-s);font-size:1.2rem;line-height:1.75;color:var(--text)}
         .art-body p{margin-bottom:28px}
 
+        /* SHARE BUTTONS */
+        .share-bar{display:flex;align-items:center;gap:10px;margin:36px 0 28px;flex-wrap:wrap;padding:20px;background:var(--bg);border-radius:var(--radius2);border:1px solid var(--border)}
+        .share-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-right:4px}
+        .share-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;font-size:.82rem;font-weight:600;text-decoration:none;border:1px solid var(--border);color:var(--text2);background:var(--white);transition:transform .15s,box-shadow .15s,background .15s,color .15s,border-color .15s}
+        .share-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+        .share-btn.tw:hover{background:#000;color:#fff;border-color:#000}
+        .share-btn.wa:hover{background:#25D366;color:#fff;border-color:#25D366}
+        .share-btn.li:hover{background:#0077B5;color:#fff;border-color:#0077B5}
+
+        /* RELATED ARTICLES */
+        .related-section{margin:48px 0;padding-top:36px;border-top:2px solid var(--border)}
+        .related-title{font-family:var(--font-h);font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:22px;display:flex;align-items:center;gap:10px}
+        .related-title::before{content:'';width:3px;height:20px;background:var(--red);border-radius:2px;display:block;flex-shrink:0}
+        .related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+        .related-card{cursor:pointer;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);transition:transform .2s,box-shadow .2s,border-color .2s}
+        .related-card:hover{transform:translateY(-3px);box-shadow:var(--shadow2);border-color:var(--border2)}
+        .related-card img{width:100%;height:145px;object-fit:cover;display:block}
+        .related-card-body{padding:13px;background:var(--white)}
+        .related-cat{font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:5px}
+        .related-card-title{font-family:var(--font-h);font-size:.9rem;font-weight:700;line-height:1.3;color:var(--text)}
+
+        /* FADE-UP SCROLL */
+        .fade-up{opacity:0;transform:translateY(30px);transition:opacity .65s ease,transform .65s ease}
+        .fade-up.visible{opacity:1;transform:translateY(0)}
+
         .notification{position:fixed;bottom:30px;right:30px;background:var(--navy);color:#fff;padding:16px 24px;border-radius:var(--radius2);box-shadow:var(--shadow2);display:flex;align-items:center;gap:12px;transform:translateY(100px);opacity:0;transition:all .4s cubic-bezier(.175,.885,.32,1.275);z-index:1000}
         .notification.show{transform:translateY(0);opacity:1}
 
@@ -261,6 +287,7 @@
             .bio-photo-col{min-height:auto;flex-direction:row;gap:24px;align-items:center;padding:32px}
             .bio-text-col{padding:0 32px 32px}
         }
+        @media(max-width:600px){.related-grid{grid-template-columns:1fr 1fr}.share-btn{padding:6px 11px;font-size:.76rem}}
         @media (max-width:768px){
             .nav-cats,.nav-divider{display:none}
             .nav-hamburger{display:flex}
@@ -378,7 +405,7 @@
                     </div>
                 </div>
             </section>
-            <section class="newsletter">
+            <section class="newsletter fade-up">
                 <div class="newsletter-inner">
                     <div class="nl-tag">Newsletter</div>
                     <h2 class="nl-title">L'information, directement chez vous</h2>
@@ -400,7 +427,7 @@
                         <h2 class="section-title">Rédacteur en chef</h2>
                     </div>
 
-                    <div class="bio-card">
+                    <div class="bio-card fade-up">
                         <!-- Colonne photo -->
                         <div class="bio-photo-col">
                             <img
@@ -593,6 +620,7 @@
                 }
             } catch(e) {}
 
+            // Commentaires approuvés
             const approvedCmts = getComments(id);
             const cmtsHtml = approvedCmts.length ? approvedCmts.map(c => `
                 <div style="padding:16px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--bg)">
@@ -601,6 +629,34 @@
                 </div>
             `).join('') : '<p style="color:var(--text3);font-size:.9rem">Aucun commentaire pour cet article.</p>';
 
+            // Partage social
+            const pageUrl = encodeURIComponent(window.location.href);
+            const shareText = encodeURIComponent(art.title + ' — Ligne Rouge');
+            const shareBar = `
+                <div class="share-bar">
+                    <span class="share-label">Partager</span>
+                    <a class="share-btn tw" href="https://twitter.com/intent/tweet?text=${shareText}&url=${pageUrl}" target="_blank" rel="noopener">𝕏 Twitter</a>
+                    <a class="share-btn wa" href="https://wa.me/?text=${shareText}%20${pageUrl}" target="_blank" rel="noopener">💬 WhatsApp</a>
+                    <a class="share-btn li" href="https://www.linkedin.com/sharing/share-offsite/?url=${pageUrl}" target="_blank" rel="noopener">in LinkedIn</a>
+                </div>`;
+
+            // Articles similaires (même catégorie, exclut l'article actuel)
+            const related = articles.filter(a => a.cat === art.cat && a.id != art.id).slice(0, 3);
+            const relatedHtml = related.length ? `
+                <div class="related-section">
+                    <h3 class="related-title">À lire aussi</h3>
+                    <div class="related-grid">
+                        ${related.map(r => `
+                            <div class="related-card fade-up" onclick="openArticle('${r.id}')">
+                                <img src="${r.img}" alt="${r.title}" loading="lazy">
+                                <div class="related-card-body">
+                                    <div class="related-cat">${r.cat}</div>
+                                    <div class="related-card-title">${r.title}</div>
+                                </div>
+                            </div>`).join('')}
+                    </div>
+                </div>` : '';
+
             document.getElementById('article-content').innerHTML = `
                 <div class="art-hero"><div class="art-container">
                     <span class="art-cat">${art.cat}</span>
@@ -608,37 +664,26 @@
                     <p class="art-subtitle">${art.subtitle || ''}</p>
                     <div class="art-meta-top">
                         <div class="art-author">
-                            <img src="Capture d'écran 2026-05-15 220637.png" alt="Alassane Ibrahima" class="author-img" width="44" height="44">
+                            <img src="Capture d'écran 2026-05-15 220637.png" alt="Alassane Ibrahima" class="author-img" width="44" height="44" loading="lazy">
                             <div><div class="author-name">Alassane Ibrahima</div><div class="author-date">${art.date} · ${art.read}</div></div>
                         </div>
                         <button onclick="showPage('page-home')" style="font-size:.8rem;color:var(--text3);border:1px solid var(--border);padding:6px 14px;border-radius:20px;cursor:pointer;">← Retour</button>
                     </div>
-                    ${art.img ? `<div class="art-main-img-wrap"><img src="${art.img}" alt="${art.title}" style="width:100%;border-radius:8px;"></div>` : ''}
+                    ${art.img ? `<div class="art-main-img-wrap"><img src="${art.img}" alt="${art.title}" style="width:100%;border-radius:8px;" loading="lazy"></div>` : ''}
                     <div class="art-body">${art.body}</div>
-
+                    ${shareBar}
+                    ${relatedHtml}
                     <!-- COMMENTAIRES -->
-                    <div style="margin-top:56px;padding-top:40px;border-top:2px solid var(--border)">
-                        <h3 style="font-family:var(--font-h);font-size:1.4rem;font-weight:700;color:var(--navy);margin-bottom:24px">
-                            Commentaires (${approvedCmts.length})
-                        </h3>
+                    <div style="margin-top:48px;padding-top:36px;border-top:2px solid var(--border)">
+                        <h3 style="font-family:var(--font-h);font-size:1.4rem;font-weight:700;color:var(--navy);margin-bottom:24px">Commentaires (${approvedCmts.length})</h3>
                         <div id="cmts-list">${cmtsHtml}</div>
-
                         <div style="margin-top:32px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:24px">
                             <h4 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:18px">Laisser un commentaire</h4>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-                                <div>
-                                    <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:5px">Nom *</label>
-                                    <input id="cmt-name" type="text" placeholder="Votre nom" style="width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:.9rem;outline:none">
-                                </div>
-                                <div>
-                                    <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:5px">Email (optionnel)</label>
-                                    <input id="cmt-email" type="email" placeholder="votre@email.com" style="width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:.9rem;outline:none">
-                                </div>
+                                <div><label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:5px">Nom *</label><input id="cmt-name" type="text" placeholder="Votre nom" style="width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:.9rem;outline:none"></div>
+                                <div><label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:5px">Email (optionnel)</label><input id="cmt-email" type="email" placeholder="votre@email.com" style="width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:.9rem;outline:none"></div>
                             </div>
-                            <div style="margin-bottom:16px">
-                                <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:5px">Commentaire *</label>
-                                <textarea id="cmt-text" rows="4" placeholder="Partagez votre avis..." style="width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:.9rem;outline:none;resize:vertical;line-height:1.6"></textarea>
-                            </div>
+                            <div style="margin-bottom:16px"><label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:5px">Commentaire *</label><textarea id="cmt-text" rows="4" placeholder="Partagez votre avis..." style="width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:.9rem;outline:none;resize:vertical;line-height:1.6"></textarea></div>
                             <button onclick="submitComment('${art.id}','${art.title.replace(/'/g,"\\'")}')}" style="background:var(--navy);color:#fff;padding:10px 24px;border-radius:6px;font-weight:700;font-size:.9rem;cursor:pointer;border:none;font-family:var(--font-b)">Envoyer le commentaire</button>
                             <p style="font-size:.75rem;color:var(--text3);margin-top:10px">Votre commentaire sera visible après modération par la rédaction.</p>
                         </div>
@@ -646,6 +691,7 @@
                 </div></div>
             `;
             UI.showPage('page-article');
+            setTimeout(initFadeUp, 50);
         }
 
         function submitComment(articleId, articleTitle) {
@@ -678,7 +724,7 @@
                 const side = filtered.slice(1, 4);
                 heroGrid.innerHTML = `
                     <div class="hero-main" onclick="openArticle('${main.id}')">
-                        <img src="${main.img}" alt="${main.title}" style="width:100%;height:480px;object-fit:cover;">
+                        <img src="${main.img}" alt="${main.title}" style="width:100%;height:480px;object-fit:cover;" loading="eager">
                         <div class="hero-overlay"></div>
                         <div class="hero-content">
                             <span class="hero-cat-badge">${main.cat}</span>
@@ -688,16 +734,16 @@
                         </div>
                     </div>
                     <div class="hero-sidebar">${side.map(a => `
-                        <div class="hero-side-item" onclick="openArticle('${a.id}')">
-                            <img src="${a.img}" alt="${a.title}" class="hero-side-img" width="90" height="72">
+                        <div class="hero-side-item fade-up" onclick="openArticle('${a.id}')">
+                            <img src="${a.img}" alt="${a.title}" class="hero-side-img" width="90" height="72" loading="lazy">
                             <div><div class="hero-side-cat">${a.cat}</div><h3 class="hero-side-title">${a.title}</h3></div>
                         </div>`).join('')}
                     </div>
                 `;
             }
             document.getElementById('trending-grid').innerHTML = filtered.slice(0, 4).map((a, i) => `
-                <div class="trend-card" onclick="openArticle('${a.id}')">
-                    <img src="${a.img}" alt="${a.title}" class="trend-img" width="300" height="190">
+                <div class="trend-card fade-up" onclick="openArticle('${a.id}')" style="transition-delay:${i * 80}ms">
+                    <img src="${a.img}" alt="${a.title}" class="trend-img" width="300" height="190" loading="lazy">
                     <div class="trend-num">#${i + 1}</div>
                     <h3 class="trend-title">${a.title}</h3>
                     <div class="trend-meta">${a.date}</div>
@@ -706,6 +752,15 @@
             document.getElementById('ticker-inner').innerHTML = articles.map(a =>
                 `<div class="ticker-item"><div class="ticker-dot"></div> ${a.title}</div>`
             ).join('').repeat(2);
+            setTimeout(initFadeUp, 50);
+        }
+
+        // IntersectionObserver — déclenche fade-up au scroll
+        function initFadeUp() {
+            const obs = new IntersectionObserver((entries) => {
+                entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+            }, { threshold: 0.12 });
+            document.querySelectorAll('.fade-up:not(.visible)').forEach(el => obs.observe(el));
         }
 
         function subscribeNewsletter() { UI.showNotif('Merci pour votre inscription !'); document.getElementById('nl-email').value = ''; }
