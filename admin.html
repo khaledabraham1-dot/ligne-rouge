@@ -311,13 +311,16 @@
 <div id="admin-notif" class="admin-notif"></div>
 
 <script>
-// ---- ACCÈS SÉCURISÉ PAR TOKEN ----
+// ---- ACCÈS SÉCURISÉ ----
 (function checkAccess() {
     const SECRET = 'LR2026xK9mPqZ4r';
     const params = new URLSearchParams(window.location.search);
-    if (params.get('access') !== SECRET) {
+    const validToken = params.get('access') === SECRET;
+    const validGate  = sessionStorage.getItem('lr_gate') === '1';
+    if (!validToken && !validGate) {
         window.location.replace('index.html');
     }
+    sessionStorage.setItem('lr_gate', '1'); // maintenir la session
 })();
 
 const KEY = 'lr_';

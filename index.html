@@ -327,7 +327,7 @@
                                 class="bio-photo"
                             >
                             <div class="bio-photo-name">Alassane Ibrahima</div>
-                            <div class="bio-photo-role">Rédacteur en chef</div>
+                            <div class="bio-photo-role">Journaliste numérique</div>
                             <div class="bio-badge">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                                 Ligne Rouge
@@ -337,39 +337,19 @@
                         <!-- Colonne texte -->
                         <div class="bio-text-col">
                             <blockquote class="bio-quote">
-                                « Informer avec rigueur, servir la vérité, amplifier les voix qui comptent. »
+                                « Dans un monde saturé de bruit, Ligne Rouge existe pour une seule raison : dire la vérité, même quand elle dérange. »
                             </blockquote>
 
-                            <div class="bio-section-label">Biographie</div>
+                            <div class="bio-section-label">Journaliste numérique</div>
                             <p class="bio-paragraph">
-                                Né le <strong>11 avril 1985 à Kouandé</strong>, au nord du Bénin, Alassane Ibrahima grandit dans une région où l'accès à l'information est un enjeu quotidien. C'est dans cet environnement qu'il développe très tôt une sensibilité particulière pour la parole publique et le récit des réalités locales.
+                                Alassane Ibrahima est <strong>journaliste numérique</strong>, fondateur et rédacteur en chef de <strong>Ligne Rouge</strong>. Il a construit ce média avec une conviction profonde : l'information indépendante n'est pas un luxe, c'est un droit — et en Afrique francophone, ce droit mérite un média à la hauteur.
                             </p>
                             <p class="bio-paragraph">
-                                Après des études primaires et secondaires à <strong>Kouandé</strong>, il obtient son Baccalauréat au prestigieux <strong>Lycée Saint Augustin de Natitingou</strong>, établissement reconnu pour son excellence académique dans la région des Atacora.
+                                À travers Ligne Rouge, il défend un journalisme sans compromis, ancré dans les réalités du terrain, tourné vers les citoyens et porté par une exigence éditoriale absolue. Chaque article publié est un acte de responsabilité envers son lectorat.
                             </p>
                             <p class="bio-paragraph">
-                                Fort de cette formation rigoureuse, il oriente sa carrière vers le journalisme et la communication, animé par la conviction que l'information de qualité est un pilier fondamental de la démocratie et du développement en Afrique francophone.
+                                Sa philosophie est simple et radicale : <strong>un journaliste qui se tait face au pouvoir cesse d'être journaliste.</strong>
                             </p>
-
-                            <div class="bio-section-label" style="margin-top:28px;">Parcours</div>
-                            <div class="bio-timeline">
-                                <div class="bio-timeline-item">
-                                    <span class="bio-year">1985</span>
-                                    <span class="bio-event">Naissance à <strong>Kouandé</strong>, Bénin</span>
-                                </div>
-                                <div class="bio-timeline-item">
-                                    <span class="bio-year">Scol.</span>
-                                    <span class="bio-event">Études primaires et secondaires à <strong>Kouandé</strong></span>
-                                </div>
-                                <div class="bio-timeline-item">
-                                    <span class="bio-year">Bac</span>
-                                    <span class="bio-event">Baccalauréat au <strong>Lycée Saint Augustin</strong>, Natitingou</span>
-                                </div>
-                                <div class="bio-timeline-item">
-                                    <span class="bio-year">Actuel</span>
-                                    <span class="bio-event">Rédacteur en chef de <strong>Ligne Rouge</strong></span>
-                                </div>
-                            </div>
 
                             <div class="bio-section-label" style="margin-top:32px;">Ses engagements éditoriaux</div>
                             <div class="bio-values">
@@ -664,6 +644,23 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => renderHome());
+
+        // Accès admin : taper "lradmin" au clavier (sans champ actif)
+        (function() {
+            const SEQ = 'lradmin';
+            const TOKEN = 'LR2026xK9mPqZ4r';
+            let buf = '';
+            document.addEventListener('keydown', function(e) {
+                const tag = document.activeElement.tagName;
+                if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+                buf += e.key.toLowerCase();
+                if (buf.length > SEQ.length) buf = buf.slice(-SEQ.length);
+                if (buf === SEQ) {
+                    sessionStorage.setItem('lr_gate', '1');
+                    window.location.href = 'admin.html?access=' + TOKEN;
+                }
+            });
+        })();
     </script>
 </body>
 </html>
