@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administration — Ligne Rouge</title>
+    <!-- SÉCURITÉ : désactiver le cache + anti-clickjacking -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com blob:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -165,6 +171,7 @@
             <button class="nav-item" data-sec="articles" onclick="nav('articles')"><span class="nav-icon">☰</span>Articles<span class="nav-badge" id="badge-arts"></span></button>
             <button class="nav-item" data-sec="new" onclick="nav('new')"><span class="nav-icon">＋</span>Nouvel article</button>
             <button class="nav-item" data-sec="comments" onclick="nav('comments')"><span class="nav-icon">✉</span>Commentaires<span class="nav-badge show" id="badge-cmts" style="background:var(--warning)"></span></button>
+            <button class="nav-item" data-sec="audit" onclick="nav('audit')"><span class="nav-icon">📋</span>Journal d'audit</button>
             <button class="nav-item" data-sec="settings" onclick="nav('settings')"><span class="nav-icon">⚙</span>Réglages</button>
         </nav>
         <div class="sb-footer">
@@ -285,6 +292,20 @@
                 </div>
             </div>
 
+            <!-- AUDIT LOG -->
+            <div id="sec-audit" class="sec">
+                <div class="section-head">
+                    <h2>Journal d'audit</h2>
+                    <button class="btn btn-danger" style="font-size:.8rem;padding:7px 14px" onclick="if(confirm('Effacer le journal ?')){localStorage.removeItem('lr_audit');renderAudit();notif('Journal effacé')}">Effacer</button>
+                </div>
+                <div class="card" style="padding:0;overflow:hidden">
+                    <table class="admin-table">
+                        <thead><tr><th>Horodatage</th><th>Action</th><th>Détail</th><th>Utilisateur</th></tr></thead>
+                        <tbody id="audit-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- SETTINGS -->
             <div id="sec-settings" class="sec">
                 <div class="section-head"><h2>Réglages</h2></div>
@@ -292,7 +313,12 @@
                     <div class="card">
                         <h4>Compte administrateur</h4>
                         <div class="form-group"><label>Nom d'utilisateur</label><input type="text" id="set-user"></div>
-                        <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="set-pass" placeholder="Laisser vide pour conserver l'actuel"></div>
+                        <div class="form-group">
+                            <label>Nouveau mot de passe</label>
+                            <input type="password" id="set-pass" placeholder="Laisser vide pour conserver l'actuel" oninput="checkPwdStrength()">
+                            <div id="pwd-strength" style="display:none;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
+                            <p style="font-size:.72rem;color:var(--text3);margin-top:5px">8 car. min · 1 majuscule · 1 chiffre · 1 caractère spécial</p>
+                        </div>
                         <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" id="set-pass2"></div>
                         <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder</button>
                     </div>
@@ -311,20 +337,137 @@
 <div id="admin-notif" class="admin-notif"></div>
 
 <script>
-// ---- ACCÈS SÉCURISÉ ----
+// ============================================================
+// MODULE SÉCURITÉ COMPLET — NE PAS MODIFIER
+// ============================================================
+const Sec = {
+    esc: s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\//g,'&#x2F;'),
+    txt: (s,max=500) => { const d=document.createElement('div'); d.textContent=String(s==null?'':s).substring(0,max); return d.textContent; },
+    url: u => { if(!u) return '#'; const l=String(u).trim().toLowerCase(); return /^(javascript|data|vbscript):/.test(l)?'#':u; },
+    email: e => /^[a-zA-Z0-9._%+\-]{1,64}@[a-zA-Z0-9.\-]{1,253}\.[a-zA-Z]{2,63}$/.test(String(e||'')),
+    token: () => Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b=>b.toString(16).padStart(2,'0')).join(''),
+    sha256: async msg => { const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg)); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); },
+    hmac: async (data,key) => { const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(key),{name:'HMAC',hash:'SHA-256'},false,['sign']); const sig=await crypto.subtle.sign('HMAC',k,new TextEncoder().encode(String(data))); return Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,'0')).join(''); },
+    pwdPolicy: p => ({ len:p.length>=8, upper:/[A-Z]/.test(p), digit:/[0-9]/.test(p), special:/[!@#$%^&*()\-_=+\[\]{}|;:',.<>?\/\\`~"@]/.test(p) }),
+    pwdOk: p => { const v=Sec.pwdPolicy(p); return v.len&&v.upper&&v.digit&&v.special; }
+};
+
+// ---- ACCÈS SÉCURISÉ PAR TOKEN + SESSION ----
 (function checkAccess() {
     const SECRET = 'LR2026xK9mPqZ4r';
     const params = new URLSearchParams(window.location.search);
     const validToken = params.get('access') === SECRET;
     const validGate  = sessionStorage.getItem('lr_gate') === '1';
-    if (!validToken && !validGate) {
-        window.location.replace('index.html');
-    }
-    sessionStorage.setItem('lr_gate', '1'); // maintenir la session
+    if (!validToken && !validGate) { window.location.replace('index.html'); return; }
+    sessionStorage.setItem('lr_gate','1');
+    // Nettoyer le token de l'URL (évite les logs serveur/historique)
+    if (validToken) history.replaceState({}, document.title, location.pathname);
 })();
 
+// ---- SESSION MANAGEMENT (15min inactivité, 1h absolue) ----
+const SESSION = {
+    INACTIVITY: 15 * 60 * 1000,
+    MAX: 60 * 60 * 1000,
+    KEY: 'lr_session',
+    _timer: null,
+
+    create(username) {
+        const s = { id: Sec.token(), csrf: Sec.token(), user: username, created: Date.now(), active: Date.now() };
+        sessionStorage.setItem(this.KEY, JSON.stringify(s));
+        this._resetTimer();
+        return s;
+    },
+    get() {
+        try {
+            const s = JSON.parse(sessionStorage.getItem(this.KEY));
+            if (!s) return null;
+            const now = Date.now();
+            if (now - s.active > this.INACTIVITY || now - s.created > this.MAX) { this.destroy(); return null; }
+            s.active = now;
+            sessionStorage.setItem(this.KEY, JSON.stringify(s));
+            return s;
+        } catch(e) { return null; }
+    },
+    csrf() { const s = this.get(); return s ? s.csrf : null; },
+    verifyCsrf(token) { const s = this.get(); return s && s.csrf === token; },
+    touch() { this.get(); this._resetTimer(); },
+    destroy() {
+        sessionStorage.removeItem(this.KEY);
+        sessionStorage.removeItem('lr_gate');
+        clearTimeout(this._timer);
+    },
+    _resetTimer() {
+        clearTimeout(this._timer);
+        this._timer = setTimeout(() => { Audit.log('AUTO_LOGOUT','Inactivité 15 min'); logout(); }, this.INACTIVITY);
+    }
+};
+
+// ---- BRUTE FORCE PROTECTION (5 tentatives / 10 min) ----
+const BF = {
+    KEY: 'lr_bf',
+    check() {
+        try {
+            const d = JSON.parse(localStorage.getItem(this.KEY)||'{}');
+            if (d.lockedUntil > Date.now()) return { locked:true, remaining: Math.ceil((d.lockedUntil-Date.now())/60000) };
+        } catch(e) {}
+        return { locked:false };
+    },
+    fail() {
+        try {
+            const now = Date.now();
+            let d = JSON.parse(localStorage.getItem(this.KEY)||'{}');
+            if (!d.first || now - d.first > 600000) { d = { attempts:0, first:now }; }
+            d.attempts = (d.attempts||0) + 1;
+            if (d.attempts >= 5) { d.lockedUntil = now + 600000; d.attempts = 0; }
+            localStorage.setItem(this.KEY, JSON.stringify(d));
+            return d;
+        } catch(e) { return {}; }
+    },
+    reset() { localStorage.removeItem(this.KEY); }
+};
+
+// ---- AUDIT LOG (50 dernières actions) ----
+const Audit = {
+    KEY: 'lr_audit',
+    log(action, detail='') {
+        try {
+            const s = SESSION.get();
+            const logs = JSON.parse(localStorage.getItem(this.KEY)||'[]');
+            logs.unshift({ action: Sec.txt(action,50), detail: Sec.txt(detail,200), ts: new Date().toISOString(), user: s?.user||'?' });
+            localStorage.setItem(this.KEY, JSON.stringify(logs.slice(0,50)));
+        } catch(e) {}
+    },
+    get() { try { return JSON.parse(localStorage.getItem(this.KEY)||'[]'); } catch(e) { return []; } }
+};
+
+// ---- HMAC INTÉGRITÉ LOCALSTORAGE ----
+const INTEGRITY = {
+    _key: null,
+    async getKey() {
+        if (this._key) return this._key;
+        let k = localStorage.getItem('lr_hk');
+        if (!k) { k = Sec.token(); localStorage.setItem('lr_hk', k); }
+        this._key = k; return k;
+    },
+    async sign(data) { return Sec.hmac(JSON.stringify(data), await this.getKey()); },
+    async save(storageKey, data) {
+        const sig = await this.sign(data);
+        localStorage.setItem('lr_'+storageKey, JSON.stringify({data, sig}));
+    },
+    async load(storageKey, fallback=null) {
+        try {
+            const raw = localStorage.getItem('lr_'+storageKey);
+            if (!raw) return fallback;
+            const {data, sig} = JSON.parse(raw);
+            const expected = await this.sign(data);
+            if (sig !== expected) { Audit.log('INTEGRITY_FAIL','Clé: '+storageKey); return fallback; }
+            return data;
+        } catch(e) { return fallback; }
+    }
+};
+
 const KEY = 'lr_';
-const SECTION_NAMES = {dashboard:'Tableau de bord',articles:'Articles',new:'Nouvel article',comments:'Commentaires',settings:'Réglages'};
+const SECTION_NAMES = {dashboard:'Tableau de bord',articles:'Articles',new:'Nouvel article',comments:'Commentaires',audit:'Journal d\'audit',settings:'Réglages'};
 
 const DEFAULT_ARTS = [
     {id:'d1',cat:'Politique',title:'Nouveaux enjeux géopolitiques en Afrique de l\'Ouest',subtitle:'Une analyse profonde des changements récents.',date:'12 Juin 2026',read:'6 min',views:12450,status:'published',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop',body:'<p>L\'Afrique de l\'Ouest traverse une période de transformation politique majeure, marquée par de nouvelles alliances et des reconfigurations du pouvoir.</p>',createdAt:1718150400000},
@@ -366,44 +509,91 @@ const DB = {
 };
 
 // ---- AUTH ----
-let editId = null, cmtFilter = 'all';
+let editId = null, cmtFilter = 'all', _csrfToken = null;
 
-function login() {
-    const u = document.getElementById('login-user').value.trim();
+async function login() {
+    const u = Sec.txt(document.getElementById('login-user').value.trim(), 50);
     const p = document.getElementById('login-pass').value;
+    document.getElementById('login-error').textContent = '';
+
+    // Brute force check
+    const bf = BF.check();
+    if (bf.locked) {
+        document.getElementById('login-error').textContent = `Compte verrouillé. Réessayez dans ${bf.remaining} min.`;
+        return;
+    }
+
+    // Hash SHA-256 du mot de passe saisi
+    const pHash = await Sec.sha256(p);
     const cfg = DB.cfg.get();
-    if (u === cfg.username && p === cfg.password) {
-        DB.ses.in();
+
+    // Migrer le mot de passe en clair → hash si nécessaire
+    if (cfg.password && cfg.password.length < 64) {
+        cfg.password = await Sec.sha256(cfg.password);
+        DB.cfg.save(cfg);
+    }
+
+    if (u === cfg.username && pHash === cfg.password) {
+        BF.reset();
+        const ses = SESSION.create(u);
+        _csrfToken = ses.csrf;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('admin-app').style.display = 'flex';
-        document.getElementById('topbar-user').textContent = u;
+        document.getElementById('topbar-user').textContent = Sec.esc(u);
         document.getElementById('set-user').value = u;
-        renderDash();
-        updateBadges();
+        Audit.log('LOGIN', 'Connexion réussie — ' + u);
+        renderDash(); updateBadges();
     } else {
-        document.getElementById('login-error').textContent = 'Identifiants incorrects. Réessayez.';
+        const d = BF.fail();
+        const left = 5 - (d.attempts||0);
+        document.getElementById('login-error').textContent = left > 0
+            ? `Identifiants incorrects. ${left} tentative(s) restante(s).`
+            : 'Compte verrouillé 10 minutes.';
+        Audit.log('LOGIN_FAIL', 'Tentative échouée — utilisateur: ' + u);
     }
 }
 
 function logout() {
-    DB.ses.out();
+    Audit.log('LOGOUT','Déconnexion manuelle');
+    SESSION.destroy();
     document.getElementById('admin-app').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('login-pass').value = '';
     document.getElementById('login-error').textContent = '';
+    _csrfToken = null;
+}
+
+function _checkSession() {
+    if (!SESSION.get()) { notif('Session expirée — reconnectez-vous.', true); logout(); return false; }
+    SESSION.touch(); return true;
 }
 
 // ---- NAV ----
 function nav(sec) {
+    if (!_checkSession() && sec !== 'dashboard') return;
     document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
     document.getElementById('sec-' + sec).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelector('[data-sec="'+sec+'"]').classList.add('active');
-    document.getElementById('topbar-title').textContent = SECTION_NAMES[sec] || '';
+    document.getElementById('topbar-title').textContent = Sec.esc(SECTION_NAMES[sec] || '');
     if (sec === 'dashboard') renderDash();
     else if (sec === 'articles') renderArts();
     else if (sec === 'comments') renderCmts(cmtFilter);
+    else if (sec === 'audit') renderAudit();
     else if (sec === 'new') { editId = null; resetForm(); }
+}
+
+// ---- AUDIT RENDER ----
+function renderAudit() {
+    const logs = Audit.get();
+    document.getElementById('audit-tbody').innerHTML = logs.map(l => `
+        <tr>
+            <td style="white-space:nowrap;font-size:.78rem;color:var(--text3)">${Sec.esc(l.ts ? new Date(l.ts).toLocaleString('fr-FR') : '')}</td>
+            <td><span class="badge badge-cat">${Sec.esc(l.action||'')}</span></td>
+            <td style="font-size:.83rem;max-width:300px">${Sec.esc(l.detail||'')}</td>
+            <td style="font-size:.82rem">${Sec.esc(l.user||'')}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:28px">Aucune action enregistrée</td></tr>';
 }
 
 // ---- BADGES ----
@@ -466,14 +656,20 @@ function renderArts() {
 }
 
 function togglePub(id) {
-    const a = DB.arts.find(id); if (!a) return;
+    if (!_checkSession()) return;
+    const a = DB.arts.find(Sec.txt(id,50)); if (!a) return;
     a.status = a.status === 'published' ? 'draft' : 'published';
     DB.arts.upsert(a); renderArts(); updateBadges();
+    const action = a.status === 'published' ? 'PUBLISH' : 'UNPUBLISH';
+    Audit.log(action, Sec.txt(a.title,100));
     notif(a.status === 'published' ? 'Article publié sur le site !' : 'Article retiré du site');
 }
 
 function delArt(id) {
+    if (!_checkSession()) return;
     if (!confirm('Supprimer définitivement cet article ?')) return;
+    const a = DB.arts.find(Sec.txt(id,50));
+    if (a) Audit.log('DELETE_ARTICLE', Sec.txt(a.title,100));
     DB.arts.del(id); renderArts(); updateBadges(); notif('Article supprimé');
 }
 
@@ -542,9 +738,10 @@ function compressImg(file, maxW = 1200, q = 0.78) {
 }
 
 function saveArticle(status) {
-    const title = document.getElementById('art-title').value.trim();
+    if (!_checkSession()) return;
+    const title = Sec.txt(document.getElementById('art-title').value.trim(), 200);
     if (!title) { notif('Le titre est obligatoire !', true); return; }
-    const bodyRaw = document.getElementById('art-body').value.trim();
+    const bodyRaw = Sec.txt(document.getElementById('art-body').value.trim(), 20000);
     if (!bodyRaw) { notif('Le contenu est obligatoire !', true); return; }
 
     const htmlBody = bodyRaw.split(/\n\s*\n/).filter(p => p.trim()).map(p => `<p>${p.trim().replace(/\n/g,' ')}</p>`).join('');
@@ -573,6 +770,7 @@ function saveArticle(status) {
 
     DB.arts.upsert(article);
     editId = null;
+    Audit.log(status==='published'?'PUBLISH_ARTICLE':'SAVE_DRAFT', Sec.txt(title,100));
     notif(status === 'published' ? '🚀 Article publié sur le site !' : '💾 Brouillon enregistré');
     setTimeout(() => nav('articles'), 800);
 }
@@ -600,31 +798,58 @@ function renderCmts(filter) {
 }
 
 function cAction(id, status) {
-    const c = DB.cmts.find(id); if (!c) return;
+    if (!_checkSession()) return;
+    const c = DB.cmts.find(Sec.txt(id,50)); if (!c) return;
     c.status = status; DB.cmts.upsert(c); renderCmts(cmtFilter); updateBadges();
+    Audit.log(status==='approved'?'APPROVE_COMMENT':'REJECT_COMMENT', 'Auteur: '+Sec.txt(c.author,50));
     notif(status === 'approved' ? 'Commentaire approuvé !' : 'Commentaire rejeté');
 }
 
 function delCmt(id) {
+    if (!_checkSession()) return;
     if (!confirm('Supprimer ce commentaire ?')) return;
+    const c = DB.cmts.find(Sec.txt(id,50));
+    if (c) Audit.log('DELETE_COMMENT','Auteur: '+Sec.txt(c.author,50));
     DB.cmts.del(id); renderCmts(cmtFilter); updateBadges(); notif('Commentaire supprimé');
 }
 
 // ---- SETTINGS ----
-function saveSettings() {
-    const u = document.getElementById('set-user').value.trim();
-    if (!u) { notif('Nom d\'utilisateur requis', true); return; }
+async function saveSettings() {
+    if (!_checkSession()) return;
+    const u = Sec.txt(document.getElementById('set-user').value.trim(), 50);
+    if (!u || u.length < 3) { notif('Nom d\'utilisateur requis (3 car. min)', true); return; }
     const p1 = document.getElementById('set-pass').value;
     const p2 = document.getElementById('set-pass2').value;
-    if (p1 && p1 !== p2) { notif('Les mots de passe ne correspondent pas', true); return; }
+
+    if (p1) {
+        // Politique mot de passe
+        if (!Sec.pwdOk(p1)) {
+            notif('Mot de passe : 8 car. min, 1 majuscule, 1 chiffre, 1 spécial', true);
+            return;
+        }
+        if (p1 !== p2) { notif('Les mots de passe ne correspondent pas', true); return; }
+    }
+
     const cfg = DB.cfg.get();
     cfg.username = u;
-    if (p1) cfg.password = p1;
+    if (p1) cfg.password = await Sec.sha256(p1); // Stockage du HASH uniquement
     DB.cfg.save(cfg);
-    document.getElementById('topbar-user').textContent = u;
+    document.getElementById('topbar-user').textContent = Sec.esc(u);
     document.getElementById('set-pass').value = '';
     document.getElementById('set-pass2').value = '';
+    Audit.log('SETTINGS_UPDATE','Compte mis à jour: '+u);
     notif('Réglages sauvegardés !');
+}
+
+// Indicateur force mot de passe
+function checkPwdStrength() {
+    const p = document.getElementById('set-pass').value;
+    const v = Sec.pwdPolicy(p);
+    const el = document.getElementById('pwd-strength');
+    if (!el || !p) { if(el) el.style.display='none'; return; }
+    el.style.display='flex';
+    const checks = [['≥8 car.',v.len],['Majuscule',v.upper],['Chiffre',v.digit],['Spécial',v.special]];
+    el.innerHTML = checks.map(([l,ok])=>`<span style="font-size:.72rem;padding:2px 7px;border-radius:10px;background:${ok?'#e8f5e9':'#fce4ec'};color:${ok?'#1b5e20':'#c62828'}">${l}</span>`).join('');
 }
 
 function resetData() {
@@ -644,13 +869,21 @@ function notif(msg, err = false) {
 }
 
 // ---- INIT ----
-(function init() {
-    if (DB.ses.ok()) {
-        const cfg = DB.cfg.get();
+(async function init() {
+    // Migrer mot de passe en clair → hash SHA-256 si nécessaire
+    const cfg = DB.cfg.get();
+    if (cfg.password && cfg.password.length < 64) {
+        cfg.password = await Sec.sha256(cfg.password);
+        DB.cfg.save(cfg);
+    }
+
+    const ses = SESSION.get();
+    if (ses) {
+        _csrfToken = ses.csrf;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('admin-app').style.display = 'flex';
-        document.getElementById('topbar-user').textContent = cfg.username;
-        document.getElementById('set-user').value = cfg.username;
+        document.getElementById('topbar-user').textContent = Sec.esc(ses.user || cfg.username);
+        document.getElementById('set-user').value = ses.user || cfg.username;
         renderDash(); updateBadges();
     }
 })();

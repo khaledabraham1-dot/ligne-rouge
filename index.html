@@ -12,6 +12,11 @@
     <meta property="og:locale" content="fr_FR">
     <meta property="og:site_name" content="Ligne Rouge">
 
+    <!-- SÉCURITÉ : CSP + anti-clickjacking -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://*.unsplash.com; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -552,6 +557,58 @@
     <div id="notif" class="notification" role="alert" aria-live="polite"><span id="notif-msg"></span></div>
 
     <script>
+        // ======================================================
+        // MODULE SÉCURITÉ — NE PAS MODIFIER
+        // ======================================================
+        const Sec = {
+            // Échappe TOUT contenu avant insertion dans le DOM
+            esc: s => String(s == null ? '' : s)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                .replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\//g,'&#x2F;'),
+
+            // Supprime tout HTML — texte brut uniquement
+            txt: (s, max = 500) => {
+                const d = document.createElement('div');
+                d.textContent = String(s == null ? '' : s).substring(0, max);
+                return d.textContent;
+            },
+
+            // Valide une URL : bloque javascript:, data:, vbscript:
+            url: u => {
+                if (!u) return '#';
+                const lower = String(u).trim().toLowerCase();
+                if (/^(javascript|data|vbscript):/.test(lower)) return '#';
+                return u;
+            },
+
+            // Regex email stricte
+            email: e => /^[a-zA-Z0-9._%+\-]{1,64}@[a-zA-Z0-9.\-]{1,253}\.[a-zA-Z]{2,63}$/.test(String(e||'')),
+
+            // Génère un token aléatoire
+            token: () => Array.from(crypto.getRandomValues(new Uint8Array(16)))
+                .map(b => b.toString(16).padStart(2,'0')).join('')
+        };
+
+        // Rate limiting commentaires : 5/jour, min 30s entre soumissions
+        const RateLimit = {
+            KEY: 'lr_cmtrl',
+            check() {
+                const now = Date.now();
+                const d = this._get();
+                if (now - d.lastSub < 30000) return { ok: false, msg: 'Veuillez attendre 30 secondes entre deux commentaires.' };
+                const recent = d.subs.filter(t => t > now - 86400000);
+                if (recent.length >= 5) return { ok: false, msg: 'Limite de 5 commentaires par jour atteinte.' };
+                return { ok: true };
+            },
+            record() {
+                const now = Date.now(); const d = this._get();
+                d.subs = [...d.subs.filter(t => t > now - 86400000), now];
+                d.lastSub = now;
+                localStorage.setItem(this.KEY, JSON.stringify(d));
+            },
+            _get() { try { return JSON.parse(localStorage.getItem(this.KEY)) || {subs:[],lastSub:0}; } catch(e) { return {subs:[],lastSub:0}; } }
+        };
+
         // ---- ARTICLES : charge depuis localStorage (admin) ou fallback hardcodé ----
         const DEFAULT_ARTS = [
             {id:'d1',cat:'Politique',title:"Nouveaux enjeux géopolitiques en Afrique de l'Ouest",subtitle:'Une analyse profonde des changements récents.',date:'12 Juin 2026',read:'6 min',views:12450,status:'published',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop',body:"<p>L'Afrique de l'Ouest traverse une période de transformation politique majeure, marquée par de nouvelles alliances et des reconfigurations du pouvoir.</p>"},
@@ -624,8 +681,8 @@
             const approvedCmts = getComments(id);
             const cmtsHtml = approvedCmts.length ? approvedCmts.map(c => `
                 <div style="padding:16px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--bg)">
-                    <div style="font-weight:700;font-size:.88rem;margin-bottom:4px">${c.author} <span style="font-weight:400;color:var(--text3);font-size:.78rem">· ${c.date}</span></div>
-                    <div style="font-size:.92rem;color:var(--text2);line-height:1.6">${c.text}</div>
+                    <div style="font-weight:700;font-size:.88rem;margin-bottom:4px">${Sec.esc(c.author)} <span style="font-weight:400;color:var(--text3);font-size:.78rem">· ${Sec.esc(c.date)}</span></div>
+                    <div style="font-size:.92rem;color:var(--text2);line-height:1.6">${Sec.esc(c.text)}</div>
                 </div>
             `).join('') : '<p style="color:var(--text3);font-size:.9rem">Aucun commentaire pour cet article.</p>';
 
@@ -659,9 +716,9 @@
 
             document.getElementById('article-content').innerHTML = `
                 <div class="art-hero"><div class="art-container">
-                    <span class="art-cat">${art.cat}</span>
-                    <h1 class="art-title">${art.title}</h1>
-                    <p class="art-subtitle">${art.subtitle || ''}</p>
+                    <span class="art-cat">${Sec.esc(art.cat)}</span>
+                    <h1 class="art-title">${Sec.esc(art.title)}</h1>
+                    <p class="art-subtitle">${Sec.esc(art.subtitle || '')}</p>
                     <div class="art-meta-top">
                         <div class="art-author">
                             <img src="Capture d'écran 2026-05-15 220637.png" alt="Alassane Ibrahima" class="author-img" width="44" height="44" loading="lazy">
@@ -695,20 +752,34 @@
         }
 
         function submitComment(articleId, articleTitle) {
-            const name = document.getElementById('cmt-name').value.trim();
-            const text = document.getElementById('cmt-text').value.trim();
-            if (!name || !text) { UI.showNotif('Merci de remplir votre nom et commentaire'); return; }
+            // Rate limiting
+            const rl = RateLimit.check();
+            if (!rl.ok) { UI.showNotif(rl.msg); return; }
+
+            // Sanitisation stricte — texte brut uniquement
+            const name = Sec.txt(document.getElementById('cmt-name').value, 80).trim();
+            const text = Sec.txt(document.getElementById('cmt-text').value, 500).trim();
+            const emailRaw = document.getElementById('cmt-email').value.trim();
+
+            if (!name || name.length < 2) { UI.showNotif('Nom invalide (2 caractères minimum).'); return; }
+            if (!text || text.length < 5) { UI.showNotif('Commentaire trop court (5 caractères minimum).'); return; }
+            if (emailRaw && !Sec.email(emailRaw)) { UI.showNotif('Adresse email invalide.'); return; }
+
+            // ID aléatoire — pas prévisible
+            const id = 'c' + Sec.token();
             const now = new Date();
             saveComment({
-                id: 'c' + Date.now(),
-                articleId,
-                articleTitle,
+                id,
+                articleId: Sec.txt(articleId, 50),
+                articleTitle: Sec.txt(articleTitle, 200),
                 author: name,
-                email: document.getElementById('cmt-email').value.trim(),
+                email: emailRaw ? Sec.txt(emailRaw, 100) : '',
                 text,
                 status: 'pending',
                 date: now.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'})
             });
+
+            RateLimit.record();
             document.getElementById('cmt-name').value = '';
             document.getElementById('cmt-email').value = '';
             document.getElementById('cmt-text').value = '';
@@ -723,30 +794,30 @@
                 const main = filtered[0];
                 const side = filtered.slice(1, 4);
                 heroGrid.innerHTML = `
-                    <div class="hero-main" onclick="openArticle('${main.id}')">
-                        <img src="${main.img}" alt="${main.title}" style="width:100%;height:480px;object-fit:cover;" loading="eager">
+                    <div class="hero-main" onclick="openArticle('${Sec.esc(main.id)}')">
+                        <img src="${Sec.url(main.img)}" alt="${Sec.esc(main.title)}" style="width:100%;height:480px;object-fit:cover;" loading="eager">
                         <div class="hero-overlay"></div>
                         <div class="hero-content">
-                            <span class="hero-cat-badge">${main.cat}</span>
-                            <h2 class="hero-title">${main.title}</h2>
-                            <p class="hero-sub">${main.subtitle || ''}</p>
-                            <div class="hero-meta">${main.date}</div>
+                            <span class="hero-cat-badge">${Sec.esc(main.cat)}</span>
+                            <h2 class="hero-title">${Sec.esc(main.title)}</h2>
+                            <p class="hero-sub">${Sec.esc(main.subtitle || '')}</p>
+                            <div class="hero-meta">${Sec.esc(main.date)}</div>
                         </div>
                     </div>
                     <div class="hero-sidebar">${side.map(a => `
-                        <div class="hero-side-item fade-up" onclick="openArticle('${a.id}')">
-                            <img src="${a.img}" alt="${a.title}" class="hero-side-img" width="90" height="72" loading="lazy">
-                            <div><div class="hero-side-cat">${a.cat}</div><h3 class="hero-side-title">${a.title}</h3></div>
+                        <div class="hero-side-item fade-up" onclick="openArticle('${Sec.esc(a.id)}')">
+                            <img src="${Sec.url(a.img)}" alt="${Sec.esc(a.title)}" class="hero-side-img" width="90" height="72" loading="lazy">
+                            <div><div class="hero-side-cat">${Sec.esc(a.cat)}</div><h3 class="hero-side-title">${Sec.esc(a.title)}</h3></div>
                         </div>`).join('')}
                     </div>
                 `;
             }
             document.getElementById('trending-grid').innerHTML = filtered.slice(0, 4).map((a, i) => `
-                <div class="trend-card fade-up" onclick="openArticle('${a.id}')" style="transition-delay:${i * 80}ms">
-                    <img src="${a.img}" alt="${a.title}" class="trend-img" width="300" height="190" loading="lazy">
+                <div class="trend-card fade-up" onclick="openArticle('${Sec.esc(a.id)}')" style="transition-delay:${i * 80}ms">
+                    <img src="${Sec.url(a.img)}" alt="${Sec.esc(a.title)}" class="trend-img" width="300" height="190" loading="lazy">
                     <div class="trend-num">#${i + 1}</div>
-                    <h3 class="trend-title">${a.title}</h3>
-                    <div class="trend-meta">${a.date}</div>
+                    <h3 class="trend-title">${Sec.esc(a.title)}</h3>
+                    <div class="trend-meta">${Sec.esc(a.date)}</div>
                 </div>
             `).join('');
             document.getElementById('ticker-inner').innerHTML = articles.map(a =>
