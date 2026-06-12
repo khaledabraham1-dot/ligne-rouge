@@ -96,6 +96,13 @@
         .btn-sm.btn-warning{background:var(--warning);color:#fff;border-color:var(--warning)}
         .btn-sm.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
         .btn-loading,.btn-sm.btn-loading{opacity:.55;pointer-events:none;cursor:default}
+        @keyframes slideInRow{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+        #arts-tbody tr,#cmts-tbody tr{animation:slideInRow .3s ease both}
+        #arts-tbody tr:nth-child(2),#cmts-tbody tr:nth-child(2){animation-delay:.04s}
+        #arts-tbody tr:nth-child(3),#cmts-tbody tr:nth-child(3){animation-delay:.08s}
+        #arts-tbody tr:nth-child(4),#cmts-tbody tr:nth-child(4){animation-delay:.12s}
+        #arts-tbody tr:nth-child(5),#cmts-tbody tr:nth-child(5){animation-delay:.16s}
+        #arts-tbody tr:nth-child(6),#cmts-tbody tr:nth-child(6){animation-delay:.20s}
         .btn-spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:btnSpin .55s linear infinite;flex-shrink:0;vertical-align:middle}
         .btn-sm .btn-spinner{width:11px;height:11px}
         @keyframes btnSpin{to{transform:rotate(360deg)}}
