@@ -582,6 +582,14 @@
                 return u;
             },
 
+            // Pour les <img src> : autorise data: (base64 admin uploads), bloque javascript:/vbscript:
+            imgUrl: u => {
+                if (!u) return '';
+                const lower = String(u).trim().toLowerCase();
+                if (/^(javascript|vbscript):/.test(lower)) return '';
+                return u;
+            },
+
             // Regex email stricte
             email: e => /^[a-zA-Z0-9._%+\-]{1,64}@[a-zA-Z0-9.\-]{1,253}\.[a-zA-Z]{2,63}$/.test(String(e||'')),
 
@@ -796,7 +804,7 @@
                 const side = filtered.slice(1, 4);
                 heroGrid.innerHTML = `
                     <div class="hero-main" onclick="openArticle('${Sec.esc(main.id)}')">
-                        <img src="${Sec.url(main.img)}" alt="${Sec.esc(main.title)}" style="width:100%;height:480px;object-fit:cover;" loading="eager">
+                        <img src="${Sec.imgUrl(main.img)}" alt="${Sec.esc(main.title)}" style="width:100%;height:480px;object-fit:cover;" loading="eager">
                         <div class="hero-overlay"></div>
                         <div class="hero-content">
                             <span class="hero-cat-badge">${Sec.esc(main.cat)}</span>
@@ -807,7 +815,7 @@
                     </div>
                     <div class="hero-sidebar">${side.map(a => `
                         <div class="hero-side-item fade-up" onclick="openArticle('${Sec.esc(a.id)}')">
-                            <img src="${Sec.url(a.img)}" alt="${Sec.esc(a.title)}" class="hero-side-img" width="90" height="72" loading="lazy">
+                            <img src="${Sec.imgUrl(a.img)}" alt="${Sec.esc(a.title)}" class="hero-side-img" width="90" height="72" loading="lazy">
                             <div><div class="hero-side-cat">${Sec.esc(a.cat)}</div><h3 class="hero-side-title">${Sec.esc(a.title)}</h3></div>
                         </div>`).join('')}
                     </div>
@@ -815,7 +823,7 @@
             }
             document.getElementById('trending-grid').innerHTML = filtered.slice(0, 4).map((a, i) => `
                 <div class="trend-card fade-up" onclick="openArticle('${Sec.esc(a.id)}')" style="transition-delay:${i * 80}ms">
-                    <img src="${Sec.url(a.img)}" alt="${Sec.esc(a.title)}" class="trend-img" width="300" height="190" loading="lazy">
+                    <img src="${Sec.imgUrl(a.img)}" alt="${Sec.esc(a.title)}" class="trend-img" width="300" height="190" loading="lazy">
                     <div class="trend-num">#${i + 1}</div>
                     <h3 class="trend-title">${Sec.esc(a.title)}</h3>
                     <div class="trend-meta">${Sec.esc(a.date)}</div>
