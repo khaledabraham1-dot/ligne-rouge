@@ -389,19 +389,19 @@
 
     <nav id="nav" role="navigation" aria-label="Menu principal">
         <div class="container nav-inner">
-            <div class="nav-logo" onclick="showPage('page-home')" role="link" aria-label="Retour à l'accueil">
+            <div class="nav-logo" onclick="filterCategory('all',document.querySelector('.nav-cat'))" role="link" aria-label="Retour à l'accueil">
                 <span class="logo-ligne">LIGNE</span>&nbsp;<span class="logo-rouge">ROUGE</span>
             </div>
             <div class="nav-divider" aria-hidden="true"></div>
             <div class="nav-cats">
-                <button class="nav-cat active" onclick="filterCategory('all')" aria-current="page">Accueil</button>
-                <button class="nav-cat" onclick="filterCategory('Actualité')">Actualité</button>
-                <button class="nav-cat" onclick="filterCategory('Politique')">Politique</button>
-                <button class="nav-cat" onclick="filterCategory('Sport')">Sport</button>
-                <button class="nav-cat" onclick="filterCategory('Société')">Société</button>
-                <button class="nav-cat" onclick="filterCategory('International')">International</button>
-                <button class="nav-cat" onclick="filterCategory('Culture')">Culture</button>
-                <button class="nav-cat" onclick="showPage('page-about')">À propos</button>
+                <button class="nav-cat active" onclick="filterCategory('all',this)" aria-current="page">Accueil</button>
+                <button class="nav-cat" onclick="filterCategory('Actualité',this)">Actualité</button>
+                <button class="nav-cat" onclick="filterCategory('Politique',this)">Politique</button>
+                <button class="nav-cat" onclick="filterCategory('Sport',this)">Sport</button>
+                <button class="nav-cat" onclick="filterCategory('Société',this)">Société</button>
+                <button class="nav-cat" onclick="filterCategory('International',this)">International</button>
+                <button class="nav-cat" onclick="filterCategory('Culture',this)">Culture</button>
+                <button class="nav-cat" onclick="setNavActive(this);UI.showPage('page-about')">À propos</button>
             </div>
             <div class="nav-actions">
                 <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" aria-label="Basculer mode sombre" title="Mode sombre">🌙</button>
@@ -804,7 +804,11 @@
 
         function showPage(id) { UI.showPage(id); }
         function showNotif(msg) { UI.showNotif(msg); }
-        function filterCategory(cat) { UI.showPage('page-home'); renderHome(cat); }
+        function setNavActive(btn) {
+            document.querySelectorAll('.nav-cat').forEach(b => { b.classList.remove('active'); b.removeAttribute('aria-current'); });
+            if (btn) { btn.classList.add('active'); btn.setAttribute('aria-current', 'page'); }
+        }
+        function filterCategory(cat, btn) { setNavActive(btn); UI.showPage('page-home'); renderHome(cat); }
 
         function openArticle(id) {
             const articles = getArticles();
