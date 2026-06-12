@@ -225,6 +225,16 @@
         .footer-col-link:hover{color:var(--red)}
         .footer-bottom{padding-top:32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--text3)}
 
+        /* SKELETON / PULSE */
+        .skel{background:#E8E6E1;border-radius:var(--radius);position:relative;overflow:hidden}
+        .skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.55) 50%,transparent 100%);background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite}
+        @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        body.dark .skel{background:#2D3A4A}
+        body.dark .skel::after{background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.06) 50%,transparent 100%)}
+        .skel-hero-main{border-radius:var(--radius);overflow:hidden}
+        .skel-side-item{display:flex;gap:14px;padding:14px;border-radius:var(--radius);border:1px solid var(--border)}
+        .skel-trend{display:flex;flex-direction:column;gap:10px}
+
         /* ARTICLE PAGE */
         .art-hero{padding:60px 0;background:var(--white)}
         .art-container{max-width:820px;margin:0 auto;padding:0 24px}
@@ -317,7 +327,41 @@
         <!-- PAGE ACCUEIL -->
         <div id="page-home" class="page active">
             <section class="hero">
-                <div class="container"><div class="hero-grid" id="hero-grid"></div></div>
+                <div class="container">
+                    <div class="hero-grid" id="hero-grid">
+                        <!-- Skeleton hero principal -->
+                        <div class="skel-hero-main">
+                            <div class="skel" style="width:100%;height:480px"></div>
+                        </div>
+                        <!-- Skeleton sidebar -->
+                        <div class="hero-sidebar">
+                            <div class="skel-side-item" style="background:var(--bg)">
+                                <div class="skel" style="width:90px;height:72px;flex-shrink:0"></div>
+                                <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px">
+                                    <div class="skel" style="height:10px;width:50%"></div>
+                                    <div class="skel" style="height:14px"></div>
+                                    <div class="skel" style="height:14px;width:75%"></div>
+                                </div>
+                            </div>
+                            <div class="skel-side-item" style="background:var(--bg)">
+                                <div class="skel" style="width:90px;height:72px;flex-shrink:0"></div>
+                                <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px">
+                                    <div class="skel" style="height:10px;width:50%"></div>
+                                    <div class="skel" style="height:14px"></div>
+                                    <div class="skel" style="height:14px;width:75%"></div>
+                                </div>
+                            </div>
+                            <div class="skel-side-item" style="background:var(--bg)">
+                                <div class="skel" style="width:90px;height:72px;flex-shrink:0"></div>
+                                <div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px">
+                                    <div class="skel" style="height:10px;width:50%"></div>
+                                    <div class="skel" style="height:14px"></div>
+                                    <div class="skel" style="height:14px;width:75%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
             <section class="trending">
                 <div class="container">
@@ -325,7 +369,13 @@
                         <h2 class="section-title">À la une</h2>
                         <button class="section-link" onclick="filterCategory('all')" aria-label="Voir tous les articles">Tout voir →</button>
                     </div>
-                    <div class="trending-grid" id="trending-grid"></div>
+                    <div class="trending-grid" id="trending-grid">
+                        <!-- Skeleton trending x4 -->
+                        <div class="skel-trend"><div class="skel" style="height:190px"></div><div class="skel" style="height:11px;width:35%"></div><div class="skel" style="height:16px"></div><div class="skel" style="height:16px;width:80%"></div></div>
+                        <div class="skel-trend"><div class="skel" style="height:190px"></div><div class="skel" style="height:11px;width:35%"></div><div class="skel" style="height:16px"></div><div class="skel" style="height:16px;width:80%"></div></div>
+                        <div class="skel-trend"><div class="skel" style="height:190px"></div><div class="skel" style="height:11px;width:35%"></div><div class="skel" style="height:16px"></div><div class="skel" style="height:16px;width:80%"></div></div>
+                        <div class="skel-trend"><div class="skel" style="height:190px"></div><div class="skel" style="height:11px;width:35%"></div><div class="skel" style="height:16px"></div><div class="skel" style="height:16px;width:80%"></div></div>
+                    </div>
                 </div>
             </section>
             <section class="newsletter">
@@ -691,7 +741,13 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => { renderHome(); applyTheme(); });
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTheme();
+            // Skeleton visible 700ms, puis remplacement fluide
+            setTimeout(() => {
+                renderHome();
+            }, 700);
+        });
 
         // Accès admin : taper "lradmin" au clavier (sans champ actif)
         (function() {
