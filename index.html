@@ -326,6 +326,9 @@
             .bio-text-col{padding:0 32px 32px}
         }
         @media(max-width:600px){.related-grid{grid-template-columns:1fr 1fr}.share-btn{padding:6px 11px;font-size:.76rem}}
+        /* BADGE NOUVEAU */
+        .badge-new{display:inline-block;background:var(--red);color:#fff;font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-left:7px;vertical-align:middle;flex-shrink:0;white-space:nowrap}
+
         /* BARRE DE PROGRESSION LECTURE */
         #read-progress{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--red);z-index:1000;opacity:0;transition:opacity .2s;pointer-events:none}
         #read-progress.visible{opacity:1}
@@ -711,6 +714,13 @@
             {id:'d5',cat:'International',title:"Sommet sur le climat : Les engagements de l'Afrique",subtitle:'Vers une transition énergétique durable.',date:'08 Juin 2026',read:'8 min',views:3100,status:'published',img:'https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=800&auto=format&fit=crop',body:"<p>Les dirigeants africains ont porté une voix unie lors du sommet international sur le changement climatique.</p>"}
         ];
 
+        function isNew(art) {
+            return art.createdAt && (Date.now() - art.createdAt) < 86400000;
+        }
+        function newBadge(art) {
+            return isNew(art) ? '<span class="badge-new">Nouveau</span>' : '';
+        }
+
         function getArticles() {
             try {
                 const saved = localStorage.getItem('lr_articles');
@@ -810,7 +820,7 @@
                                 <img src="${r.img}" alt="${r.title}" loading="lazy">
                                 <div class="related-card-body">
                                     <div class="related-cat">${r.cat}</div>
-                                    <div class="related-card-title">${r.title}</div>
+                                    <div class="related-card-title">${r.title}${newBadge(r)}</div>
                                 </div>
                             </div>`).join('')}
                     </div>
@@ -909,7 +919,7 @@
                     <div class="hero-sidebar">${side.map(a => `
                         <div class="hero-side-item fade-up" onclick="openArticle('${Sec.esc(a.id)}')">
                             <img src="${Sec.imgUrl(a.img)}" alt="${Sec.esc(a.title)}" class="hero-side-img" width="90" height="72" loading="lazy">
-                            <div><div class="hero-side-cat">${Sec.esc(a.cat)}</div><h3 class="hero-side-title">${Sec.esc(a.title)}</h3></div>
+                            <div><div class="hero-side-cat">${Sec.esc(a.cat)}</div><h3 class="hero-side-title">${Sec.esc(a.title)}${newBadge(a)}</h3></div>
                         </div>`).join('')}
                     </div>
                 `;
@@ -918,7 +928,7 @@
                 <div class="trend-card fade-up" onclick="openArticle('${Sec.esc(a.id)}')" style="transition-delay:${i * 80}ms">
                     <img src="${Sec.imgUrl(a.img)}" alt="${Sec.esc(a.title)}" class="trend-img" width="300" height="190" loading="lazy">
                     <div class="trend-num">#${i + 1}</div>
-                    <h3 class="trend-title">${Sec.esc(a.title)}</h3>
+                    <h3 class="trend-title">${Sec.esc(a.title)}${newBadge(a)}</h3>
                     <div class="trend-meta">${Sec.esc(a.date)}</div>
                 </div>
             `).join('');
