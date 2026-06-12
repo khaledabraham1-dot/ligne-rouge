@@ -455,7 +455,10 @@
             </div>
             <div class="footer-bottom">
                 <span>© 2026 <strong>Ligne Rouge</strong>. Tous droits réservés.</span>
-                <span>Média indépendant — Afrique francophone</span>
+                <span style="display:flex;align-items:center;gap:16px">
+                    <span>Média indépendant — Afrique francophone</span>
+                    <a href="admin.html" style="font-size:.72rem;color:var(--border2);text-decoration:none;opacity:.5;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.5">⚙ Admin</a>
+                </span>
             </div>
         </div>
     </footer>
@@ -463,22 +466,41 @@
     <div id="notif" class="notification" role="alert" aria-live="polite"><span id="notif-msg"></span></div>
 
     <script>
-        const IMGS = [
-            "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=800&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=800&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop"
+        // ---- ARTICLES : charge depuis localStorage (admin) ou fallback hardcodé ----
+        const DEFAULT_ARTS = [
+            {id:'d1',cat:'Politique',title:"Nouveaux enjeux géopolitiques en Afrique de l'Ouest",subtitle:'Une analyse profonde des changements récents.',date:'12 Juin 2026',read:'6 min',views:12450,status:'published',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop',body:"<p>L'Afrique de l'Ouest traverse une période de transformation politique majeure, marquée par de nouvelles alliances et des reconfigurations du pouvoir.</p>"},
+            {id:'d2',cat:'Sport',title:"Lions de la Téranga : Préparatifs pour la Coupe du Monde",subtitle:'Le Sénégal affine sa stratégie.',date:'11 Juin 2026',read:'4 min',views:8900,status:'published',img:'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop',body:"<p>L'équipe nationale du Sénégal se prépare intensivement pour le prochain tournoi mondial.</p>"},
+            {id:'d3',cat:'Actualité',title:"Innovation technologique : Le hub numérique de Dakar",subtitle:"La capitale sénégalaise s'affirme comme leader tech.",date:'10 Juin 2026',read:'5 min',views:5600,status:'published',img:'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',body:"<p>Dakar continue d'attirer les investissements technologiques de toute l'Afrique et au-delà.</p>"},
+            {id:'d4',cat:'Culture',title:"Biennale de Dakar : Un succès retentissant",subtitle:"L'art contemporain africain à l'honneur.",date:'09 Juin 2026',read:'7 min',views:4200,status:'published',img:'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=800&auto=format&fit=crop',body:"<p>L'édition de cette année a battu tous les records d'affluence, confirmant le rayonnement de l'art africain.</p>"},
+            {id:'d5',cat:'International',title:"Sommet sur le climat : Les engagements de l'Afrique",subtitle:'Vers une transition énergétique durable.',date:'08 Juin 2026',read:'8 min',views:3100,status:'published',img:'https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=800&auto=format&fit=crop',body:"<p>Les dirigeants africains ont porté une voix unie lors du sommet international sur le changement climatique.</p>"}
         ];
 
-        let articles = [
-            { id: 1, cat: 'Politique', title: 'Nouveaux enjeux géopolitiques en Afrique de l\'Ouest', subtitle: 'Une analyse profonde des changements récents.', date: '12 Juin 2026', read: '6 min', views: 12450, img: IMGS[1], body: '<p>L\'Afrique de l\'Ouest traverse une période de transformation politique majeure...</p>' },
-            { id: 2, cat: 'Sport', title: 'Lions de la Téranga : Préparatifs pour la Coupe du Monde', subtitle: 'Le Sénégal affine sa stratégie.', date: '11 Juin 2026', read: '4 min', views: 8900, img: IMGS[2], body: '<p>L\'équipe nationale du Sénégal se prépare intensivement...</p>' },
-            { id: 3, cat: 'Actualité', title: 'Innovation technologique : Le hub numérique de Dakar', subtitle: 'La capitale sénégalaise s\'affirme comme leader tech.', date: '10 Juin 2026', read: '5 min', views: 5600, img: IMGS[0], body: '<p>Dakar continue d\'attirer les investissements technologiques...</p>' },
-            { id: 4, cat: 'Culture', title: 'Biennale de Dakar : Un succès retentissant', subtitle: 'L\'art contemporain africain à l\'honneur.', date: '09 Juin 2026', read: '7 min', views: 4200, img: IMGS[4], body: '<p>L\'édition de cette année a battu tous les records d\'affluence...</p>' },
-            { id: 5, cat: 'International', title: 'Sommet sur le climat : Les engagements de l\'Afrique', subtitle: 'Vers une transition énergétique durable.', date: '08 Juin 2026', read: '8 min', views: 3100, img: IMGS[3], body: '<p>Les dirigeants africains ont porté une voix unie lors du sommet...</p>' }
-        ];
+        function getArticles() {
+            try {
+                const saved = localStorage.getItem('lr_articles');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    const pub = parsed.filter(a => a.status === 'published');
+                    if (pub.length > 0) return pub;
+                }
+            } catch(e) {}
+            return DEFAULT_ARTS;
+        }
+
+        function getComments(articleId) {
+            try {
+                const saved = JSON.parse(localStorage.getItem('lr_comments') || '[]');
+                return saved.filter(c => c.articleId == articleId && c.status === 'approved');
+            } catch(e) { return []; }
+        }
+
+        function saveComment(comment) {
+            try {
+                const saved = JSON.parse(localStorage.getItem('lr_comments') || '[]');
+                saved.unshift(comment);
+                localStorage.setItem('lr_comments', JSON.stringify(saved));
+            } catch(e) {}
+        }
 
         const UI = {
             showPage(id) {
@@ -499,13 +521,32 @@
         function filterCategory(cat) { UI.showPage('page-home'); renderHome(cat); }
 
         function openArticle(id) {
-            const art = articles.find(a => a.id === id);
+            const articles = getArticles();
+            const art = articles.find(a => a.id == id);
             if (!art) return;
+
+            // Incrémenter les vues
+            try {
+                const saved = JSON.parse(localStorage.getItem('lr_articles') || 'null');
+                if (saved) {
+                    const idx = saved.findIndex(a => a.id == id);
+                    if (idx >= 0) { saved[idx].views = (saved[idx].views || 0) + 1; localStorage.setItem('lr_articles', JSON.stringify(saved)); }
+                }
+            } catch(e) {}
+
+            const approvedCmts = getComments(id);
+            const cmtsHtml = approvedCmts.length ? approvedCmts.map(c => `
+                <div style="padding:16px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--bg)">
+                    <div style="font-weight:700;font-size:.88rem;margin-bottom:4px">${c.author} <span style="font-weight:400;color:var(--text3);font-size:.78rem">· ${c.date}</span></div>
+                    <div style="font-size:.92rem;color:var(--text2);line-height:1.6">${c.text}</div>
+                </div>
+            `).join('') : '<p style="color:var(--text3);font-size:.9rem">Aucun commentaire pour cet article.</p>';
+
             document.getElementById('article-content').innerHTML = `
                 <div class="art-hero"><div class="art-container">
                     <span class="art-cat">${art.cat}</span>
                     <h1 class="art-title">${art.title}</h1>
-                    <p class="art-subtitle">${art.subtitle}</p>
+                    <p class="art-subtitle">${art.subtitle || ''}</p>
                     <div class="art-meta-top">
                         <div class="art-author">
                             <img src="Capture d'écran 2026-05-15 220637.png" alt="Alassane Ibrahima" class="author-img" width="44" height="44">
@@ -513,32 +554,82 @@
                         </div>
                         <button onclick="showPage('page-home')" style="font-size:.8rem;color:var(--text3);border:1px solid var(--border);padding:6px 14px;border-radius:20px;cursor:pointer;">← Retour</button>
                     </div>
-                    <div class="art-main-img-wrap"><img src="${art.img}" alt="${art.title}" style="width:100%;border-radius:8px;"></div>
+                    ${art.img ? `<div class="art-main-img-wrap"><img src="${art.img}" alt="${art.title}" style="width:100%;border-radius:8px;"></div>` : ''}
                     <div class="art-body">${art.body}</div>
+
+                    <!-- COMMENTAIRES -->
+                    <div style="margin-top:56px;padding-top:40px;border-top:2px solid var(--border)">
+                        <h3 style="font-family:var(--font-h);font-size:1.4rem;font-weight:700;color:var(--navy);margin-bottom:24px">
+                            Commentaires (${approvedCmts.length})
+                        </h3>
+                        <div id="cmts-list">${cmtsHtml}</div>
+
+                        <div style="margin-top:32px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:24px">
+                            <h4 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:18px">Laisser un commentaire</h4>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+                                <div>
+                                    <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:5px">Nom *</label>
+                                    <input id="cmt-name" type="text" placeholder="Votre nom" style="width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:.9rem;outline:none">
+                                </div>
+                                <div>
+                                    <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:5px">Email (optionnel)</label>
+                                    <input id="cmt-email" type="email" placeholder="votre@email.com" style="width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:.9rem;outline:none">
+                                </div>
+                            </div>
+                            <div style="margin-bottom:16px">
+                                <label style="display:block;font-size:.82rem;font-weight:600;margin-bottom:5px">Commentaire *</label>
+                                <textarea id="cmt-text" rows="4" placeholder="Partagez votre avis..." style="width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:.9rem;outline:none;resize:vertical;line-height:1.6"></textarea>
+                            </div>
+                            <button onclick="submitComment('${art.id}','${art.title.replace(/'/g,"\\'")}')}" style="background:var(--navy);color:#fff;padding:10px 24px;border-radius:6px;font-weight:700;font-size:.9rem;cursor:pointer;border:none;font-family:var(--font-b)">Envoyer le commentaire</button>
+                            <p style="font-size:.75rem;color:var(--text3);margin-top:10px">Votre commentaire sera visible après modération par la rédaction.</p>
+                        </div>
+                    </div>
                 </div></div>
             `;
             UI.showPage('page-article');
         }
 
+        function submitComment(articleId, articleTitle) {
+            const name = document.getElementById('cmt-name').value.trim();
+            const text = document.getElementById('cmt-text').value.trim();
+            if (!name || !text) { UI.showNotif('Merci de remplir votre nom et commentaire'); return; }
+            const now = new Date();
+            saveComment({
+                id: 'c' + Date.now(),
+                articleId,
+                articleTitle,
+                author: name,
+                email: document.getElementById('cmt-email').value.trim(),
+                text,
+                status: 'pending',
+                date: now.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'})
+            });
+            document.getElementById('cmt-name').value = '';
+            document.getElementById('cmt-email').value = '';
+            document.getElementById('cmt-text').value = '';
+            UI.showNotif('Merci ! Votre commentaire est en attente de modération.');
+        }
+
         function renderHome(filter = 'all') {
+            const articles = getArticles();
             const filtered = filter === 'all' ? articles : articles.filter(a => a.cat === filter);
             const heroGrid = document.getElementById('hero-grid');
             if (filtered.length > 0) {
                 const main = filtered[0];
                 const side = filtered.slice(1, 4);
                 heroGrid.innerHTML = `
-                    <div class="hero-main" onclick="openArticle(${main.id})">
+                    <div class="hero-main" onclick="openArticle('${main.id}')">
                         <img src="${main.img}" alt="${main.title}" style="width:100%;height:480px;object-fit:cover;">
                         <div class="hero-overlay"></div>
                         <div class="hero-content">
                             <span class="hero-cat-badge">${main.cat}</span>
                             <h2 class="hero-title">${main.title}</h2>
-                            <p class="hero-sub">${main.subtitle}</p>
+                            <p class="hero-sub">${main.subtitle || ''}</p>
                             <div class="hero-meta">${main.date}</div>
                         </div>
                     </div>
                     <div class="hero-sidebar">${side.map(a => `
-                        <div class="hero-side-item" onclick="openArticle(${a.id})">
+                        <div class="hero-side-item" onclick="openArticle('${a.id}')">
                             <img src="${a.img}" alt="${a.title}" class="hero-side-img" width="90" height="72">
                             <div><div class="hero-side-cat">${a.cat}</div><h3 class="hero-side-title">${a.title}</h3></div>
                         </div>`).join('')}
@@ -546,7 +637,7 @@
                 `;
             }
             document.getElementById('trending-grid').innerHTML = filtered.slice(0, 4).map((a, i) => `
-                <div class="trend-card" onclick="openArticle(${a.id})">
+                <div class="trend-card" onclick="openArticle('${a.id}')">
                     <img src="${a.img}" alt="${a.title}" class="trend-img" width="300" height="190">
                     <div class="trend-num">#${i + 1}</div>
                     <h3 class="trend-title">${a.title}</h3>
@@ -568,9 +659,10 @@
         function searchArticles(q) {
             const res = document.getElementById('search-results');
             if (!q || q.length < 2) { res.innerHTML = ''; return; }
+            const articles = getArticles();
             const hits = articles.filter(a => a.title.toLowerCase().includes(q.toLowerCase()));
             res.innerHTML = hits.length
-                ? hits.map(a => `<div class="search-result-item" onclick="openArticle(${a.id});toggleSearch()"><div class="sri-title">${a.title}</div></div>`).join('')
+                ? hits.map(a => `<div class="search-result-item" onclick="openArticle('${a.id}');toggleSearch()"><div class="sri-title">${a.title}</div></div>`).join('')
                 : '<p style="padding:12px;color:var(--text3)">Aucun résultat trouvé</p>';
         }
 

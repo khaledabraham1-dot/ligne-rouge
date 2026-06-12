@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration — Ligne Rouge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--navy:#0D1B2A;--navy2:#162233;--red:#C01D35;--red2:#A01728;--bg:#F5F6F8;--white:#fff;--text:#1A1A1A;--text2:#4A4A4A;--text3:#7A7A7A;--border:#E5E7EB;--success:#27a745;--warning:#f0ad4e;--danger:#dc3545;--sidebar-w:240px;--topbar-h:60px;--font:'Source Sans 3',system-ui,sans-serif;--font-h:'Playfair Display',Georgia,serif}
+        html,body{height:100%;font-family:var(--font);font-size:15px;color:var(--text)}
+
+        /* LOGIN */
+        #login-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:1000}
+        .login-card{background:var(--white);border-radius:12px;padding:48px 40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+        .login-brand{font-family:var(--font-h);font-size:1.9rem;font-weight:800;color:var(--navy);text-align:center;margin-bottom:4px}
+        .login-brand span{color:var(--red)}
+        .login-sub{font-size:.85rem;color:var(--text3);text-align:center;margin-bottom:32px}
+        .login-error{color:var(--red);font-size:.85rem;margin-bottom:10px;min-height:18px;text-align:center}
+
+        /* APP LAYOUT */
+        #admin-app{display:flex;height:100vh;overflow:hidden}
+
+        /* SIDEBAR */
+        #sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;overflow:hidden}
+        .sb-brand{font-family:var(--font-h);font-size:1.25rem;font-weight:800;color:#fff;padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+        .sb-brand span{color:var(--red)}
+        .sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+        .nav-item{display:flex;align-items:center;gap:10px;width:100%;padding:11px 20px;color:rgba(255,255,255,.6);font-size:.87rem;font-weight:500;cursor:pointer;border:none;background:none;text-align:left;transition:all .15s;border-left:3px solid transparent;position:relative}
+        .nav-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+        .nav-item.active{color:#fff;background:rgba(255,255,255,.1);border-left-color:var(--red)}
+        .nav-icon{font-size:.95rem;width:18px;text-align:center;flex-shrink:0}
+        .nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:20px;display:none}
+        .nav-badge.show{display:inline}
+        .sb-footer{padding:14px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:6px}
+        .sb-link{color:rgba(255,255,255,.45);font-size:.8rem;text-decoration:none;padding:6px 4px;transition:color .15s}
+        .sb-link:hover{color:#fff}
+        .sb-logout{color:rgba(255,255,255,.45);font-size:.8rem;text-align:left;cursor:pointer;padding:6px 4px;transition:color .15s;background:none;border:none;font-family:var(--font)}
+        .sb-logout:hover{color:var(--red)}
+
+        /* MAIN */
+        #main-wrapper{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+        #topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+        #topbar-title{font-family:var(--font-h);font-size:1.05rem;font-weight:700;color:var(--navy)}
+        .topbar-user{font-size:.8rem;font-weight:600;color:var(--text3);background:var(--bg);padding:5px 12px;border-radius:20px}
+        #content{flex:1;overflow-y:auto;padding:28px;background:var(--bg)}
+
+        /* SECTIONS */
+        .sec{display:none}.sec.active{display:block}
+
+        /* STAT CARDS */
+        .stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+        .stat-card{background:var(--white);border-radius:10px;padding:20px;border:1px solid var(--border)}
+        .stat-card.accent{background:var(--navy)}
+        .stat-value{font-size:1.9rem;font-weight:700;color:var(--navy);line-height:1;margin-bottom:5px}
+        .stat-card.accent .stat-value{color:#fff}
+        .stat-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+        .stat-card.accent .stat-label{color:rgba(255,255,255,.55)}
+
+        /* CARDS */
+        .card{background:var(--white);border-radius:10px;border:1px solid var(--border);padding:22px;margin-bottom:18px}
+        .card h4{font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:16px}
+        .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+        .card-header h3{font-size:.95rem;font-weight:700;color:var(--navy)}
+        .dash-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+
+        /* TABLES */
+        .admin-table{width:100%;border-collapse:collapse;font-size:.86rem}
+        .admin-table th{text-align:left;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);padding:9px 12px;background:var(--bg);border-bottom:1px solid var(--border)}
+        .admin-table td{padding:11px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+        .admin-table tr:last-child td{border-bottom:none}
+        .admin-table tr:hover td{background:#fafafa}
+
+        /* BADGES */
+        .badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:.68rem;font-weight:700}
+        .badge-published,.badge-approved{background:#e8f5e9;color:#1b5e20}
+        .badge-draft{background:#fff3e0;color:#e65100}
+        .badge-pending{background:#fff8e1;color:#f57f17}
+        .badge-rejected{background:#fce4ec;color:#880e4f}
+        .badge-cat{background:#e8eaf6;color:#1a237e}
+
+        /* BUTTONS */
+        .btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 18px;border-radius:6px;font-size:.87rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:var(--font);gap:5px}
+        .btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{background:var(--navy2)}
+        .btn-publish{background:var(--red);color:#fff;font-size:.95rem;padding:11px 20px}.btn-publish:hover{background:var(--red2)}
+        .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{opacity:.9}
+        .btn-outline{border:1px solid var(--border);color:var(--text);background:transparent}.btn-outline:hover{background:var(--bg)}
+        .btn-sm{padding:4px 10px;font-size:.75rem;border-radius:4px;cursor:pointer;font-weight:600;border:1px solid var(--border);background:var(--white);color:var(--text);margin-right:3px;transition:all .15s;font-family:var(--font)}
+        .btn-sm.btn-success{background:var(--success);color:#fff;border-color:var(--success)}
+        .btn-sm.btn-warning{background:var(--warning);color:#fff;border-color:var(--warning)}
+        .btn-sm.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+        .w-full{width:100%}
+
+        /* FORMS */
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-size:.83rem;font-weight:600;color:var(--text);margin-bottom:5px}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:6px;font-size:.9rem;font-family:var(--font);color:var(--text);background:var(--white);transition:border-color .15s;outline:none}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--navy)}
+        .form-group textarea{resize:vertical;line-height:1.65}
+        .form-hint{font-size:.75rem;color:var(--text3);margin-bottom:7px}
+
+        /* ARTICLE EDITOR */
+        .form-grid{display:grid;grid-template-columns:1fr 290px;gap:22px;align-items:start}
+        .form-sidebar .card{margin-bottom:14px}
+        .pub-actions{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+
+        /* IMAGE UPLOAD */
+        .img-upload-area{border:2px dashed var(--border);border-radius:8px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text3)}
+        .img-upload-area:hover{border-color:var(--red);background:#fff8f8}
+        .img-upload-icon{font-size:2rem;margin-bottom:8px}
+        .img-upload-area p{font-size:.82rem;margin-bottom:3px}
+
+        /* SECTION HEADER */
+        .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+        .section-head h2{font-family:var(--font-h);font-size:1.35rem;font-weight:700;color:var(--navy)}
+
+        /* FILTERS */
+        .filter-group{display:flex;gap:6px;flex-wrap:wrap}
+        .filter-btn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);font-size:.78rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--text3);transition:all .15s;font-family:var(--font)}
+        .filter-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+        /* COMMENT PREVIEW (dashboard) */
+        .comment-preview{padding:10px 0;border-bottom:1px solid var(--border)}
+        .comment-preview:last-child{border-bottom:none}
+        .cp-meta{font-size:.77rem;font-weight:600;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:7px}
+        .cp-text{font-size:.82rem;color:var(--text3);line-height:1.4}
+
+        /* TOAST */
+        .admin-notif{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:13px 22px;border-radius:8px;font-size:.87rem;font-weight:500;transform:translateY(80px);opacity:0;transition:all .35s;z-index:9999;border-left:4px solid var(--success)}
+        .admin-notif.show{transform:translateY(0);opacity:1}
+        .admin-notif.err{border-left-color:var(--red)}
+
+        /* RESPONSIVE */
+        @media(max-width:1024px){.stat-cards{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.form-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
+        @media(max-width:768px){#sidebar{width:190px}#content{padding:16px}.section-head{flex-direction:column;align-items:flex-start;gap:10px}}
+    </style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="login-screen">
+    <div class="login-card">
+        <div class="login-brand">LIGNE <span>ROUGE</span></div>
+        <p class="login-sub">Espace Administration</p>
+        <div class="form-group">
+            <label>Identifiant</label>
+            <input type="text" id="login-user" placeholder="admin" onkeydown="if(event.key==='Enter')login()">
+        </div>
+        <div class="form-group">
+            <label>Mot de passe</label>
+            <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()">
+        </div>
+        <div id="login-error" class="login-error"></div>
+        <button class="btn btn-primary w-full" onclick="login()">Se connecter</button>
+    </div>
+</div>
+
+<!-- ===== ADMIN APP ===== -->
+<div id="admin-app" style="display:none">
+
+    <aside id="sidebar">
+        <div class="sb-brand">LIGNE <span>ROUGE</span></div>
+        <nav class="sb-nav">
+            <button class="nav-item active" data-sec="dashboard" onclick="nav('dashboard')"><span class="nav-icon">◈</span>Tableau de bord</button>
+            <button class="nav-item" data-sec="articles" onclick="nav('articles')"><span class="nav-icon">☰</span>Articles<span class="nav-badge" id="badge-arts"></span></button>
+            <button class="nav-item" data-sec="new" onclick="nav('new')"><span class="nav-icon">＋</span>Nouvel article</button>
+            <button class="nav-item" data-sec="comments" onclick="nav('comments')"><span class="nav-icon">✉</span>Commentaires<span class="nav-badge show" id="badge-cmts" style="background:var(--warning)"></span></button>
+            <button class="nav-item" data-sec="settings" onclick="nav('settings')"><span class="nav-icon">⚙</span>Réglages</button>
+        </nav>
+        <div class="sb-footer">
+            <a href="index.html" target="_blank" class="sb-link">↗ Voir le site</a>
+            <button class="sb-logout" onclick="logout()">⏻ Déconnexion</button>
+        </div>
+    </aside>
+
+    <div id="main-wrapper">
+        <header id="topbar">
+            <span id="topbar-title">Tableau de bord</span>
+            <span class="topbar-user" id="topbar-user">admin</span>
+        </header>
+        <main id="content">
+
+            <!-- DASHBOARD -->
+            <div id="sec-dashboard" class="sec active">
+                <div class="stat-cards">
+                    <div class="stat-card"><div class="stat-value" id="st-total">0</div><div class="stat-label">Total articles</div></div>
+                    <div class="stat-card accent"><div class="stat-value" id="st-pub">0</div><div class="stat-label">Publiés</div></div>
+                    <div class="stat-card"><div class="stat-value" id="st-cmts">0</div><div class="stat-label">Commentaires en attente</div></div>
+                    <div class="stat-card"><div class="stat-value" id="st-views">0</div><div class="stat-label">Vues totales</div></div>
+                </div>
+                <div class="dash-grid">
+                    <div class="card">
+                        <div class="card-header"><h3>Articles récents</h3><button class="btn btn-outline btn-sm" style="padding:5px 12px" onclick="nav('new')">+ Nouveau</button></div>
+                        <table class="admin-table"><thead><tr><th>Titre</th><th>Catégorie</th><th>Statut</th><th>Date</th></tr></thead><tbody id="dash-arts"></tbody></table>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h3>Derniers commentaires</h3><button class="btn btn-outline btn-sm" style="padding:5px 12px" onclick="nav('comments')">Voir tout</button></div>
+                        <div id="dash-cmts"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ARTICLES -->
+            <div id="sec-articles" class="sec">
+                <div class="section-head">
+                    <h2>Gestion des articles</h2>
+                    <button class="btn btn-primary" onclick="nav('new')">+ Nouvel article</button>
+                </div>
+                <div class="card" style="padding:0;overflow:hidden">
+                    <table class="admin-table">
+                        <thead><tr><th style="width:38%">Article</th><th>Catégorie</th><th>Statut</th><th>Date</th><th>Vues</th><th>Actions</th></tr></thead>
+                        <tbody id="arts-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- NEW / EDIT ARTICLE -->
+            <div id="sec-new" class="sec">
+                <div class="section-head"><h2 id="form-title">Nouvel article</h2></div>
+                <div class="form-grid">
+                    <div>
+                        <div class="card">
+                            <div class="form-group"><label>Titre *</label><input type="text" id="art-title" placeholder="Titre de l'article"></div>
+                            <div class="form-group"><label>Sous-titre / Accroche</label><input type="text" id="art-subtitle" placeholder="Résumé en une phrase percutante"></div>
+                            <div class="form-group">
+                                <label>Corps de l'article *</label>
+                                <p class="form-hint">Séparez les paragraphes par une ligne vide. Vous pouvez utiliser du HTML basique (&lt;strong&gt;, &lt;em&gt;).</p>
+                                <textarea id="art-body" rows="20" placeholder="Rédigez votre article ici...&#10;&#10;Appuyez deux fois sur Entrée pour créer un nouveau paragraphe."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-sidebar">
+                        <div class="card">
+                            <h4>Publication</h4>
+                            <div class="form-group">
+                                <label>Catégorie</label>
+                                <select id="art-cat">
+                                    <option value="Actualité">Actualité</option>
+                                    <option value="Politique">Politique</option>
+                                    <option value="Sport">Sport</option>
+                                    <option value="Société">Société</option>
+                                    <option value="International">International</option>
+                                    <option value="Culture">Culture</option>
+                                </select>
+                            </div>
+                            <div class="pub-actions">
+                                <button class="btn btn-outline w-full" onclick="saveArticle('draft')">💾 Enregistrer brouillon</button>
+                                <button class="btn btn-publish w-full" onclick="saveArticle('published')">🚀 Publier sur le site</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h4>Image principale</h4>
+                            <div class="img-upload-area" onclick="document.getElementById('img-input').click()" id="img-drop">
+                                <div class="img-upload-icon">📷</div>
+                                <p><strong>Cliquez pour uploader</strong></p>
+                                <p style="font-size:.75rem;color:var(--text3);margin-top:4px">Téléphone, ordinateur, tablette</p>
+                                <p style="font-size:.72rem;color:var(--text3)">JPG · PNG · WEBP</p>
+                            </div>
+                            <input type="file" id="img-input" accept="image/*" capture="environment" style="display:none" onchange="handleImg(this)">
+                            <div id="img-prev-wrap" style="display:none;margin-top:12px">
+                                <img id="img-prev" style="width:100%;border-radius:6px;max-height:180px;object-fit:cover;">
+                                <button class="btn btn-danger w-full" style="margin-top:8px;font-size:.8rem;padding:7px" onclick="removeImg()">✕ Supprimer l'image</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMMENTS -->
+            <div id="sec-comments" class="sec">
+                <div class="section-head">
+                    <h2>Commentaires</h2>
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-filter="all" onclick="renderCmts('all')">Tous</button>
+                        <button class="filter-btn" data-filter="pending" onclick="renderCmts('pending')">En attente</button>
+                        <button class="filter-btn" data-filter="approved" onclick="renderCmts('approved')">Approuvés</button>
+                        <button class="filter-btn" data-filter="rejected" onclick="renderCmts('rejected')">Rejetés</button>
+                    </div>
+                </div>
+                <div class="card" style="padding:0;overflow:hidden">
+                    <table class="admin-table">
+                        <thead><tr><th>Auteur</th><th>Commentaire</th><th>Article</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+                        <tbody id="cmts-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div id="sec-settings" class="sec">
+                <div class="section-head"><h2>Réglages</h2></div>
+                <div style="max-width:460px">
+                    <div class="card">
+                        <h4>Compte administrateur</h4>
+                        <div class="form-group"><label>Nom d'utilisateur</label><input type="text" id="set-user"></div>
+                        <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="set-pass" placeholder="Laisser vide pour conserver l'actuel"></div>
+                        <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" id="set-pass2"></div>
+                        <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder</button>
+                    </div>
+                    <div class="card">
+                        <h4>Zone de danger</h4>
+                        <p style="font-size:.85rem;color:var(--text3);margin-bottom:14px">Supprime tous les articles et commentaires. Action irréversible.</p>
+                        <button class="btn btn-danger" onclick="resetData()">Réinitialiser toutes les données</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<div id="admin-notif" class="admin-notif"></div>
+
+<script>
+const KEY = 'lr_';
+const SECTION_NAMES = {dashboard:'Tableau de bord',articles:'Articles',new:'Nouvel article',comments:'Commentaires',settings:'Réglages'};
+
+const DEFAULT_ARTS = [
+    {id:'d1',cat:'Politique',title:'Nouveaux enjeux géopolitiques en Afrique de l\'Ouest',subtitle:'Une analyse profonde des changements récents.',date:'12 Juin 2026',read:'6 min',views:12450,status:'published',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop',body:'<p>L\'Afrique de l\'Ouest traverse une période de transformation politique majeure, marquée par de nouvelles alliances et des reconfigurations du pouvoir.</p>',createdAt:1718150400000},
+    {id:'d2',cat:'Sport',title:'Lions de la Téranga : Préparatifs pour la Coupe du Monde',subtitle:'Le Sénégal affine sa stratégie.',date:'11 Juin 2026',read:'4 min',views:8900,status:'published',img:'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop',body:'<p>L\'équipe nationale du Sénégal se prépare intensivement pour le prochain tournoi mondial.</p>',createdAt:1718064000000},
+    {id:'d3',cat:'Actualité',title:'Innovation technologique : Le hub numérique de Dakar',subtitle:'La capitale sénégalaise s\'affirme comme leader tech.',date:'10 Juin 2026',read:'5 min',views:5600,status:'published',img:'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',body:'<p>Dakar continue d\'attirer les investissements technologiques de toute l\'Afrique et au-delà.</p>',createdAt:1717977600000},
+    {id:'d4',cat:'Culture',title:'Biennale de Dakar : Un succès retentissant',subtitle:'L\'art contemporain africain à l\'honneur.',date:'09 Juin 2026',read:'7 min',views:4200,status:'published',img:'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=800&auto=format&fit=crop',body:'<p>L\'édition de cette année a battu tous les records d\'affluence, confirmant le rayonnement de l\'art africain.</p>',createdAt:1717891200000},
+    {id:'d5',cat:'International',title:'Sommet sur le climat : Les engagements de l\'Afrique',subtitle:'Vers une transition énergétique durable.',date:'08 Juin 2026',read:'8 min',views:3100,status:'published',img:'https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=800&auto=format&fit=crop',body:'<p>Les dirigeants africains ont porté une voix unie lors du sommet international sur le changement climatique.</p>',createdAt:1717804800000}
+];
+
+// ---- DB ----
+const DB = {
+    g: k => { try { return JSON.parse(localStorage.getItem(KEY+k)) } catch(e) { return null } },
+    s: (k,v) => localStorage.setItem(KEY+k, JSON.stringify(v)),
+
+    arts: {
+        all() { let a = DB.g('articles'); if (!a) { a = DEFAULT_ARTS; DB.arts.save(a); } return a; },
+        save(a) { DB.s('articles', a); },
+        find(id) { return this.all().find(a => a.id == id); },
+        upsert(art) { let a = this.all(); const i = a.findIndex(x => x.id == art.id); i >= 0 ? a[i] = art : a.unshift(art); this.save(a); },
+        del(id) { this.save(this.all().filter(a => a.id != id)); }
+    },
+    cmts: {
+        all() { return DB.g('comments') || []; },
+        save(c) { DB.s('comments', c); },
+        add(c) { let a = this.all(); a.unshift(c); this.save(a); },
+        find(id) { return this.all().find(c => c.id == id); },
+        upsert(cmt) { let a = this.all(); const i = a.findIndex(x => x.id == cmt.id); i >= 0 ? a[i] = cmt : a.unshift(cmt); this.save(a); },
+        del(id) { this.save(this.all().filter(c => c.id != id)); }
+    },
+    cfg: {
+        get() { return DB.g('settings') || {username:'admin',password:'LigneRouge2026'}; },
+        save(s) { DB.s('settings', s); }
+    },
+    ses: {
+        ok() { return sessionStorage.getItem('lr_auth') === '1'; },
+        in() { sessionStorage.setItem('lr_auth','1'); },
+        out() { sessionStorage.removeItem('lr_auth'); }
+    }
+};
+
+// ---- AUTH ----
+let editId = null, cmtFilter = 'all';
+
+function login() {
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    const cfg = DB.cfg.get();
+    if (u === cfg.username && p === cfg.password) {
+        DB.ses.in();
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('admin-app').style.display = 'flex';
+        document.getElementById('topbar-user').textContent = u;
+        document.getElementById('set-user').value = u;
+        renderDash();
+        updateBadges();
+    } else {
+        document.getElementById('login-error').textContent = 'Identifiants incorrects. Réessayez.';
+    }
+}
+
+function logout() {
+    DB.ses.out();
+    document.getElementById('admin-app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-error').textContent = '';
+}
+
+// ---- NAV ----
+function nav(sec) {
+    document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+    document.getElementById('sec-' + sec).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector('[data-sec="'+sec+'"]').classList.add('active');
+    document.getElementById('topbar-title').textContent = SECTION_NAMES[sec] || '';
+    if (sec === 'dashboard') renderDash();
+    else if (sec === 'articles') renderArts();
+    else if (sec === 'comments') renderCmts(cmtFilter);
+    else if (sec === 'new') { editId = null; resetForm(); }
+}
+
+// ---- BADGES ----
+function updateBadges() {
+    const arts = DB.arts.all();
+    const pending = DB.cmts.all().filter(c => c.status === 'pending').length;
+    const badge = document.getElementById('badge-cmts');
+    badge.textContent = pending;
+    badge.className = 'nav-badge' + (pending > 0 ? ' show' : '');
+}
+
+// ---- DASHBOARD ----
+function renderDash() {
+    const arts = DB.arts.all();
+    const cmts = DB.cmts.all();
+    const pub = arts.filter(a => a.status === 'published');
+    const pend = cmts.filter(c => c.status === 'pending');
+    const views = arts.reduce((s, a) => s + (a.views || 0), 0);
+    document.getElementById('st-total').textContent = arts.length;
+    document.getElementById('st-pub').textContent = pub.length;
+    document.getElementById('st-cmts').textContent = pend.length;
+    document.getElementById('st-views').textContent = views.toLocaleString('fr-FR');
+
+    document.getElementById('dash-arts').innerHTML = arts.slice(0,5).map(a => `
+        <tr>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.title}</td>
+            <td><span class="badge badge-cat">${a.cat}</span></td>
+            <td><span class="badge badge-${a.status === 'published' ? 'published' : 'draft'}">${a.status === 'published' ? 'Publié' : 'Brouillon'}</span></td>
+            <td style="white-space:nowrap">${a.date}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px">Aucun article</td></tr>';
+
+    document.getElementById('dash-cmts').innerHTML = cmts.slice(0,5).map(c => `
+        <div class="comment-preview">
+            <div class="cp-meta">${c.author} <span class="badge badge-${c.status === 'approved' ? 'approved' : c.status === 'rejected' ? 'rejected' : 'pending'}">${c.status === 'approved' ? 'Approuvé' : c.status === 'rejected' ? 'Rejeté' : 'En attente'}</span></div>
+            <div class="cp-text">${(c.text||'').substring(0,90)}${c.text && c.text.length > 90 ? '…' : ''}</div>
+        </div>
+    `).join('') || '<p style="color:#aaa;font-size:.85rem;padding:8px 0">Aucun commentaire</p>';
+}
+
+// ---- ARTICLES ----
+function renderArts() {
+    document.getElementById('arts-tbody').innerHTML = DB.arts.all().map(a => `
+        <tr>
+            <td>
+                ${a.img ? `<img src="${a.img}" style="width:44px;height:36px;object-fit:cover;border-radius:4px;margin-right:10px;vertical-align:middle;flex-shrink:0">` : ''}
+                <span style="vertical-align:middle;font-weight:500">${a.title}</span>
+            </td>
+            <td><span class="badge badge-cat">${a.cat}</span></td>
+            <td><span class="badge badge-${a.status === 'published' ? 'published' : 'draft'}">${a.status === 'published' ? 'Publié' : 'Brouillon'}</span></td>
+            <td style="white-space:nowrap;color:var(--text3)">${a.date}</td>
+            <td style="color:var(--text3)">${(a.views||0).toLocaleString('fr-FR')}</td>
+            <td style="white-space:nowrap">
+                <button class="btn-sm" onclick="editArt('${a.id}')">✏ Modifier</button>
+                <button class="btn-sm ${a.status === 'published' ? 'btn-warning' : 'btn-success'}" onclick="togglePub('${a.id}')">${a.status === 'published' ? '⏸ Dépublier' : '▶ Publier'}</button>
+                <button class="btn-sm btn-danger" onclick="delArt('${a.id}')">✕</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:32px">Aucun article créé</td></tr>';
+}
+
+function togglePub(id) {
+    const a = DB.arts.find(id); if (!a) return;
+    a.status = a.status === 'published' ? 'draft' : 'published';
+    DB.arts.upsert(a); renderArts(); updateBadges();
+    notif(a.status === 'published' ? 'Article publié sur le site !' : 'Article retiré du site');
+}
+
+function delArt(id) {
+    if (!confirm('Supprimer définitivement cet article ?')) return;
+    DB.arts.del(id); renderArts(); updateBadges(); notif('Article supprimé');
+}
+
+function editArt(id) {
+    const a = DB.arts.find(id); if (!a) return;
+    editId = id; nav('new');
+    setTimeout(() => {
+        document.getElementById('form-title').textContent = 'Modifier l\'article';
+        document.getElementById('art-title').value = a.title || '';
+        document.getElementById('art-subtitle').value = a.subtitle || '';
+        document.getElementById('art-cat').value = a.cat || 'Actualité';
+        // Convert HTML back to plain text for editing
+        const tmp = document.createElement('div'); tmp.innerHTML = a.body || '';
+        document.getElementById('art-body').value = tmp.innerText || '';
+        if (a.img) {
+            document.getElementById('img-prev').src = a.img;
+            document.getElementById('img-prev-wrap').style.display = 'block';
+        }
+    }, 30);
+}
+
+// ---- NEW ARTICLE FORM ----
+function resetForm() {
+    document.getElementById('form-title').textContent = 'Nouvel article';
+    document.getElementById('art-title').value = '';
+    document.getElementById('art-subtitle').value = '';
+    document.getElementById('art-body').value = '';
+    document.getElementById('art-cat').value = 'Actualité';
+    document.getElementById('img-prev-wrap').style.display = 'none';
+    document.getElementById('img-prev').src = '';
+    document.getElementById('img-input').value = '';
+}
+
+async function handleImg(input) {
+    const file = input.files[0]; if (!file) return;
+    notif('Compression de l\'image…');
+    const b64 = await compressImg(file);
+    document.getElementById('img-prev').src = b64;
+    document.getElementById('img-prev-wrap').style.display = 'block';
+    notif('Image chargée !');
+}
+
+function removeImg() {
+    document.getElementById('img-prev').src = '';
+    document.getElementById('img-prev-wrap').style.display = 'none';
+    document.getElementById('img-input').value = '';
+}
+
+function compressImg(file, maxW = 1200, q = 0.78) {
+    return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+                let w = img.width, h = img.height;
+                if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                const c = document.createElement('canvas');
+                c.width = w; c.height = h;
+                c.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(c.toDataURL('image/jpeg', q));
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function saveArticle(status) {
+    const title = document.getElementById('art-title').value.trim();
+    if (!title) { notif('Le titre est obligatoire !', true); return; }
+    const bodyRaw = document.getElementById('art-body').value.trim();
+    if (!bodyRaw) { notif('Le contenu est obligatoire !', true); return; }
+
+    const htmlBody = bodyRaw.split(/\n\s*\n/).filter(p => p.trim()).map(p => `<p>${p.trim().replace(/\n/g,' ')}</p>`).join('');
+    const words = bodyRaw.split(/\s+/).length;
+    const readTime = Math.max(1, Math.round(words / 200)) + ' min';
+    const imgEl = document.getElementById('img-prev');
+    const img = imgEl.src && imgEl.src !== window.location.href ? imgEl.src : '';
+    const now = new Date();
+    const dateFr = now.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
+
+    const existing = editId ? DB.arts.find(editId) : null;
+    const article = {
+        id: editId || ('a' + Date.now()),
+        title,
+        subtitle: document.getElementById('art-subtitle').value.trim(),
+        cat: document.getElementById('art-cat').value,
+        body: htmlBody,
+        img: img || (existing ? existing.img : ''),
+        date: existing ? existing.date : dateFr,
+        read: readTime,
+        views: existing ? (existing.views || 0) : 0,
+        status,
+        createdAt: existing ? existing.createdAt : Date.now()
+    };
+    if (status === 'published') article.publishedAt = Date.now();
+
+    DB.arts.upsert(article);
+    editId = null;
+    notif(status === 'published' ? '🚀 Article publié sur le site !' : '💾 Brouillon enregistré');
+    setTimeout(() => nav('articles'), 800);
+}
+
+// ---- COMMENTS ----
+function renderCmts(filter) {
+    cmtFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+    let cmts = DB.cmts.all();
+    if (filter !== 'all') cmts = cmts.filter(c => c.status === filter);
+    document.getElementById('cmts-tbody').innerHTML = cmts.map(c => `
+        <tr>
+            <td><strong>${c.author}</strong>${c.email ? `<br><small style="color:#aaa">${c.email}</small>` : ''}</td>
+            <td style="max-width:260px"><span style="font-size:.84rem">${(c.text||'').substring(0,110)}${c.text && c.text.length > 110 ? '…' : ''}</span></td>
+            <td style="font-size:.8rem;color:var(--text3)">${c.articleTitle || '—'}</td>
+            <td style="font-size:.8rem;color:var(--text3);white-space:nowrap">${c.date || ''}</td>
+            <td><span class="badge badge-${c.status === 'approved' ? 'approved' : c.status === 'rejected' ? 'rejected' : 'pending'}">${c.status === 'approved' ? 'Approuvé' : c.status === 'rejected' ? 'Rejeté' : 'En attente'}</span></td>
+            <td style="white-space:nowrap">
+                ${c.status !== 'approved' ? `<button class="btn-sm btn-success" onclick="cAction('${c.id}','approved')">✓ Approuver</button>` : ''}
+                ${c.status !== 'rejected' ? `<button class="btn-sm btn-warning" onclick="cAction('${c.id}','rejected')">✕ Rejeter</button>` : ''}
+                <button class="btn-sm btn-danger" onclick="delCmt('${c.id}')">🗑</button>
+            </td>
+        </tr>
+    `).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:28px">Aucun commentaire</td></tr>';
+}
+
+function cAction(id, status) {
+    const c = DB.cmts.find(id); if (!c) return;
+    c.status = status; DB.cmts.upsert(c); renderCmts(cmtFilter); updateBadges();
+    notif(status === 'approved' ? 'Commentaire approuvé !' : 'Commentaire rejeté');
+}
+
+function delCmt(id) {
+    if (!confirm('Supprimer ce commentaire ?')) return;
+    DB.cmts.del(id); renderCmts(cmtFilter); updateBadges(); notif('Commentaire supprimé');
+}
+
+// ---- SETTINGS ----
+function saveSettings() {
+    const u = document.getElementById('set-user').value.trim();
+    if (!u) { notif('Nom d\'utilisateur requis', true); return; }
+    const p1 = document.getElementById('set-pass').value;
+    const p2 = document.getElementById('set-pass2').value;
+    if (p1 && p1 !== p2) { notif('Les mots de passe ne correspondent pas', true); return; }
+    const cfg = DB.cfg.get();
+    cfg.username = u;
+    if (p1) cfg.password = p1;
+    DB.cfg.save(cfg);
+    document.getElementById('topbar-user').textContent = u;
+    document.getElementById('set-pass').value = '';
+    document.getElementById('set-pass2').value = '';
+    notif('Réglages sauvegardés !');
+}
+
+function resetData() {
+    if (!confirm('ATTENTION : Supprimer tous les articles et commentaires ? Cette action est irréversible.')) return;
+    localStorage.removeItem(KEY + 'articles');
+    localStorage.removeItem(KEY + 'comments');
+    notif('Données réinitialisées'); renderDash(); updateBadges();
+}
+
+// ---- NOTIFICATION ----
+function notif(msg, err = false) {
+    const el = document.getElementById('admin-notif');
+    el.textContent = msg;
+    el.className = 'admin-notif show' + (err ? ' err' : '');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ---- INIT ----
+(function init() {
+    if (DB.ses.ok()) {
+        const cfg = DB.cfg.get();
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('admin-app').style.display = 'flex';
+        document.getElementById('topbar-user').textContent = cfg.username;
+        document.getElementById('set-user').value = cfg.username;
+        renderDash(); updateBadges();
+    }
+})();
+</script>
+</body>
+</html>
