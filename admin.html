@@ -352,17 +352,7 @@ const Sec = {
     pwdOk: p => { const v=Sec.pwdPolicy(p); return v.len&&v.upper&&v.digit&&v.special; }
 };
 
-// ---- ACCÈS SÉCURISÉ PAR TOKEN + SESSION ----
-(function checkAccess() {
-    const SECRET = 'LR2026xK9mPqZ4r';
-    const params = new URLSearchParams(window.location.search);
-    const validToken = params.get('access') === SECRET;
-    const validGate  = sessionStorage.getItem('lr_gate') === '1';
-    if (!validToken && !validGate) { window.location.replace('index.html'); return; }
-    sessionStorage.setItem('lr_gate','1');
-    // Nettoyer le token de l'URL (évite les logs serveur/historique)
-    if (validToken) history.replaceState({}, document.title, location.pathname);
-})();
+// ---- ACCÈS DIRECT (protégé par login/password ci-dessous) ----
 
 // ---- SESSION MANAGEMENT (15min inactivité, 1h absolue) ----
 const SESSION = {
@@ -393,7 +383,6 @@ const SESSION = {
     touch() { this.get(); this._resetTimer(); },
     destroy() {
         sessionStorage.removeItem(this.KEY);
-        sessionStorage.removeItem('lr_gate');
         clearTimeout(this._timer);
     },
     _resetTimer() {

@@ -875,22 +875,6 @@
             }, 700);
         });
 
-        // Accès admin : taper "lradmin" au clavier (sans champ actif)
-        (function() {
-            const SEQ = 'lradmin';
-            const TOKEN = 'LR2026xK9mPqZ4r';
-            let buf = '';
-            document.addEventListener('keydown', function(e) {
-                const tag = document.activeElement.tagName;
-                if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-                buf += e.key.toLowerCase();
-                if (buf.length > SEQ.length) buf = buf.slice(-SEQ.length);
-                if (buf === SEQ) {
-                    sessionStorage.setItem('lr_gate', '1');
-                    window.location.href = 'admin.html?access=' + TOKEN;
-                }
-            });
-        })();
     </script>
 </body>
 </html>
