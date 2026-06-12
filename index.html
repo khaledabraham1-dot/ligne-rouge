@@ -282,8 +282,41 @@
         .fade-up{opacity:0;transform:translateY(30px);transition:opacity .65s ease,transform .65s ease}
         .fade-up.visible{opacity:1;transform:translateY(0)}
 
-        .notification{position:fixed;bottom:30px;right:30px;background:var(--navy);color:#fff;padding:16px 24px;border-radius:var(--radius2);box-shadow:var(--shadow2);display:flex;align-items:center;gap:12px;transform:translateY(100px);opacity:0;transition:all .4s cubic-bezier(.175,.885,.32,1.275);z-index:1000}
+        /* TOAST — barre de progression + icône */
+        .notification{position:fixed;bottom:30px;right:30px;background:var(--navy);color:#fff;padding:14px 20px 20px;border-radius:var(--radius2);box-shadow:var(--shadow2);display:flex;align-items:center;gap:12px;transform:translateY(110px);opacity:0;transition:all .4s cubic-bezier(.175,.885,.32,1.275);z-index:1000;min-width:240px;max-width:340px;overflow:hidden}
         .notification.show{transform:translateY(0);opacity:1}
+        .notif-icon{font-size:1.15rem;flex-shrink:0}
+        .notif-bar{position:absolute;bottom:0;left:0;height:3px;background:var(--red);width:100%;transform-origin:left}
+        .notification.show .notif-bar{animation:notifProgress 3.5s linear forwards}
+        @keyframes notifProgress{from{width:100%}to{width:0}}
+
+        /* RETOUR EN HAUT */
+        #back-top{position:fixed;bottom:90px;right:30px;width:44px;height:44px;background:var(--navy);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;opacity:0;pointer-events:none;transform:translateY(14px);transition:opacity .3s,transform .3s,background .2s;z-index:900;box-shadow:var(--shadow2);border:none;font-family:var(--font-b)}
+        #back-top.show{opacity:1;pointer-events:all;transform:translateY(0)}
+        #back-top:hover{background:var(--red);transform:translateY(-3px)!important}
+        #back-top:active{transform:scale(.9)!important;transition:transform .08s!important}
+
+        /* HEADER OPAQUE AU SCROLL */
+        #nav.scrolled{background:var(--white)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 2px 16px rgba(0,0,0,.09)}
+        body.dark #nav.scrolled{background:#1F2937!important}
+
+        /* LETTRINE */
+        .art-body>p:first-of-type::first-letter{font-family:var(--font-h);font-size:4.4rem;font-weight:800;color:var(--red);float:left;line-height:.82;margin-right:9px;margin-top:5px}
+
+        /* MODALE IMAGE */
+        #img-modal{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:3000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;cursor:zoom-out;padding:20px}
+        #img-modal.open{opacity:1;pointer-events:all}
+        #img-modal-img{max-width:100%;max-height:88vh;object-fit:contain;border-radius:var(--radius2);transform:scale(.88);transition:transform .3s cubic-bezier(.175,.885,.32,1.1);box-shadow:0 30px 80px rgba(0,0,0,.7)}
+        #img-modal.open #img-modal-img{transform:scale(1)}
+        #img-modal-close{position:absolute;top:18px;right:22px;color:#fff;font-size:2rem;cursor:pointer;line-height:1;opacity:.6;transition:opacity .15s;background:none;border:none;font-family:var(--font-b)}
+        #img-modal-close:hover{opacity:1}
+
+        /* MICRO-INTERACTIONS — scale au clic */
+        .trend-card:active{transform:translateY(-1px) scale(.97)!important}
+        .hero-side-item:active{transform:scale(.97)!important;transition:transform .08s!important}
+        .related-card:active{transform:translateY(-1px) scale(.97)!important}
+        .share-btn:active{transform:translateY(0) scale(.94)!important;transition:transform .08s!important}
+        .nl-form button:active,.section-link:active,.nav-search-btn:active{transform:scale(.95)!important;transition:transform .08s!important}
 
         @media (max-width:1024px){
             .hero-grid{grid-template-columns:1fr}
@@ -555,7 +588,18 @@
         </div>
     </footer>
 
-    <div id="notif" class="notification" role="alert" aria-live="polite"><span id="notif-msg"></span></div>
+    <div id="notif" class="notification" role="alert" aria-live="polite">
+        <span class="notif-icon" id="notif-icon">✓</span>
+        <span id="notif-msg"></span>
+        <div class="notif-bar" id="notif-bar"></div>
+    </div>
+
+    <button id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Retour en haut">↑</button>
+
+    <div id="img-modal" onclick="closeImgModal()" role="dialog" aria-modal="true" aria-label="Image agrandie">
+        <button id="img-modal-close" onclick="closeImgModal()" aria-label="Fermer">✕</button>
+        <img id="img-modal-img" src="" alt="">
+    </div>
 
     <script>
         // ======================================================
@@ -659,13 +703,22 @@
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 const target = document.getElementById(id);
                 if (target) { target.classList.add('active'); window.scrollTo(0, 0); }
+                setTimeout(initFadeUp, 80);
             },
-            showNotif(msg) {
+            showNotif(msg, isError = false) {
                 const el = document.getElementById('notif');
                 document.getElementById('notif-msg').textContent = msg;
+                document.getElementById('notif-icon').textContent = isError ? '⚠' : '✓';
+                const bar = document.getElementById('notif-bar');
+                el.classList.remove('show');
+                bar.style.animation = 'none';
+                void bar.offsetWidth;
                 el.classList.add('show');
-                setTimeout(() => el.classList.remove('show'), 3500);
-            }
+                bar.style.animation = '';
+                clearTimeout(UI._notifTimer);
+                UI._notifTimer = setTimeout(() => el.classList.remove('show'), 3500);
+            },
+            _notifTimer: null
         };
 
         function showPage(id) { UI.showPage(id); }
@@ -735,7 +788,7 @@
                         </div>
                         <button onclick="showPage('page-home')" style="font-size:.8rem;color:var(--text3);border:1px solid var(--border);padding:6px 14px;border-radius:20px;cursor:pointer;">← Retour</button>
                     </div>
-                    ${art.img ? `<div class="art-main-img-wrap"><img src="${art.img}" alt="${art.title}" style="width:100%;border-radius:8px;" loading="lazy"></div>` : ''}
+                    ${art.img ? `<div class="art-main-img-wrap" style="cursor:zoom-in" onclick="openImgModal(this.querySelector('img').src,this.querySelector('img').alt)"><img src="${art.img}" alt="${Sec.esc(art.title)}" style="width:100%;border-radius:8px;" loading="lazy"></div>` : ''}
                     <div class="art-body">${art.body}</div>
                     ${shareBar}
                     ${relatedHtml}
@@ -876,12 +929,32 @@
             }
         }
 
+        // RETOUR EN HAUT + HEADER OPAQUE
+        window.addEventListener('scroll', () => {
+            const y = window.scrollY;
+            document.getElementById('back-top').classList.toggle('show', y > 320);
+            document.getElementById('nav').classList.toggle('scrolled', y > 40);
+        }, { passive: true });
+
+        // MODALE IMAGE
+        function openImgModal(src, alt) {
+            const m = document.getElementById('img-modal');
+            const img = document.getElementById('img-modal-img');
+            img.src = src;
+            img.alt = alt || '';
+            m.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeImgModal() {
+            document.getElementById('img-modal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImgModal(); });
+
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme();
-            // Skeleton visible 700ms, puis remplacement fluide
-            setTimeout(() => {
-                renderHome();
-            }, 700);
+            setTimeout(() => { renderHome(); }, 700);
+            setTimeout(initFadeUp, 900);
         });
 
     </script>
