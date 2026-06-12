@@ -326,6 +326,10 @@
             .bio-text-col{padding:0 32px 32px}
         }
         @media(max-width:600px){.related-grid{grid-template-columns:1fr 1fr}.share-btn{padding:6px 11px;font-size:.76rem}}
+        /* BARRE DE PROGRESSION LECTURE */
+        #read-progress{position:fixed;top:0;left:0;height:3px;width:0%;background:var(--red);z-index:1000;opacity:0;transition:opacity .2s;pointer-events:none}
+        #read-progress.visible{opacity:1}
+
         /* MOBILE DRAWER BACKDROP */
         #mobile-backdrop{position:fixed;inset:0;background:rgba(13,27,42,.55);backdrop-filter:blur(2px);z-index:350;opacity:0;pointer-events:none;transition:opacity .3s}
         #mobile-backdrop.open{opacity:1;pointer-events:all}
@@ -629,6 +633,7 @@
         <div class="notif-bar" id="notif-bar"></div>
     </div>
 
+    <div id="read-progress" role="progressbar" aria-hidden="true"></div>
     <button id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Retour en haut">↑</button>
 
     <div id="img-modal" onclick="closeImgModal()" role="dialog" aria-modal="true" aria-label="Image agrandie">
@@ -988,6 +993,14 @@
             const y = window.scrollY;
             document.getElementById('back-top').classList.toggle('show', y > 320);
             document.getElementById('nav').classList.toggle('scrolled', y > 40);
+            const bar = document.getElementById('read-progress');
+            if (document.getElementById('page-article').classList.contains('active')) {
+                const h = document.documentElement.scrollHeight - window.innerHeight;
+                bar.style.width = h > 0 ? (y / h * 100) + '%' : '0%';
+                bar.classList.add('visible');
+            } else {
+                bar.classList.remove('visible');
+            }
         }, { passive: true });
 
         // MODALE IMAGE
