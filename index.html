@@ -326,8 +326,12 @@
             .bio-text-col{padding:0 32px 32px}
         }
         @media(max-width:600px){.related-grid{grid-template-columns:1fr 1fr}.share-btn{padding:6px 11px;font-size:.76rem}}
+        /* MOBILE DRAWER BACKDROP */
+        #mobile-backdrop{position:fixed;inset:0;background:rgba(13,27,42,.55);backdrop-filter:blur(2px);z-index:350;opacity:0;pointer-events:none;transition:opacity .3s}
+        #mobile-backdrop.open{opacity:1;pointer-events:all}
+
         @media (max-width:768px){
-            .nav-cats,.nav-divider{display:none}
+            .nav-divider{display:none}
             .nav-hamburger{display:flex}
             .hero-sidebar{grid-template-columns:1fr}
             .trending-grid{grid-template-columns:1fr 1fr}
@@ -335,7 +339,36 @@
             .art-title{font-size:2.2rem}
             .nl-form{flex-direction:column}
             .bio-values{grid-template-columns:1fr}
+
+            /* DRAWER */
+            .nav-cats{
+                display:flex!important;
+                flex-direction:column;
+                align-items:flex-start;
+                position:fixed;
+                top:0;left:0;
+                width:75%;max-width:320px;
+                height:100vh;
+                background:var(--white);
+                z-index:400;
+                padding:calc(var(--nav-h) + var(--ticker-h) + 8px) 0 32px;
+                box-shadow:6px 0 32px rgba(0,0,0,.18);
+                transform:translateX(-105%);
+                transition:transform .32s cubic-bezier(.4,0,.2,1);
+                overflow-y:auto;
+                gap:0;
+            }
+            body.dark .nav-cats{background:#1F2937}
+            .nav-cats.drawer-open{transform:translateX(0)}
+            .nav-cat{width:100%;padding:15px 24px;font-size:.9rem;border-radius:0;border-bottom:1px solid var(--border);white-space:nowrap}
+            .nav-cat.active{border-left:3px solid var(--red);padding-left:21px;background:var(--bg)}
+            .nav-cat:hover{background:var(--bg)}
         }
+
+        /* HAMBURGER → X */
+        .nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+        .nav-hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+        .nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
     </style>
 </head>
 <body>
@@ -375,6 +408,8 @@
             </div>
         </div>
     </nav>
+
+    <div id="mobile-backdrop" onclick="closeMobileMenu()" aria-hidden="true"></div>
 
     <div id="search-overlay" onclick="closeSearch(event)" role="dialog" aria-modal="true" aria-label="Recherche d'articles">
         <div class="search-box">
@@ -928,6 +963,25 @@
                 document.getElementById('dark-toggle').textContent = '☀️';
             }
         }
+
+        // MENU HAMBURGER
+        function openMobileMenu() {
+            const open = document.querySelector('.nav-cats').classList.toggle('drawer-open');
+            document.getElementById('mobile-backdrop').classList.toggle('open', open);
+            document.querySelector('.nav-hamburger').classList.toggle('open', open);
+            document.body.style.overflow = open ? 'hidden' : '';
+        }
+        function closeMobileMenu() {
+            document.querySelector('.nav-cats').classList.remove('drawer-open');
+            document.getElementById('mobile-backdrop').classList.remove('open');
+            document.querySelector('.nav-hamburger').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        // Fermer le drawer quand on clique un lien de nav
+        document.querySelectorAll('.nav-cat').forEach(el =>
+            el.addEventListener('click', closeMobileMenu)
+        );
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileMenu(); });
 
         // RETOUR EN HAUT + HEADER OPAQUE
         window.addEventListener('scroll', () => {
