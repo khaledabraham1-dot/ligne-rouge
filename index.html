@@ -533,9 +533,12 @@
             .bio-photo{width:110px;height:140px}
             /* RESPONSIVE FIX — meta article en colonne sur très petit mobile */
             .art-meta-top{flex-direction:column;align-items:flex-start;gap:12px}
-            /* RESPONSIVE FIX — share buttons plus compacts */
-            .share-bar{padding:14px 16px;gap:8px}
-            .share-btn{min-width:unset;padding:8px 12px;font-size:.78rem;flex:1}
+            /* RESPONSIVE FIX — share buttons en grille 2 colonnes */
+            .share-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px}
+            .share-label{grid-column:1/-1;margin:0 0 2px}
+            .share-btn{min-width:unset;width:100%;justify-content:center;min-height:44px;padding:9px 8px;font-size:.79rem}
+            /* RESPONSIVE FIX — articles liés 1 colonne */
+            .related-grid{grid-template-columns:1fr}
             /* RESPONSIVE FIX — image article pleine largeur sans overflow */
             .art-main-img-wrap{margin-left:0!important;width:100%!important}
         }
@@ -545,6 +548,11 @@
             .nav-cats{width:85%;max-width:unset}
             .related-grid{grid-template-columns:1fr}
             .footer-grid{grid-template-columns:1fr}
+            /* Hero text plus compact sur très petit écran */
+            .hero-title{font-size:1.15rem}
+            .hero-meta{flex-wrap:wrap;gap:6px}
+            /* Share bar 1 colonne sur écrans < 400px */
+            .share-bar{grid-template-columns:1fr}
         }
     </style>
 </head>

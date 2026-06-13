@@ -252,14 +252,27 @@
             #sec-dashboard .admin-table tbody tr:last-child{border-bottom:none}
             #sec-dashboard .admin-table tbody td{display:inline-block;border:none;padding:2px 6px 4px 0;vertical-align:middle;font-size:.83rem}
             #sec-dashboard .admin-table tbody td:first-child{display:block;font-weight:500;padding:0 0 4px;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+            /* ── SUBSCRIBERS TABLE → HORIZONTAL LIST (# · email · supprimer) ── */
+            #sec-subscribers .table-scroll{overflow-x:visible}
+            #sec-subscribers .admin-table{min-width:unset;width:100%}
+            #sec-subscribers .admin-table thead{display:none}
+            #sec-subscribers .admin-table tbody tr{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;padding:11px 14px;background:var(--white)}
+            #sec-subscribers .admin-table tbody tr:last-child{margin-bottom:0}
+            #sec-subscribers .admin-table tbody td{display:block;border:none;padding:0;font-size:.85rem;min-height:44px;display:flex;align-items:center}
+            #sec-subscribers .admin-table tbody td:first-child{color:var(--text3);font-size:.76rem;min-width:22px;flex-shrink:0}
+            #sec-subscribers .admin-table tbody td:nth-child(2){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            #sec-subscribers .admin-table tbody td:last-child{flex-shrink:0;margin-left:auto}
+            #sec-subscribers .admin-table tbody td:last-child .btn-sm{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center}
         }
 
         /* ── Petit mobile ≤480px ── */
         @media(max-width:480px){
-            .stat-cards{grid-template-columns:1fr 1fr;gap:8px}
-            .stat-card{padding:12px 10px}
-            .stat-value{font-size:1.25rem}
-            .stat-label{font-size:.65rem}
+            /* Stat cards : 1 colonne, valeur à gauche + label à droite */
+            .stat-cards{grid-template-columns:1fr;gap:8px}
+            .stat-card{padding:12px 16px;display:flex;flex-direction:row;align-items:center;gap:14px}
+            .stat-value{font-size:1.5rem;min-width:fit-content;flex-shrink:0}
+            .stat-label{font-size:.68rem;flex:1;text-align:left}
             .section-head h2{font-size:1rem}
             .admin-table{font-size:.76rem}
             .admin-table td,.admin-table th{padding:7px 8px}
@@ -271,14 +284,14 @@
             .card-header{gap:6px}
             .section-head{gap:8px}
             .filter-btn{font-size:.72rem;padding:4px 9px}
+            /* Touch targets minimum 44px */
+            .btn-sm{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center}
+            .filter-btn{min-height:44px;display:inline-flex;align-items:center}
         }
 
         /* ── Très petit mobile ≤380px ── */
         @media(max-width:380px){
-            .stat-cards{grid-template-columns:1fr}
-            .stat-card{padding:14px 16px;display:flex;flex-direction:row;align-items:center;gap:14px}
-            .stat-value{font-size:1.6rem;min-width:fit-content}
-            .stat-label{font-size:.72rem}
+            .stat-value{font-size:1.6rem}
             .topbar-user{display:none}
             #content{padding:8px}
             .card{padding:10px}
