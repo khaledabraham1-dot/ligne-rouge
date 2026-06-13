@@ -109,19 +109,20 @@
         @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
         /* NAV — glassmorphism */
-        #nav{background:rgba(255,255,255,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(222,219,212,.4);position:sticky;top:0;z-index:200;height:var(--nav-h);transition:background .35s ease,backdrop-filter .35s ease,-webkit-backdrop-filter .35s ease,box-shadow .35s ease}
+        #nav{background:rgba(255,255,255,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(222,219,212,.4);position:sticky;top:0;z-index:200;height:var(--nav-h);transition:background .35s ease,backdrop-filter .35s ease,-webkit-backdrop-filter .35s ease,box-shadow .35s ease,height .2s ease}
         body.dark #nav{background:rgba(17,24,39,.7);border-bottom-color:rgba(255,255,255,.06)}
         .nav-inner{display:flex;align-items:center;height:100%;gap:0;position:relative}
-        .nav-logo{font-family:var(--font-h);font-size:1.6rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;flex-shrink:0;cursor:pointer;display:flex;align-items:center;gap:4px}
+        .nav-logo{font-family:var(--font-h);font-size:1.6rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;flex-shrink:0;cursor:pointer;display:flex;align-items:center;gap:4px;transition:font-size .2s ease}
         .nav-logo .logo-ligne{color:var(--navy)}
         .nav-logo .logo-rouge{color:var(--red)}
         .nav-divider{width:1px;height:28px;background:var(--border2);margin:0 20px;flex-shrink:0}
         .nav-cats{display:flex;align-items:center;gap:2px;flex:1}
-        .nav-cat{font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text2);padding:8px 12px;border-radius:var(--radius);transition:color .15s,background .15s;white-space:nowrap;cursor:pointer}
+        .nav-cat{font-size:.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text2);padding:8px 12px;border-radius:var(--radius);transition:color .15s,background .15s,letter-spacing .2s ease;white-space:nowrap;cursor:pointer}
         .nav-cat:hover,.nav-cat.active{color:var(--navy);background:var(--bg)}
         .nav-cat.active{border-bottom:2px solid var(--red);border-radius:0}
         .nav-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
-        .nav-search-btn{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:500;color:var(--text2);background:var(--bg);border:1px solid var(--border);padding:7px 14px;border-radius:20px;transition:all .15s}
+        .nav-search-btn{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:500;color:var(--text2);background:var(--bg);border:1px solid var(--border);padding:7px 14px;border-radius:20px;transition:all .15s,padding .2s ease}
+        .nav-search-btn span{display:inline-block;overflow:hidden;max-width:80px;white-space:nowrap;opacity:1;transition:max-width .2s ease,opacity .15s ease,margin-left .2s ease}
         .nav-search-btn:hover{border-color:var(--border2);color:var(--text)}
         .nav-hamburger{display:none;flex-direction:column;gap:5px;padding:6px;cursor:pointer}
         .nav-hamburger span{width:22px;height:2px;background:var(--text);transition:all .25s;display:block}
@@ -313,6 +314,22 @@
         /* HEADER OPAQUE AU SCROLL */
         #nav.scrolled{background:rgba(255,255,255,.98)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:0 2px 16px rgba(0,0,0,.09)}
         body.dark #nav.scrolled{background:#1F2937!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+        /* BLOOMBERG COMPACT HEADER — scroll > 100px */
+        #nav.compact{height:52px}
+        #nav.compact .nav-logo{font-size:1.2rem}
+        #nav.compact .nav-cat{letter-spacing:.1em}
+        #nav.compact .nav-search-btn span{max-width:0;opacity:0;margin-left:0}
+        #nav.compact .nav-search-btn{padding:7px 10px}
+        /* Bande rouge suit la hauteur du nav */
+        #red-band{transition:top .2s ease}
+        #nav.compact+#red-band{top:52px}
+        /* Sur mobile : pas de mode compact */
+        @media(max-width:768px){
+            #nav.compact{height:var(--nav-h)!important}
+            #nav.compact .nav-logo{font-size:1.6rem!important}
+            #nav.compact+#red-band{top:var(--nav-h)!important}
+        }
 
         /* LETTRINE */
         .art-body>p:first-of-type::first-letter{font-family:var(--font-h);font-size:4.4rem;font-weight:800;color:var(--red);float:left;line-height:.82;margin-right:9px;margin-top:5px}
@@ -1290,11 +1307,14 @@
         );
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobileMenu(); });
 
-        // RETOUR EN HAUT + HEADER OPAQUE
+        // RETOUR EN HAUT + HEADER OPAQUE + BLOOMBERG COMPACT
         window.addEventListener('scroll', () => {
             const y = window.scrollY;
             document.getElementById('back-top').classList.toggle('show', y > 320);
-            document.getElementById('nav').classList.toggle('scrolled', y > 50);
+            const nav = document.getElementById('nav');
+            nav.classList.toggle('scrolled', y > 50);
+            // Bloomberg compact : uniquement sur desktop
+            if (window.innerWidth > 768) nav.classList.toggle('compact', y > 100);
             const bar = document.getElementById('read-progress');
             if (document.getElementById('page-article').classList.contains('active')) {
                 const h = document.documentElement.scrollHeight - window.innerHeight;
