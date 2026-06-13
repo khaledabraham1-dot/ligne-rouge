@@ -260,6 +260,16 @@
         .breaking-dot{width:5px;height:5px;background:#fff;border-radius:50%;animation:bdot 1.2s ease-in-out infinite;flex-shrink:0}
         @keyframes bdot{0%,100%{opacity:1}50%{opacity:.25}}
 
+        /* CHARGER PLUS */
+        .load-more-wrap{background:var(--white);display:flex;flex-direction:column;align-items:center;padding:8px 0 36px;gap:10px}
+        .load-more-btn{display:none;align-items:center;gap:10px;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:13px 32px;cursor:pointer;font-family:var(--font-b);font-size:.92rem;font-weight:600;transition:background .2s,transform .15s}
+        .load-more-btn:hover{background:var(--red);transform:translateY(-2px)}
+        .load-more-btn:active{transform:translateY(0)}
+        .load-more-btn svg{transition:transform .3s}
+        .load-more-btn:hover svg{transform:translateY(3px)}
+        .load-more-info{font-size:.75rem;color:var(--text3)}
+        body.dark .load-more-wrap{background:var(--white)}
+
         /* LES PLUS LUS */
         .plus-lus{padding:40px 0;background:var(--bg)}
         .plus-lus-list{list-style:none;display:flex;flex-direction:column;gap:0}
@@ -814,6 +824,13 @@
                     </div>
                 </div>
             </section>
+            <div class="load-more-wrap" id="load-more-wrap">
+                <button class="load-more-btn" id="load-more-btn" onclick="loadMore()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                    <span id="load-more-label">Voir plus d'articles</span>
+                </button>
+                <span class="load-more-info" id="load-more-info"></span>
+            </div>
             <section class="plus-lus">
                 <div class="container">
                     <div class="section-header">
@@ -1223,6 +1240,8 @@
         }
 
         let _artsCache = null;
+        let _loadedCount = 8;
+        let _loadFilter = 'all';
         async function getArticles() {
             if (!_artsCache) _artsCache = await supabaseGetArticles();
             return _artsCache;
@@ -1332,8 +1351,15 @@
             document.querySelectorAll('.nav-cat').forEach(b => { b.classList.remove('active'); b.removeAttribute('aria-current'); });
             if (btn) { btn.classList.add('active'); btn.setAttribute('aria-current', 'page'); }
         }
+        function loadMore() {
+            _loadedCount += 4;
+            renderHome(_loadFilter);
+        }
+
         function filterCategory(cat, btn, label) {
             closeMobileMenu();
+            // Reset pagination quand on change de catégorie
+            if (cat !== _loadFilter) { _loadedCount = 8; _loadFilter = cat; }
             if (btn) {
                 setNavActive(btn);
             } else {
@@ -1544,6 +1570,7 @@
         }
 
         async function renderHome(filter = 'all') {
+            _loadFilter = filter;
             const articles = await getArticles();
             const filtered = filter === 'all' ? articles : articles.filter(a => a.cat === filter);
             const heroGrid = document.getElementById('hero-grid');
@@ -1571,14 +1598,29 @@
             } else {
                 heroGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text3)"><p style="font-size:1.1rem;font-family:var(--font-h);margin-bottom:8px;color:var(--text2)">Aucun article dans cette rubrique</p><p style="font-size:.9rem">Revenez bientôt pour découvrir nos prochaines publications.</p></div>`;
             }
-            document.getElementById('trending-grid').innerHTML = filtered.slice(0, 4).map((a, i) => `
-                <div class="trend-card fade-up" onclick="openArticle('${Sec.esc(a.id)}')" style="transition-delay:${i * 80}ms">
+            const trendSlice = filtered.slice(0, _loadedCount);
+            document.getElementById('trending-grid').innerHTML = trendSlice.map((a, i) => `
+                <div class="trend-card fade-up" onclick="openArticle('${Sec.esc(a.id)}')" style="transition-delay:${Math.min(i, 7) * 80}ms">
                     <div class="trend-img-wrap"><img src="${Sec.imgUrl(a.img)}" alt="${Sec.esc(a.title)}" class="trend-img" width="300" height="190" loading="lazy"></div>
                     <div class="trend-num">#${i + 1}</div>
                     <h3 class="trend-title">${Sec.esc(a.title)}${newBadge(a)}${breakingBadge(a)}</h3>
                     <div class="trend-meta">${Sec.esc(a.date)} · ${calcReadTime(a.body)}</div>
                 </div>
             `).join('');
+            // Bouton "Charger plus"
+            const remaining = filtered.length - _loadedCount;
+            const loadBtn = document.getElementById('load-more-btn');
+            const loadInfo = document.getElementById('load-more-info');
+            const loadLabel = document.getElementById('load-more-label');
+            if (remaining > 0) {
+                const next = Math.min(4, remaining);
+                loadLabel.textContent = `Voir ${next} article${next > 1 ? 's' : ''} de plus`;
+                loadInfo.textContent = `${remaining} article${remaining > 1 ? 's' : ''} restant${remaining > 1 ? 's' : ''}`;
+                loadBtn.style.display = 'inline-flex';
+            } else {
+                loadBtn.style.display = 'none';
+                loadInfo.textContent = filtered.length > 0 ? `Tous les articles sont affichés (${filtered.length})` : '';
+            }
             // Les plus lus — top 5 par nombre de vues
             const topRead = [...articles].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
             document.getElementById('plus-lus-list').innerHTML = topRead.length ? topRead.map((a, i) => `
