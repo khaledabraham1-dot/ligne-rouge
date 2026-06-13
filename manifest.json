@@ -13,29 +13,23 @@
   "categories": ["news"],
   "icons": [
     {
-      "src": "/ligne-rouge/icon.svg?v=3",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/ligne-rouge/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/ligne-rouge/icon.svg?v=3",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
+      "src": "/ligne-rouge/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "screenshots": [],
   "shortcuts": [
     {
       "name": "Actualité",
       "url": "/ligne-rouge/",
       "description": "Dernières actualités"
-    },
-    {
-      "name": "Politique",
-      "url": "/ligne-rouge/",
-      "description": "Politique"
     }
   ]
 }
