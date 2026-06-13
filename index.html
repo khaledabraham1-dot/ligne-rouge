@@ -3,14 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ligne Rouge | Média numérique premium</title>
-    <meta name="description" content="Ligne Rouge — Plateforme d'information indépendante. Actualité, Politique, Sport, Société, International, Culture.">
+    <title>Ligne Rouge | Actualité indépendante en Afrique francophone</title>
+    <meta name="description" content="Ligne Rouge — Média d'information indépendant. Politique, Sport, Société, International, Culture. L'actualité rigoureuse en Afrique francophone.">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="author" content="Ligne Rouge">
+    <link rel="canonical" href="https://khaledabraham1-dot.github.io/ligne-rouge/">
 
-    <meta property="og:title" content="Ligne Rouge | Média numérique premium">
-    <meta property="og:description" content="Plateforme d'information indépendante. Actualité, Politique, Sport, Société, International, Culture.">
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:title" content="Ligne Rouge | Actualité indépendante en Afrique francophone">
+    <meta property="og:description" content="Média d'information indépendant. Politique, Sport, Société, International, Culture. L'actualité rigoureuse en Afrique francophone.">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://khaledabraham1-dot.github.io/ligne-rouge/">
     <meta property="og:locale" content="fr_FR">
     <meta property="og:site_name" content="Ligne Rouge">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&h=630&fit=crop&q=80">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Ligne Rouge — Média d'information indépendant">
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Ligne Rouge | Actualité indépendante en Afrique francophone">
+    <meta name="twitter:description" content="Média d'information indépendant. Politique, Sport, Société, International, Culture.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&h=630&fit=crop&q=80">
 
     <!-- SÉCURITÉ : CSP + anti-clickjacking -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://*.unsplash.com https://pvvwmyrqreizlculgtom.supabase.co; connect-src https://pvvwmyrqreizlculgtom.supabase.co wss://pvvwmyrqreizlculgtom.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
@@ -1240,6 +1255,8 @@
                 const navBtn = [...document.querySelectorAll('.nav-cat')].find(b => b.textContent.trim() === text);
                 setNavActive(navBtn || null);
             }
+            // Reset metas SEO vers la page d'accueil
+            updateSEOMeta('', '', '');
             // Reset any stuck transition, then force-navigate to home
             UI._transitioning = false;
             const current = document.querySelector('.page.active');
@@ -1260,10 +1277,27 @@
             }
         }
 
+        function updateSEOMeta(title, description, image) {
+            const siteTitle = title ? `${title} — Ligne Rouge` : 'Ligne Rouge | Actualité indépendante en Afrique francophone';
+            const desc = description || 'Média d\'information indépendant. Politique, Sport, Société, International, Culture.';
+            const img = image || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&h=630&fit=crop&q=80';
+            document.title = siteTitle;
+            document.querySelector('meta[name="description"]').setAttribute('content', desc);
+            document.querySelector('meta[property="og:title"]').setAttribute('content', siteTitle);
+            document.querySelector('meta[property="og:description"]').setAttribute('content', desc);
+            document.querySelector('meta[property="og:image"]').setAttribute('content', img);
+            document.querySelector('meta[name="twitter:title"]').setAttribute('content', siteTitle);
+            document.querySelector('meta[name="twitter:description"]').setAttribute('content', desc);
+            document.querySelector('meta[name="twitter:image"]').setAttribute('content', img);
+        }
+
         async function openArticle(id) {
             const articles = await getArticles();
             const art = articles.find(a => String(a.id) === String(id));
             if (!art) return;
+
+            // Mettre à jour les metas SEO pour cet article
+            updateSEOMeta(art.title, art.subtitle || art.title, art.img || '');
 
             // Incrémenter les vues (fire-and-forget)
             _sb.rpc('increment_views', {article_id: art.id}).then(()=>{},()=>{});
