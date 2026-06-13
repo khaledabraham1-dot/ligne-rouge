@@ -215,6 +215,13 @@
             .stat-cards{grid-template-columns:1fr 1fr}
             .stat-value{font-size:1.3rem}
             .section-head h2{font-size:1.1rem}
+            .admin-table{font-size:.78rem}
+            .admin-table td,.admin-table th{padding:8px 8px}
+            .admin-notif{left:12px;right:12px;bottom:12px;font-size:.82rem}
+            .topbar-user{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.72rem}
+            .btn{padding:9px 14px;font-size:.83rem}
+            .card{padding:14px}
+            .stat-label{font-size:.65rem}
         }
     </style>
 </head>
@@ -280,7 +287,7 @@
                 <div class="dash-grid">
                     <div class="card">
                         <div class="card-header"><h3>Articles récents</h3><button class="btn btn-outline btn-sm" style="padding:5px 12px" onclick="nav('new')">+ Nouveau</button></div>
-                        <table class="admin-table"><thead><tr><th>Titre</th><th>Catégorie</th><th>Statut</th><th>Date</th></tr></thead><tbody id="dash-arts"></tbody></table>
+                        <div class="table-scroll"><table class="admin-table" style="min-width:420px"><thead><tr><th>Titre</th><th>Catégorie</th><th>Statut</th><th>Date</th></tr></thead><tbody id="dash-arts"></tbody></table></div>
                     </div>
                     <div class="card">
                         <div class="card-header"><h3>Derniers commentaires</h3><button class="btn btn-outline btn-sm" style="padding:5px 12px" onclick="nav('comments')">Voir tout</button></div>
@@ -394,10 +401,10 @@
                     <button class="btn btn-danger" style="font-size:.8rem;padding:7px 14px" onclick="if(confirm('Effacer le journal ?')){localStorage.removeItem('lr_audit');renderAudit();notif('Journal effacé')}">Effacer</button>
                 </div>
                 <div class="card" style="padding:0;overflow:hidden">
-                    <table class="admin-table">
+                    <div class="table-scroll"><table class="admin-table" style="min-width:520px">
                         <thead><tr><th>Horodatage</th><th>Action</th><th>Détail</th><th>Utilisateur</th></tr></thead>
                         <tbody id="audit-tbody"></tbody>
-                    </table>
+                    </table></div>
                 </div>
             </div>
 
@@ -408,10 +415,10 @@
                     <button class="btn btn-primary" onclick="exportSubscribers()">⬇ Exporter CSV</button>
                 </div>
                 <div class="card" style="padding:0;overflow:hidden">
-                    <table class="table" style="margin-bottom:0">
+                    <div class="table-scroll"><table class="admin-table w-full" style="min-width:320px;margin-bottom:0">
                         <thead><tr><th>#</th><th>Email</th><th>Actions</th></tr></thead>
                         <tbody id="subs-tbody"></tbody>
-                    </table>
+                    </table></div>
                 </div>
                 <p id="subs-empty" style="text-align:center;color:var(--text3);padding:40px;display:none">Aucun abonné pour l'instant.</p>
             </div>
