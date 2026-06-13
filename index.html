@@ -411,8 +411,8 @@
         #read-progress.visible{opacity:1}
 
         /* MOBILE DRAWER BACKDROP */
-        #mobile-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:350;opacity:0;pointer-events:none;transition:opacity .25s}
-        #mobile-backdrop.open{opacity:1;pointer-events:all}
+        #mobile-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.12);z-index:349;opacity:0;pointer-events:none!important;transition:opacity .25s}
+        #mobile-backdrop.open{opacity:1}
 
         /* HAMBURGER → X */
         .nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
@@ -664,7 +664,7 @@
     </nav>
     <div id="red-band" aria-hidden="true"></div>
 
-    <div id="mobile-backdrop" onclick="closeMobileMenu()" aria-hidden="true"></div>
+    <div id="mobile-backdrop" aria-hidden="true"></div>
 
     <div id="search-overlay" onclick="closeSearch(event)" role="dialog" aria-modal="true" aria-label="Recherche d'articles">
         <div class="search-box">
@@ -1482,12 +1482,23 @@
             const open = document.querySelector('.nav-cats').classList.toggle('drawer-open');
             document.getElementById('mobile-backdrop').classList.toggle('open', open);
             document.querySelector('.nav-hamburger').classList.toggle('open', open);
+            document.body.style.overflow = open ? 'hidden' : '';
         }
         function closeMobileMenu() {
             document.querySelector('.nav-cats').classList.remove('drawer-open');
             document.getElementById('mobile-backdrop').classList.remove('open');
             document.querySelector('.nav-hamburger').classList.remove('open');
+            document.body.style.overflow = '';
         }
+        // Fermer le drawer en cliquant en dehors (backdrop est pointer-events:none)
+        document.addEventListener('click', function(e) {
+            const drawer = document.querySelector('.nav-cats');
+            if (!drawer || !drawer.classList.contains('drawer-open')) return;
+            const hamburger = document.querySelector('.nav-hamburger');
+            if (!drawer.contains(e.target) && !hamburger.contains(e.target)) {
+                closeMobileMenu();
+            }
+        });
         // Fermer le drawer quand on clique un lien de nav
         document.querySelectorAll('.nav-cat').forEach(el =>
             el.addEventListener('click', closeMobileMenu)
