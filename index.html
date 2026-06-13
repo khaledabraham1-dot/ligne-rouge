@@ -13,7 +13,7 @@
     <meta property="og:site_name" content="Ligne Rouge">
 
     <!-- SÉCURITÉ : CSP + anti-clickjacking -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://*.unsplash.com; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://*.unsplash.com; connect-src https://pvvwmyrqreizlculgtom.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
@@ -915,7 +915,50 @@
         <img id="img-modal-img" src="" alt="">
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script>
+        // ======================================================
+        // SUPABASE — base de données temps réel
+        // ======================================================
+        const SUPABASE_URL = 'https://pvvwmyrqreizlculgtom.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_X6ooED2iBW9tZa5T9B5Ljw_61YMgzN4';
+        const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function supabaseGetArticles() {
+            const { data, error } = await _sb.from('articles')
+                .select('*').eq('status','published').order('created_at',{ascending:false});
+            if (error) { console.error('[Supabase]',error.message); return DEFAULT_ARTS; }
+            return data?.length ? data : DEFAULT_ARTS;
+        }
+        async function supabaseGetComments(articleId) {
+            const { data, error } = await _sb.from('comments')
+                .select('*').eq('article_id',String(articleId)).eq('status','approved')
+                .order('created_at',{ascending:true});
+            if (error) { console.error('[Supabase]',error.message); return []; }
+            return data || [];
+        }
+        async function supabaseSaveComment(comment) {
+            const { error } = await _sb.from('comments').insert([{
+                article_id: String(comment.articleId),
+                article_title: comment.articleTitle,
+                author: comment.author,
+                email: comment.email || '',
+                text: comment.text,
+                status: 'pending',
+                date: comment.date
+            }]);
+            if (error) { console.error('[Supabase]',error.message); return false; }
+            return true;
+        }
+        async function supabaseSaveSubscriber(email) {
+            const { error } = await _sb.from('newsletter_subscribers').insert([{email}]);
+            if (error) {
+                if (error.code === '23505') return {duplicate:true};
+                console.error('[Supabase]',error.message); return {error:true};
+            }
+            return {success:true};
+        }
+
         // ======================================================
         // MODULE SÉCURITÉ — NE PAS MODIFIER
         // ======================================================
@@ -992,31 +1035,16 @@
             return isNew(art) ? '<span class="badge-new">Nouveau</span>' : '';
         }
 
-        function getArticles() {
-            try {
-                const saved = localStorage.getItem('lr_articles');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    const pub = parsed.filter(a => a.status === 'published');
-                    if (pub.length > 0) return pub;
-                }
-            } catch(e) {}
-            return DEFAULT_ARTS;
+        async function getArticles() {
+            return await supabaseGetArticles();
         }
 
-        function getComments(articleId) {
-            try {
-                const saved = JSON.parse(localStorage.getItem('lr_comments') || '[]');
-                return saved.filter(c => c.articleId == articleId && c.status === 'approved');
-            } catch(e) { return []; }
+        async function getComments(articleId) {
+            return await supabaseGetComments(articleId);
         }
 
-        function saveComment(comment) {
-            try {
-                const saved = JSON.parse(localStorage.getItem('lr_comments') || '[]');
-                saved.unshift(comment);
-                localStorage.setItem('lr_comments', JSON.stringify(saved));
-            } catch(e) {}
+        async function saveComment(comment) {
+            return await supabaseSaveComment(comment);
         }
 
         const UI = {
@@ -1135,22 +1163,16 @@
             }
         }
 
-        function openArticle(id) {
-            const articles = getArticles();
-            const art = articles.find(a => a.id == id);
+        async function openArticle(id) {
+            const articles = await getArticles();
+            const art = articles.find(a => String(a.id) === String(id));
             if (!art) return;
 
-            // Incrémenter les vues
-            try {
-                const saved = JSON.parse(localStorage.getItem('lr_articles') || 'null');
-                if (saved) {
-                    const idx = saved.findIndex(a => a.id == id);
-                    if (idx >= 0) { saved[idx].views = (saved[idx].views || 0) + 1; localStorage.setItem('lr_articles', JSON.stringify(saved)); }
-                }
-            } catch(e) {}
+            // Incrémenter les vues (fire-and-forget)
+            _sb.from('articles').update({views:(art.views||0)+1}).eq('id',art.id).catch(()=>{});
 
             // Commentaires approuvés
-            const approvedCmts = getComments(id);
+            const approvedCmts = await getComments(id);
             const cmtsHtml = approvedCmts.length ? approvedCmts.map(c => `
                 <div style="padding:16px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--bg)">
                     <div style="font-weight:700;font-size:.88rem;margin-bottom:4px">${Sec.esc(c.author)} <span style="font-weight:400;color:var(--text3);font-size:.78rem">· ${Sec.esc(c.date)}</span></div>
@@ -1232,7 +1254,7 @@
             setTimeout(initFadeUp, 50);
         }
 
-        function submitComment(articleId, articleTitle) {
+        async function submitComment(articleId, articleTitle) {
             // Rate limiting
             const rl = RateLimit.check();
             if (!rl.ok) { UI.showNotif(rl.msg); return; }
@@ -1246,11 +1268,8 @@
             if (!text || text.length < 5) { UI.showNotif('Commentaire trop court (5 caractères minimum).'); return; }
             if (emailRaw && !Sec.email(emailRaw)) { UI.showNotif('Adresse email invalide.'); return; }
 
-            // ID aléatoire — pas prévisible
-            const id = 'c' + Sec.token();
             const now = new Date();
-            saveComment({
-                id,
+            const ok = await saveComment({
                 articleId: Sec.txt(articleId, 50),
                 articleTitle: Sec.txt(articleTitle, 200),
                 author: name,
@@ -1264,11 +1283,12 @@
             document.getElementById('cmt-name').value = '';
             document.getElementById('cmt-email').value = '';
             document.getElementById('cmt-text').value = '';
-            UI.showNotif('Merci ! Votre commentaire est en attente de modération.');
+            if (ok) UI.showNotif('Merci ! Votre commentaire est en attente de modération.');
+            else UI.showNotif('Erreur lors de l\'envoi. Réessayez.');
         }
 
-        function renderHome(filter = 'all') {
-            const articles = getArticles();
+        async function renderHome(filter = 'all') {
+            const articles = await getArticles();
             const filtered = filter === 'all' ? articles : articles.filter(a => a.cat === filter);
             const heroGrid = document.getElementById('hero-grid');
             if (filtered.length > 0) {
@@ -1315,19 +1335,18 @@
             document.querySelectorAll('.fade-up:not(.visible)').forEach(el => obs.observe(el));
         }
 
-        function subscribeNewsletter(inputId) {
+        async function subscribeNewsletter(inputId) {
             const emailEl = document.getElementById(inputId || 'nl-email');
             if (!emailEl) return;
             const email = emailEl.value.trim().toLowerCase();
             if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 UI.showNotif('Adresse email invalide.'); return;
             }
-            const subs = JSON.parse(localStorage.getItem('lr_subscribers') || '[]');
-            if (subs.includes(email)) { UI.showNotif('Vous êtes déjà abonné(e) !'); emailEl.value = ''; return; }
-            subs.push(email);
-            localStorage.setItem('lr_subscribers', JSON.stringify(subs));
+            const result = await supabaseSaveSubscriber(email);
             emailEl.value = '';
-            UI.showNotif('Merci ! Vous recevrez nos prochaines actualités.');
+            if (result.duplicate) { UI.showNotif('Vous êtes déjà abonné(e) !'); return; }
+            if (result.success) UI.showNotif('Merci ! Vous recevrez nos prochaines actualités.');
+            else UI.showNotif('Erreur lors de l\'inscription. Réessayez.');
         }
         function toggleSearch() {
             const o = document.getElementById('search-overlay');
@@ -1335,10 +1354,10 @@
             if (o.classList.contains('open')) setTimeout(() => document.getElementById('search-input').focus(), 100);
         }
         function closeSearch(e) { if (e.target === document.getElementById('search-overlay')) toggleSearch(); }
-        function searchArticles(q) {
+        async function searchArticles(q) {
             const res = document.getElementById('search-results');
             if (!q || q.length < 2) { res.innerHTML = ''; return; }
-            const articles = getArticles();
+            const articles = await getArticles();
             const hits = articles.filter(a => a.title.toLowerCase().includes(q.toLowerCase()));
             res.innerHTML = hits.length
                 ? hits.map(a => `<div class="search-result-item" onclick="openArticle('${a.id}');toggleSearch()"><div class="sri-title">${a.title}</div></div>`).join('')
@@ -1389,15 +1408,15 @@
         function closeNlPopup() {
             document.getElementById('nl-popup').classList.remove('show');
         }
-        function nlPopupSubscribe() {
+        async function nlPopupSubscribe() {
             const emailEl = document.getElementById('nl-popup-email');
             const email = emailEl.value.trim().toLowerCase();
             if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { UI.showNotif('Adresse email invalide.'); return; }
-            const subs = JSON.parse(localStorage.getItem('lr_subscribers') || '[]');
-            if (subs.includes(email)) { UI.showNotif('Vous êtes déjà abonné(e) !'); emailEl.value = ''; closeNlPopup(); return; }
-            subs.push(email); localStorage.setItem('lr_subscribers', JSON.stringify(subs));
+            const result = await supabaseSaveSubscriber(email);
             emailEl.value = ''; closeNlPopup();
-            UI.showNotif('Merci ! Vous recevrez nos prochaines actualités.');
+            if (result.duplicate) { UI.showNotif('Vous êtes déjà abonné(e) !'); return; }
+            if (result.success) UI.showNotif('Merci ! Vous recevrez nos prochaines actualités.');
+            else UI.showNotif('Erreur lors de l\'inscription. Réessayez.');
         }
         document.getElementById('nl-popup').addEventListener('click', function(e) { if (e.target === this) closeNlPopup(); });
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNlPopup(); });

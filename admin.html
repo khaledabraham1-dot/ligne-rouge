@@ -8,7 +8,7 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com blob:; connect-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com blob:; connect-src https://pvvwmyrqreizlculgtom.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -227,7 +227,7 @@
         <p class="login-sub">Espace Administration</p>
         <div class="form-group">
             <label>Identifiant</label>
-            <input type="text" id="login-user" placeholder="admin" onkeydown="if(event.key==='Enter')login()">
+            <input type="email" id="login-user" placeholder="email@exemple.com" onkeydown="if(event.key==='Enter')login()">
         </div>
         <div class="form-group">
             <label>Mot de passe</label>
@@ -446,7 +446,79 @@
 
 <div id="admin-notif" class="admin-notif"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+// ============================================================
+// SUPABASE — base de données temps réel
+// ============================================================
+const SUPABASE_URL = 'https://pvvwmyrqreizlculgtom.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_X6ooED2iBW9tZa5T9B5Ljw_61YMgzN4';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let _authUser = null;
+
+async function supabaseGetAllArticles() {
+    const {data,error} = await _sb.from('articles').select('*').order('created_at',{ascending:false});
+    if (error) { console.error('[Supabase]',error.message); return []; }
+    return data || [];
+}
+async function supabaseSaveArticle(article) {
+    if (!article.id) {
+        const {data,error} = await _sb.from('articles').insert([article]).select().single();
+        if (error) { console.error('[Supabase]',error.message); return null; }
+        return data;
+    } else {
+        const {id,...fields} = article;
+        const {data,error} = await _sb.from('articles').update(fields).eq('id',id).select().single();
+        if (error) { console.error('[Supabase]',error.message); return null; }
+        return data;
+    }
+}
+async function supabaseDeleteArticle(id) {
+    const {error} = await _sb.from('articles').delete().eq('id',id);
+    if (error) { console.error('[Supabase]',error.message); return false; }
+    return true;
+}
+async function supabaseGetAllComments() {
+    const {data,error} = await _sb.from('comments').select('*').order('created_at',{ascending:false});
+    if (error) { console.error('[Supabase]',error.message); return []; }
+    return data || [];
+}
+async function supabaseApproveComment(id) {
+    const {error} = await _sb.from('comments').update({status:'approved'}).eq('id',id);
+    if (error) { console.error('[Supabase]',error.message); return false; }
+    return true;
+}
+async function supabaseRejectComment(id) {
+    const {error} = await _sb.from('comments').update({status:'rejected'}).eq('id',id);
+    if (error) { console.error('[Supabase]',error.message); return false; }
+    return true;
+}
+async function supabaseDeleteComment(id) {
+    const {error} = await _sb.from('comments').delete().eq('id',id);
+    if (error) { console.error('[Supabase]',error.message); return false; }
+    return true;
+}
+async function supabaseGetSubscribers() {
+    const {data,error} = await _sb.from('newsletter_subscribers').select('*').order('created_at',{ascending:false});
+    if (error) { console.error('[Supabase]',error.message); return []; }
+    return data || [];
+}
+async function supabaseDeleteSubscriber(id) {
+    const {error} = await _sb.from('newsletter_subscribers').delete().eq('id',id);
+    if (error) { console.error('[Supabase]',error.message); return false; }
+    return true;
+}
+async function supabaseSaveSubscriber(email) {
+    const {error} = await _sb.from('newsletter_subscribers').insert([{email}]);
+    if (error) { console.error('[Supabase]',error.message); return false; }
+    return true;
+}
+async function supabaseLogin(email, password) {
+    const {data,error} = await _sb.auth.signInWithPassword({email, password});
+    if (error) return {error: error.message};
+    return {data};
+}
+
 // ============================================================
 // MODULE SÉCURITÉ COMPLET — NE PAS MODIFIER
 // ============================================================
@@ -611,60 +683,48 @@ const DB = {
 let editId = null, cmtFilter = 'all', _csrfToken = null;
 
 async function login() {
-    const u = Sec.txt(document.getElementById('login-user').value.trim(), 50);
+    const email = Sec.txt(document.getElementById('login-user').value.trim(), 200);
     const p = document.getElementById('login-pass').value;
     document.getElementById('login-error').textContent = '';
 
-    // Brute force check
     const bf = BF.check();
     if (bf.locked) {
         document.getElementById('login-error').textContent = `Compte verrouillé. Réessayez dans ${bf.remaining} min.`;
         return;
     }
 
-    // Hash SHA-256 du mot de passe saisi
-    const pHash = await Sec.sha256(p);
-    const cfg = DB.cfg.get();
-
-    // Migrer le mot de passe en clair → hash si nécessaire
-    if (cfg.password && cfg.password.length < 64) {
-        cfg.password = await Sec.sha256(cfg.password);
-        DB.cfg.save(cfg);
-    }
-
-    if (u === cfg.username && pHash === cfg.password) {
+    const result = await supabaseLogin(email, p);
+    if (result.data?.session) {
         BF.reset();
-        const ses = SESSION.create(u);
-        _csrfToken = ses.csrf;
+        _authUser = result.data.session.user;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('admin-app').style.display = 'flex';
-        document.getElementById('topbar-user').textContent = Sec.esc(u);
-        document.getElementById('set-user').value = u;
-        Audit.log('LOGIN', 'Connexion réussie — ' + u);
+        document.getElementById('topbar-user').textContent = Sec.esc(email);
+        Audit.log('LOGIN', 'Connexion réussie — ' + email);
         renderDash(); updateBadges();
     } else {
         const d = BF.fail();
-        const left = 5 - (d.attempts||0);
-        document.getElementById('login-error').textContent = left > 0
-            ? `Identifiants incorrects. ${left} tentative(s) restante(s).`
-            : 'Compte verrouillé 10 minutes.';
-        Audit.log('LOGIN_FAIL', 'Tentative échouée — utilisateur: ' + u);
+        const left = 5 - (d.attempts || 0);
+        document.getElementById('login-error').textContent = result.error
+            ? Sec.esc(result.error)
+            : (left > 0 ? `Identifiants incorrects. ${left} tentative(s) restante(s).` : 'Compte verrouillé 10 minutes.');
+        Audit.log('LOGIN_FAIL', 'Tentative échouée — ' + email);
     }
 }
 
-function logout() {
+async function logout() {
     Audit.log('LOGOUT','Déconnexion manuelle');
-    SESSION.destroy();
+    await _sb.auth.signOut();
+    _authUser = null;
     document.getElementById('admin-app').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('login-pass').value = '';
     document.getElementById('login-error').textContent = '';
-    _csrfToken = null;
 }
 
 function _checkSession() {
-    if (!SESSION.get()) { notif('Session expirée — reconnectez-vous.', true); logout(); return false; }
-    SESSION.touch(); return true;
+    if (!_authUser) { notif('Session expirée — reconnectez-vous.', true); logout(); return false; }
+    return true;
 }
 
 // ---- RESPONSIVE FIX — SIDEBAR MOBILE ----
@@ -715,34 +775,32 @@ function renderAudit() {
 }
 
 // ---- SUBSCRIBERS ----
-function getSubscribers() {
-    return JSON.parse(localStorage.getItem('lr_subscribers') || '[]');
+async function getSubscribers() {
+    return await supabaseGetSubscribers();
 }
-function renderSubscribers() {
-    const subs = getSubscribers();
+async function renderSubscribers() {
+    const subs = await supabaseGetSubscribers();
     const tbody = document.getElementById('subs-tbody');
     const empty = document.getElementById('subs-empty');
     if (!subs.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
-    tbody.innerHTML = subs.map((email, i) => `
+    tbody.innerHTML = subs.map((sub, i) => `
         <tr>
             <td style="color:var(--text3);width:40px">${i + 1}</td>
-            <td>${Sec.esc(email)}</td>
-            <td><button class="btn btn-sm btn-danger" onclick="removeSubscriber(${i})">Supprimer</button></td>
+            <td>${Sec.esc(sub.email)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="removeSubscriber('${Sec.esc(String(sub.id))}')">Supprimer</button></td>
         </tr>
     `).join('');
 }
-function removeSubscriber(idx) {
-    const subs = getSubscribers();
-    subs.splice(idx, 1);
-    localStorage.setItem('lr_subscribers', JSON.stringify(subs));
-    renderSubscribers();
-    updateBadges();
+async function removeSubscriber(id) {
+    if (!_checkSession()) return;
+    await supabaseDeleteSubscriber(id);
+    await renderSubscribers(); await updateBadges(); notif('Abonné supprimé');
 }
-function exportSubscribers() {
-    const subs = getSubscribers();
+async function exportSubscribers() {
+    const subs = await supabaseGetSubscribers();
     if (!subs.length) { notif('Aucun abonné à exporter.', true); return; }
-    const csv = 'Email\n' + subs.join('\n');
+    const csv = 'Email\n' + subs.map(s => s.email).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -751,22 +809,23 @@ function exportSubscribers() {
 }
 
 // ---- BADGES ----
-function updateBadges() {
-    const arts = DB.arts.all();
-    const pending = DB.cmts.all().filter(c => c.status === 'pending').length;
+async function updateBadges() {
+    const cmts = await supabaseGetAllComments();
+    const subs = await supabaseGetSubscribers();
+    const pending = cmts.filter(c => c.status === 'pending').length;
     const badge = document.getElementById('badge-cmts');
     badge.textContent = pending;
     badge.className = 'nav-badge' + (pending > 0 ? ' show' : '');
     const subsBadge = document.getElementById('badge-subs');
-    const subsCount = getSubscribers().length;
-    subsBadge.textContent = subsCount;
-    subsBadge.className = 'nav-badge' + (subsCount > 0 ? ' show' : '');
+    subsBadge.textContent = subs.length;
+    subsBadge.className = 'nav-badge' + (subs.length > 0 ? ' show' : '');
 }
 
 // ---- DASHBOARD ----
-function renderDash() {
-    const arts = DB.arts.all();
-    const cmts = DB.cmts.all();
+async function renderDash() {
+    const arts = await supabaseGetAllArticles();
+    const cmts = await supabaseGetAllComments();
+    const subs = await supabaseGetSubscribers();
     const pub = arts.filter(a => a.status === 'published');
     const pend = cmts.filter(c => c.status === 'pending');
     const views = arts.reduce((s, a) => s + (a.views || 0), 0);
@@ -774,76 +833,79 @@ function renderDash() {
     document.getElementById('st-pub').textContent = pub.length;
     document.getElementById('st-cmts').textContent = pend.length;
     document.getElementById('st-views').textContent = views.toLocaleString('fr-FR');
-    document.getElementById('st-subs').textContent = getSubscribers().length;
+    document.getElementById('st-subs').textContent = subs.length;
 
     document.getElementById('dash-arts').innerHTML = arts.slice(0,5).map(a => `
         <tr>
-            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.title}</td>
-            <td><span class="badge badge-cat">${a.cat}</span></td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${Sec.esc(a.title)}</td>
+            <td><span class="badge badge-cat">${Sec.esc(a.cat)}</span></td>
             <td><span class="badge badge-${a.status === 'published' ? 'published' : 'draft'}">${a.status === 'published' ? 'Publié' : 'Brouillon'}</span></td>
-            <td style="white-space:nowrap">${a.date}</td>
+            <td style="white-space:nowrap">${Sec.esc(a.date)}</td>
         </tr>
     `).join('') || '<tr><td colspan="4" style="text-align:center;color:#aaa;padding:20px">Aucun article</td></tr>';
 
     document.getElementById('dash-cmts').innerHTML = cmts.slice(0,5).map(c => `
         <div class="comment-preview">
-            <div class="cp-meta">${c.author} <span class="badge badge-${c.status === 'approved' ? 'approved' : c.status === 'rejected' ? 'rejected' : 'pending'}">${c.status === 'approved' ? 'Approuvé' : c.status === 'rejected' ? 'Rejeté' : 'En attente'}</span></div>
-            <div class="cp-text">${(c.text||'').substring(0,90)}${c.text && c.text.length > 90 ? '…' : ''}</div>
+            <div class="cp-meta">${Sec.esc(c.author)} <span class="badge badge-${c.status === 'approved' ? 'approved' : c.status === 'rejected' ? 'rejected' : 'pending'}">${c.status === 'approved' ? 'Approuvé' : c.status === 'rejected' ? 'Rejeté' : 'En attente'}</span></div>
+            <div class="cp-text">${Sec.esc((c.text||'').substring(0,90))}${c.text && c.text.length > 90 ? '…' : ''}</div>
         </div>
     `).join('') || '<p style="color:#aaa;font-size:.85rem;padding:8px 0">Aucun commentaire</p>';
 }
 
 // ---- ARTICLES ----
-function renderArts() {
-    document.getElementById('arts-tbody').innerHTML = DB.arts.all().map(a => `
+async function renderArts() {
+    const arts = await supabaseGetAllArticles();
+    document.getElementById('arts-tbody').innerHTML = arts.map(a => `
         <tr>
             <td>
-                ${a.img ? `<img src="${a.img}" style="width:44px;height:36px;object-fit:cover;border-radius:4px;margin-right:10px;vertical-align:middle;flex-shrink:0">` : ''}
-                <span style="vertical-align:middle;font-weight:500">${a.title}</span>
+                ${a.img ? `<img src="${Sec.url(a.img)}" style="width:44px;height:36px;object-fit:cover;border-radius:4px;margin-right:10px;vertical-align:middle;flex-shrink:0">` : ''}
+                <span style="vertical-align:middle;font-weight:500">${Sec.esc(a.title)}</span>
             </td>
-            <td><span class="badge badge-cat">${a.cat}</span></td>
+            <td><span class="badge badge-cat">${Sec.esc(a.cat)}</span></td>
             <td><span class="badge badge-${a.status === 'published' ? 'published' : 'draft'}">${a.status === 'published' ? 'Publié' : 'Brouillon'}</span></td>
-            <td style="white-space:nowrap;color:var(--text3)">${a.date}</td>
+            <td style="white-space:nowrap;color:var(--text3)">${Sec.esc(a.date)}</td>
             <td style="color:var(--text3)">${(a.views||0).toLocaleString('fr-FR')}</td>
             <td>
                 <!-- RESPONSIVE FIX — .arts-actions flex col sur mobile, ligne sur desktop -->
                 <div class="arts-actions">
-                    <button class="btn-sm" onclick="editArt('${a.id}')">✏ Modifier</button>
-                    <button class="btn-sm ${a.status === 'published' ? 'btn-warning' : 'btn-success'}" onclick="togglePub('${a.id}')">${a.status === 'published' ? '⏸ Dépublier' : '▶ Publier'}</button>
-                    <button class="btn-sm btn-danger" onclick="delArt('${a.id}')">✕</button>
+                    <button class="btn-sm" onclick="editArt('${Sec.esc(String(a.id))}')">✏ Modifier</button>
+                    <button class="btn-sm ${a.status === 'published' ? 'btn-warning' : 'btn-success'}" onclick="togglePub('${Sec.esc(String(a.id))}')">${a.status === 'published' ? '⏸ Dépublier' : '▶ Publier'}</button>
+                    <button class="btn-sm btn-danger" onclick="delArt('${Sec.esc(String(a.id))}')">✕</button>
                 </div>
             </td>
         </tr>
     `).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:32px">Aucun article créé</td></tr>';
 }
 
-function togglePub(id) {
+async function togglePub(id) {
     if (!_checkSession()) return;
-    const a = DB.arts.find(Sec.txt(id,50)); if (!a) return;
-    a.status = a.status === 'published' ? 'draft' : 'published';
-    DB.arts.upsert(a); renderArts(); updateBadges();
-    const action = a.status === 'published' ? 'PUBLISH' : 'UNPUBLISH';
-    Audit.log(action, Sec.txt(a.title,100));
-    notif(a.status === 'published' ? 'Article publié sur le site !' : 'Article retiré du site');
+    const { data: a } = await _sb.from('articles').select('*').eq('id', id).single();
+    if (!a) return;
+    const newStatus = a.status === 'published' ? 'draft' : 'published';
+    await supabaseSaveArticle({...a, status: newStatus});
+    await renderArts(); await updateBadges();
+    Audit.log(newStatus === 'published' ? 'PUBLISH' : 'UNPUBLISH', Sec.txt(a.title, 100));
+    notif(newStatus === 'published' ? 'Article publié sur le site !' : 'Article retiré du site');
 }
 
-function delArt(id) {
+async function delArt(id) {
     if (!_checkSession()) return;
     if (!confirm('Supprimer définitivement cet article ?')) return;
-    const a = DB.arts.find(Sec.txt(id,50));
-    if (a) Audit.log('DELETE_ARTICLE', Sec.txt(a.title,100));
-    DB.arts.del(id); renderArts(); updateBadges(); notif('Article supprimé');
+    const { data: a } = await _sb.from('articles').select('title').eq('id', id).single();
+    if (a) Audit.log('DELETE_ARTICLE', Sec.txt(a.title, 100));
+    await supabaseDeleteArticle(id);
+    await renderArts(); await updateBadges(); notif('Article supprimé');
 }
 
-function editArt(id) {
-    const a = DB.arts.find(id); if (!a) return;
+async function editArt(id) {
+    const { data: a } = await _sb.from('articles').select('*').eq('id', id).single();
+    if (!a) return;
     editId = id; nav('new');
     setTimeout(() => {
         document.getElementById('form-title').textContent = 'Modifier l\'article';
         document.getElementById('art-title').value = a.title || '';
         document.getElementById('art-subtitle').value = a.subtitle || '';
         document.getElementById('art-cat').value = a.cat || 'Actualité';
-        // Convert HTML back to plain text for editing
         const tmp = document.createElement('div'); tmp.innerHTML = a.body || '';
         document.getElementById('art-body').value = tmp.innerText || '';
         if (a.img) {
@@ -908,7 +970,7 @@ function btnLoad(btn) {
     return () => { btn.disabled = false; btn.classList.remove('btn-loading'); btn.innerHTML = orig; };
 }
 
-function saveArticle(status, btn) {
+async function saveArticle(status, btn) {
     if (!_checkSession()) return;
     const title = Sec.txt(document.getElementById('art-title').value.trim(), 200);
     if (!title) { notif('Le titre est obligatoire !', true); return; }
@@ -924,9 +986,13 @@ function saveArticle(status, btn) {
     const now = new Date();
     const dateFr = now.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
 
-    const existing = editId ? DB.arts.find(editId) : null;
+    let existing = null;
+    if (editId) {
+        const { data } = await _sb.from('articles').select('*').eq('id', editId).single();
+        existing = data;
+    }
+
     const article = {
-        id: editId || ('a' + Date.now()),
         title,
         subtitle: document.getElementById('art-subtitle').value.trim(),
         cat: document.getElementById('art-cat').value,
@@ -935,56 +1001,61 @@ function saveArticle(status, btn) {
         date: existing ? existing.date : dateFr,
         read: readTime,
         views: existing ? (existing.views || 0) : 0,
-        status,
-        createdAt: existing ? existing.createdAt : Date.now()
+        status
     };
-    if (status === 'published') article.publishedAt = Date.now();
+    if (editId) article.id = editId;
+    if (status === 'published') article.published_at = now.toISOString();
 
-    DB.arts.upsert(article);
+    const saved = await supabaseSaveArticle(article);
     editId = null;
     Audit.log(status==='published'?'PUBLISH_ARTICLE':'SAVE_DRAFT', Sec.txt(title,100));
-    notif(status === 'published' ? '🚀 Article publié sur le site !' : '💾 Brouillon enregistré');
-    setTimeout(() => { reset(); nav('articles'); }, 800);
+    if (saved) {
+        notif(status === 'published' ? '🚀 Article publié sur le site !' : '💾 Brouillon enregistré');
+        setTimeout(() => { reset(); nav('articles'); }, 800);
+    } else {
+        notif('Erreur lors de la sauvegarde.', true);
+        reset();
+    }
 }
 
 // ---- COMMENTS ----
-function renderCmts(filter) {
+async function renderCmts(filter) {
     cmtFilter = filter;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
-    let cmts = DB.cmts.all();
+    let cmts = await supabaseGetAllComments();
     if (filter !== 'all') cmts = cmts.filter(c => c.status === filter);
     document.getElementById('cmts-tbody').innerHTML = cmts.map(c => `
         <tr>
-            <td><strong>${c.author}</strong>${c.email ? `<br><small style="color:#aaa">${c.email}</small>` : ''}</td>
-            <td style="max-width:260px"><span style="font-size:.84rem">${(c.text||'').substring(0,110)}${c.text && c.text.length > 110 ? '…' : ''}</span></td>
-            <td style="font-size:.8rem;color:var(--text3)">${c.articleTitle || '—'}</td>
-            <td style="font-size:.8rem;color:var(--text3);white-space:nowrap">${c.date || ''}</td>
+            <td><strong>${Sec.esc(c.author)}</strong>${c.email ? `<br><small style="color:#aaa">${Sec.esc(c.email)}</small>` : ''}</td>
+            <td style="max-width:260px"><span style="font-size:.84rem">${Sec.esc((c.text||'').substring(0,110))}${c.text && c.text.length > 110 ? '…' : ''}</span></td>
+            <td style="font-size:.8rem;color:var(--text3)">${Sec.esc(c.article_title || c.articleTitle || '—')}</td>
+            <td style="font-size:.8rem;color:var(--text3);white-space:nowrap">${Sec.esc(c.date || '')}</td>
             <td><span class="badge badge-${c.status === 'approved' ? 'approved' : c.status === 'rejected' ? 'rejected' : 'pending'}">${c.status === 'approved' ? 'Approuvé' : c.status === 'rejected' ? 'Rejeté' : 'En attente'}</span></td>
             <td style="white-space:nowrap">
-                ${c.status !== 'approved' ? `<button class="btn-sm btn-success" onclick="cAction('${c.id}','approved',this)">✓ Approuver</button>` : ''}
-                ${c.status !== 'rejected' ? `<button class="btn-sm btn-warning" onclick="cAction('${c.id}','rejected',this)">✕ Rejeter</button>` : ''}
-                <button class="btn-sm btn-danger" onclick="delCmt('${c.id}')">🗑</button>
+                ${c.status !== 'approved' ? `<button class="btn-sm btn-success" onclick="cAction('${Sec.esc(String(c.id))}','approved',this)">✓ Approuver</button>` : ''}
+                ${c.status !== 'rejected' ? `<button class="btn-sm btn-warning" onclick="cAction('${Sec.esc(String(c.id))}','rejected',this)">✕ Rejeter</button>` : ''}
+                <button class="btn-sm btn-danger" onclick="delCmt('${Sec.esc(String(c.id))}')">🗑</button>
             </td>
         </tr>
     `).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:28px">Aucun commentaire</td></tr>';
 }
 
-function cAction(id, status, btn) {
+async function cAction(id, status, btn) {
     if (!_checkSession()) return;
     const reset = btnLoad(btn);
-    const c = DB.cmts.find(Sec.txt(id,50)); if (!c) { reset(); return; }
-    c.status = status; DB.cmts.upsert(c);
-    Audit.log(status==='approved'?'APPROVE_COMMENT':'REJECT_COMMENT', 'Auteur: '+Sec.txt(c.author,50));
+    if (status === 'approved') await supabaseApproveComment(id);
+    else await supabaseRejectComment(id);
+    Audit.log(status==='approved'?'APPROVE_COMMENT':'REJECT_COMMENT', 'Commentaire ID: '+id);
     notif(status === 'approved' ? 'Commentaire approuvé !' : 'Commentaire rejeté');
-    setTimeout(() => { reset(); renderCmts(cmtFilter); updateBadges(); }, 600);
+    setTimeout(async () => { reset(); await renderCmts(cmtFilter); await updateBadges(); }, 600);
 }
 
-function delCmt(id) {
+async function delCmt(id) {
     if (!_checkSession()) return;
     if (!confirm('Supprimer ce commentaire ?')) return;
-    const c = DB.cmts.find(Sec.txt(id,50));
-    if (c) Audit.log('DELETE_COMMENT','Auteur: '+Sec.txt(c.author,50));
-    DB.cmts.del(id); renderCmts(cmtFilter); updateBadges(); notif('Commentaire supprimé');
+    Audit.log('DELETE_COMMENT', 'Commentaire ID: '+id);
+    await supabaseDeleteComment(id);
+    await renderCmts(cmtFilter); await updateBadges(); notif('Commentaire supprimé');
 }
 
 // ---- SETTINGS ----
@@ -1042,20 +1113,12 @@ function notif(msg, err = false) {
 
 // ---- INIT ----
 (async function init() {
-    // Migrer mot de passe en clair → hash SHA-256 si nécessaire
-    const cfg = DB.cfg.get();
-    if (cfg.password && cfg.password.length < 64) {
-        cfg.password = await Sec.sha256(cfg.password);
-        DB.cfg.save(cfg);
-    }
-
-    const ses = SESSION.get();
-    if (ses) {
-        _csrfToken = ses.csrf;
+    const { data: { session } } = await _sb.auth.getSession();
+    if (session) {
+        _authUser = session.user;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('admin-app').style.display = 'flex';
-        document.getElementById('topbar-user').textContent = Sec.esc(ses.user || cfg.username);
-        document.getElementById('set-user').value = ses.user || cfg.username;
+        document.getElementById('topbar-user').textContent = Sec.esc(session.user.email);
         renderDash(); updateBadges();
     }
 })();
