@@ -247,8 +247,10 @@
         .footer-brand .logo-rouge{color:var(--red)}
         .footer-desc{font-size:.9rem;color:var(--text2);margin-bottom:24px}
         .footer-social{display:flex;gap:12px}
-        .social-btn{width:36px;height:36px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--navy);transition:all .15s;cursor:pointer}
-        .social-btn:hover{background:var(--navy);color:#fff}
+        .social-btn{width:36px;height:36px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text2);transition:background .2s ease,color .2s ease,border-color .2s ease,transform .2s ease,box-shadow .2s ease;cursor:pointer;flex-shrink:0}
+        .social-btn svg{display:block;flex-shrink:0}
+        .social-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy);transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.14)}
+        .social-btn:active{transform:scale(.9)!important;transition:transform .08s!important}
         .footer-col-title{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);margin-bottom:24px}
         .footer-col-links{display:flex;flex-direction:column;gap:12px}
         .footer-col-link{font-size:.88rem;color:var(--text2);cursor:pointer;transition:color .15s}
@@ -826,8 +828,12 @@
                     <div class="footer-brand"><span>Ligne</span>&nbsp;<span class="logo-rouge">Rouge</span></div>
                     <p class="footer-desc">Plateforme d'information indépendante dédiée à l'actualité rigoureuse en Afrique francophone.</p>
                     <div class="footer-social">
-                        <button class="social-btn" onclick="showNotif('Bientôt disponible')" aria-label="Twitter">𝕏</button>
-                        <button class="social-btn" onclick="showNotif('Bientôt disponible')" aria-label="Facebook">f</button>
+                        <button class="social-btn" onclick="UI.showNotif('Bientôt disponible')" aria-label="X (Twitter)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.266 5.649zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </button>
+                        <button class="social-btn" onclick="UI.showNotif('Bientôt disponible')" aria-label="Facebook">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        </button>
                     </div>
                 </div>
                 <div>
