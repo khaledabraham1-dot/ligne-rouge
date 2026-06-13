@@ -330,6 +330,18 @@
         .hero-side-item:active{transform:scale(.97)!important;transition:transform .08s!important}
         .related-card:active{transform:translateY(-1px) scale(.97)!important}
         .share-btn:active{transform:translateY(0) scale(.94)!important;transition:transform .08s!important}
+
+        /* RIPPLE — onde au clic sur les cartes */
+        .trend-card{position:relative;overflow:hidden}
+        .hero-side-item{position:relative;overflow:hidden}
+        .ripple{position:absolute;border-radius:50%;background:rgba(192,29,53,.28);transform:scale(0);animation:rippleAnim .38s ease-out forwards;pointer-events:none;z-index:10}
+        @keyframes rippleAnim{to{transform:scale(4);opacity:0}}
+
+        /* SPINNER DE TRANSITION */
+        #page-spinner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;z-index:2500;pointer-events:none;opacity:0;transition:opacity .12s}
+        #page-spinner.show{opacity:1}
+        #page-spinner::after{content:'';display:block;width:38px;height:38px;border:3px solid rgba(192,29,53,.18);border-top-color:var(--red);border-radius:50%;animation:spinTurn .55s linear infinite}
+        @keyframes spinTurn{to{transform:rotate(360deg)}}
         .nl-form button:active,.section-link:active,.nav-search-btn:active{transform:scale(.95)!important;transition:transform .08s!important}
 
         .about-mission-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;margin-bottom:80px}
@@ -739,6 +751,7 @@
 
     <div id="read-progress" role="progressbar" aria-hidden="true"></div>
     <button id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Retour en haut">↑</button>
+    <div id="page-spinner" aria-hidden="true"></div>
 
     <div id="img-modal" onclick="closeImgModal()" role="dialog" aria-modal="true" aria-label="Image agrandie">
         <button id="img-modal-close" onclick="closeImgModal()" aria-label="Fermer">✕</button>
@@ -865,7 +878,9 @@
                 if (current && current.id === id) { setTimeout(initFadeUp, 80); return; }
                 UI._transitioning = true;
                 UI._transStart = Date.now();
+                const spinner = document.getElementById('page-spinner');
                 const reveal = () => {
+                    if (spinner) spinner.classList.remove('show');
                     target.style.opacity = '0';
                     target.classList.add('active');
                     window.scrollTo(0, 0);
@@ -883,6 +898,7 @@
                     }));
                 };
                 if (current) {
+                    if (spinner) spinner.classList.add('show');
                     current.style.transition = 'opacity .15s ease';
                     current.style.opacity = '0';
                     setTimeout(() => {
@@ -922,6 +938,22 @@
             setNavActive(null);
             UI.showPage('page-redac');
         }
+
+        // ---- RIPPLE ----
+        function addRipple(e, el) {
+            const rect = el.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const r = document.createElement('span');
+            r.className = 'ripple';
+            r.style.cssText = 'width:'+size+'px;height:'+size+'px;left:'+(e.clientX-rect.left-size/2)+'px;top:'+(e.clientY-rect.top-size/2)+'px;';
+            el.appendChild(r);
+            r.addEventListener('animationend', () => r.remove(), { once: true });
+        }
+        document.addEventListener('mousedown', function(e) {
+            const card = e.target.closest('.hero-main,.trend-card,.hero-side-item,.related-card');
+            if (card) addRipple(e, card);
+        });
+
         function setNavActive(btn) {
             document.querySelectorAll('.nav-cat').forEach(b => { b.classList.remove('active'); b.removeAttribute('aria-current'); });
             if (btn) { btn.classList.add('active'); btn.setAttribute('aria-current', 'page'); }
