@@ -1367,6 +1367,9 @@
                 const navBtn = [...document.querySelectorAll('.nav-cat')].find(b => b.textContent.trim() === text);
                 setNavActive(navBtn || null);
             }
+            // Deep link : reset URL vers l'accueil
+            history.pushState({ type: 'home', cat }, '', location.pathname + location.search);
+            updateCanonical('https://khaledabraham1-dot.github.io/ligne-rouge/');
             // Reset metas SEO + schema article vers la page d'accueil
             updateSEOMeta('', '', '');
             removeArticleSchema();
@@ -1427,6 +1430,13 @@
             if (el) el.remove();
         }
 
+        function updateCanonical(url) {
+            const canon = document.querySelector('link[rel="canonical"]');
+            if (canon) canon.setAttribute('href', url);
+            const ogUrl = document.querySelector('meta[property="og:url"]');
+            if (ogUrl) ogUrl.setAttribute('content', url);
+        }
+
         function updateSEOMeta(title, description, image) {
             const siteTitle = title ? `${title} — Ligne Rouge` : 'Ligne Rouge | Actualité indépendante en Afrique francophone';
             const desc = description || 'Média d\'information indépendant. Politique, Sport, Société, International, Culture.';
@@ -1441,10 +1451,18 @@
             document.querySelector('meta[name="twitter:image"]').setAttribute('content', img);
         }
 
-        async function openArticle(id) {
+        async function openArticle(id, pushHistory = true) {
             const articles = await getArticles();
             const art = articles.find(a => String(a.id) === String(id));
             if (!art) return;
+
+            // Deep link : met à jour l'URL sans recharger la page
+            const articleUrl = `${location.pathname}${location.search}#article-${id}`;
+            const canonicalUrl = `https://khaledabraham1-dot.github.io/ligne-rouge/#article-${id}`;
+            if (pushHistory) {
+                history.pushState({ type: 'article', id: String(id) }, art.title, articleUrl);
+            }
+            updateCanonical(canonicalUrl);
 
             // Mettre à jour les metas SEO + données structurées pour cet article
             updateSEOMeta(art.title, art.subtitle || art.title, art.img || '');
@@ -1784,10 +1802,40 @@
         }
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImgModal(); });
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // Bouton retour / avant du navigateur
+        window.addEventListener('popstate', async (e) => {
+            const state = e.state;
+            if (state?.type === 'article') {
+                await openArticle(state.id, false);
+            } else {
+                const cat = state?.cat || 'all';
+                removeArticleSchema();
+                updateSEOMeta('', '', '');
+                updateCanonical('https://khaledabraham1-dot.github.io/ligne-rouge/');
+                UI._transitioning = false;
+                document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.opacity = ''; p.style.transition = ''; });
+                const home = document.getElementById('page-home');
+                if (home) home.classList.add('active');
+                if (cat !== _loadFilter) { _loadedCount = 8; _loadFilter = cat; }
+                window.scrollTo(0, 0);
+                renderHome(cat);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
             applyTheme();
-            setTimeout(() => { renderHome(); }, 700);
-            setTimeout(initFadeUp, 900);
+            const hash = window.location.hash;
+            if (hash.startsWith('#article-')) {
+                const id = hash.replace('#article-', '');
+                // Pose l'accueil comme entrée initiale pour que "retour" fonctionne
+                history.replaceState({ type: 'home', cat: 'all' }, '', location.pathname + location.search);
+                getArticles(); // réchauffe le cache silencieusement
+                await openArticle(id);
+            } else {
+                history.replaceState({ type: 'home', cat: 'all' }, '', location.pathname + location.search);
+                setTimeout(() => renderHome(), 700);
+                setTimeout(initFadeUp, 900);
+            }
         });
 
     </script>
