@@ -147,9 +147,70 @@
         .admin-notif.show{transform:translateY(0);opacity:1}
         .admin-notif.err{border-left-color:var(--red)}
 
-        /* RESPONSIVE */
-        @media(max-width:1024px){.stat-cards{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.form-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
-        @media(max-width:768px){#sidebar{width:190px}#content{padding:16px}.section-head{flex-direction:column;align-items:flex-start;gap:10px}}
+        /* =============================================
+           RESPONSIVE FIXES — admin.html
+        ============================================= */
+
+        /* RESPONSIVE FIX — bouton hamburger sidebar (caché sur desktop) */
+        #sb-toggle{display:none;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1.15rem;color:var(--navy);transition:background .15s;font-family:var(--font);line-height:1;margin-right:8px}
+        #sb-toggle:hover{background:var(--bg)}
+        /* RESPONSIVE FIX — backdrop sidebar overlay mobile */
+        #sb-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:149;opacity:0;pointer-events:none;transition:opacity .3s}
+        #sb-backdrop.open{opacity:1;pointer-events:all}
+        /* RESPONSIVE FIX — scroll horizontal pour les tableaux */
+        .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+        /* RESPONSIVE FIX — boutons actions articles (flex en ligne par défaut) */
+        .arts-actions{display:flex;gap:4px;flex-wrap:nowrap;align-items:center}
+
+        @media(max-width:1024px){
+            .stat-cards{grid-template-columns:repeat(2,1fr)}
+            .dash-grid{grid-template-columns:1fr}
+            .form-grid{grid-template-columns:1fr}
+            .form-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        }
+
+        /* RESPONSIVE FIX — tablette 768px : sidebar en drawer overlay */
+        @media(max-width:768px){
+            #sb-toggle{display:inline-flex}
+            /* RESPONSIVE FIX — sidebar devient drawer fixe */
+            #sidebar{
+                position:fixed;
+                top:0;left:0;
+                height:100vh;
+                z-index:150;
+                width:var(--sidebar-w);
+                transform:translateX(-100%);
+                transition:transform .3s cubic-bezier(.4,0,.2,1);
+            }
+            #sidebar.sb-open{transform:translateX(0)}
+            /* RESPONSIVE FIX — topbar : hamburger à gauche, title flex-1 */
+            #topbar{gap:0;justify-content:flex-start;padding:0 14px}
+            #topbar-title{flex:1;margin-left:4px}
+            #content{padding:16px}
+            .section-head{flex-direction:column;align-items:flex-start;gap:10px}
+        }
+
+        /* RESPONSIVE FIX — mobile 600px : stat 2x2, boutons actions en colonne */
+        @media(max-width:600px){
+            .stat-cards{grid-template-columns:1fr 1fr;gap:10px}
+            .stat-card{padding:14px 12px}
+            .stat-value{font-size:1.5rem}
+            /* RESPONSIVE FIX — boutons actions en colonne sur mobile */
+            .arts-actions{flex-direction:column;gap:6px;align-items:stretch}
+            .arts-actions .btn-sm{margin-right:0;text-align:center;justify-content:center;display:flex;padding:8px 10px;min-height:36px;width:100%}
+            #content{padding:12px}
+            .login-card{padding:32px 20px;margin:0 12px;max-width:100%}
+            .filter-group{gap:4px}
+            .filter-btn{padding:5px 10px;font-size:.75rem}
+            .form-sidebar{grid-template-columns:1fr}
+        }
+
+        /* RESPONSIVE FIX — petit mobile 480px */
+        @media(max-width:480px){
+            .stat-cards{grid-template-columns:1fr 1fr}
+            .stat-value{font-size:1.3rem}
+            .section-head h2{font-size:1.1rem}
+        }
     </style>
 </head>
 <body>
@@ -191,9 +252,11 @@
             <button class="sb-logout" onclick="logout()">⏻ Déconnexion</button>
         </div>
     </aside>
+    <div id="sb-backdrop" onclick="closeSidebar()"></div>
 
     <div id="main-wrapper">
         <header id="topbar">
+            <button id="sb-toggle" onclick="toggleSidebar()" aria-label="Ouvrir le menu">☰</button>
             <span id="topbar-title">Tableau de bord</span>
             <span class="topbar-user" id="topbar-user">admin</span>
         </header>
@@ -226,11 +289,14 @@
                     <h2>Gestion des articles</h2>
                     <button class="btn btn-primary" onclick="nav('new')">+ Nouvel article</button>
                 </div>
+                <!-- RESPONSIVE FIX — tableau articles avec scroll horizontal -->
                 <div class="card" style="padding:0;overflow:hidden">
-                    <table class="admin-table">
-                        <thead><tr><th style="width:38%">Article</th><th>Catégorie</th><th>Statut</th><th>Date</th><th>Vues</th><th>Actions</th></tr></thead>
-                        <tbody id="arts-tbody"></tbody>
-                    </table>
+                    <div class="table-scroll">
+                        <table class="admin-table" style="min-width:600px">
+                            <thead><tr><th style="min-width:200px">Article</th><th style="min-width:100px">Catégorie</th><th style="min-width:90px">Statut</th><th style="min-width:100px">Date</th><th style="min-width:70px">Vues</th><th style="min-width:150px">Actions</th></tr></thead>
+                            <tbody id="arts-tbody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -297,11 +363,21 @@
                         <button class="filter-btn" data-filter="rejected" onclick="renderCmts('rejected')">Rejetés</button>
                     </div>
                 </div>
+                <!-- RESPONSIVE FIX — tableau commentaires avec scroll horizontal et min-widths -->
                 <div class="card" style="padding:0;overflow:hidden">
-                    <table class="admin-table">
-                        <thead><tr><th>Auteur</th><th>Commentaire</th><th>Article</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
-                        <tbody id="cmts-tbody"></tbody>
-                    </table>
+                    <div class="table-scroll">
+                        <table class="admin-table" style="min-width:800px">
+                            <thead><tr>
+                                <th style="min-width:120px">Auteur</th>
+                                <th style="min-width:200px">Commentaire</th>
+                                <th style="min-width:140px">Article</th>
+                                <th style="min-width:110px">Date</th>
+                                <th style="min-width:100px">Statut</th>
+                                <th style="min-width:130px">Actions</th>
+                            </tr></thead>
+                            <tbody id="cmts-tbody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -585,9 +661,24 @@ function _checkSession() {
     SESSION.touch(); return true;
 }
 
+// ---- RESPONSIVE FIX — SIDEBAR MOBILE ----
+function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    const bd = document.getElementById('sb-backdrop');
+    const open = sb.classList.toggle('sb-open');
+    bd.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('sb-open');
+    document.getElementById('sb-backdrop').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
 // ---- NAV ----
 function nav(sec) {
     if (!_checkSession() && sec !== 'dashboard') return;
+    closeSidebar(); // RESPONSIVE FIX — ferme le drawer sur mobile après navigation
     document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
     document.getElementById('sec-' + sec).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -705,10 +796,13 @@ function renderArts() {
             <td><span class="badge badge-${a.status === 'published' ? 'published' : 'draft'}">${a.status === 'published' ? 'Publié' : 'Brouillon'}</span></td>
             <td style="white-space:nowrap;color:var(--text3)">${a.date}</td>
             <td style="color:var(--text3)">${(a.views||0).toLocaleString('fr-FR')}</td>
-            <td style="white-space:nowrap">
-                <button class="btn-sm" onclick="editArt('${a.id}')">✏ Modifier</button>
-                <button class="btn-sm ${a.status === 'published' ? 'btn-warning' : 'btn-success'}" onclick="togglePub('${a.id}')">${a.status === 'published' ? '⏸ Dépublier' : '▶ Publier'}</button>
-                <button class="btn-sm btn-danger" onclick="delArt('${a.id}')">✕</button>
+            <td>
+                <!-- RESPONSIVE FIX — .arts-actions flex col sur mobile, ligne sur desktop -->
+                <div class="arts-actions">
+                    <button class="btn-sm" onclick="editArt('${a.id}')">✏ Modifier</button>
+                    <button class="btn-sm ${a.status === 'published' ? 'btn-warning' : 'btn-success'}" onclick="togglePub('${a.id}')">${a.status === 'published' ? '⏸ Dépublier' : '▶ Publier'}</button>
+                    <button class="btn-sm btn-danger" onclick="delArt('${a.id}')">✕</button>
+                </div>
             </td>
         </tr>
     `).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:32px">Aucun article créé</td></tr>';

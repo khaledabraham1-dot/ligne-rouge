@@ -345,15 +345,7 @@
         .nl-form button:active,.section-link:active,.nav-search-btn:active{transform:scale(.95)!important;transition:transform .08s!important}
 
         .about-mission-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;margin-bottom:80px}
-        @media (max-width:1024px){
-            .hero-grid{grid-template-columns:1fr}
-            .hero-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-            .bio-card{grid-template-columns:1fr}
-            .bio-photo-col{min-height:auto;flex-direction:row;gap:24px;align-items:center;padding:32px}
-            .bio-text-col{padding:0 32px 32px}
-            .about-mission-grid{grid-template-columns:1fr;gap:32px;margin-bottom:56px}
-        }
-        @media(max-width:600px){.related-grid{grid-template-columns:1fr 1fr}.share-btn{padding:6px 11px;font-size:.76rem}}
+
         /* BADGE NOUVEAU */
         .badge-new{display:inline-block;background:var(--red);color:#fff;font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-left:7px;vertical-align:middle;flex-shrink:0;white-space:nowrap}
 
@@ -365,17 +357,46 @@
         #mobile-backdrop{position:fixed;inset:0;background:rgba(13,27,42,.55);backdrop-filter:blur(2px);z-index:350;opacity:0;pointer-events:none;transition:opacity .3s}
         #mobile-backdrop.open{opacity:1;pointer-events:all}
 
+        /* HAMBURGER → X */
+        .nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+        .nav-hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+        .nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+        /* =============================================
+           RESPONSIVE FIXES
+        ============================================= */
+
+        /* RESPONSIVE FIX — tablette large 1024px */
+        @media (max-width:1024px){
+            .hero-grid{grid-template-columns:1fr}
+            .hero-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+            .bio-card{grid-template-columns:1fr}
+            .bio-photo-col{min-height:auto;flex-direction:row;gap:24px;align-items:center;padding:32px}
+            .bio-text-col{padding:0 32px 32px}
+            .about-mission-grid{grid-template-columns:1fr;gap:32px;margin-bottom:56px}
+            .footer-grid{grid-template-columns:1fr 1fr;gap:32px;margin-bottom:0}
+        }
+
+        /* RESPONSIVE FIX — tablette portrait 768px */
         @media (max-width:768px){
             .nav-divider{display:none}
             .nav-hamburger{display:flex}
             .hero-sidebar{grid-template-columns:1fr}
+            /* RESPONSIVE FIX — trending 2 colonnes sur tablette */
             .trending-grid{grid-template-columns:1fr 1fr}
             .footer-grid{grid-template-columns:1fr 1fr}
             .art-title{font-size:2.2rem}
             .nl-form{flex-direction:column}
             .bio-values{grid-template-columns:1fr}
-
-            /* DRAWER */
+            /* RESPONSIVE FIX — taille minimum touch target 44px */
+            .social-btn,.dark-toggle{min-width:44px;min-height:44px}
+            .section-link{min-height:44px;display:inline-flex;align-items:center}
+            /* RESPONSIVE FIX — toast pleine largeur sur mobile */
+            .notification{right:12px;left:12px;bottom:16px;min-width:unset;max-width:unset}
+            /* RESPONSIVE FIX — modal image contrainte viewport mobile */
+            #img-modal-img{max-width:95vw;max-height:80vh}
+            #img-modal-close{font-size:2.5rem;top:8px;right:10px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0}
+            /* RESPONSIVE FIX — DRAWER MOBILE */
             .nav-cats{
                 display:flex!important;
                 flex-direction:column;
@@ -395,15 +416,65 @@
             }
             body.dark .nav-cats{background:#1F2937}
             .nav-cats.drawer-open{transform:translateX(0)}
-            .nav-cat{width:100%;padding:15px 24px;font-size:.9rem;border-radius:0;border-bottom:1px solid var(--border);white-space:nowrap}
+            /* RESPONSIVE FIX — nav-cat hauteur touch 44px dans drawer */
+            .nav-cat{width:100%;padding:15px 24px;font-size:.9rem;border-radius:0;border-bottom:1px solid var(--border);white-space:nowrap;min-height:44px;display:flex;align-items:center}
             .nav-cat.active{border-left:3px solid var(--red);padding-left:21px;background:var(--bg)}
             .nav-cat:hover{background:var(--bg)}
         }
 
-        /* HAMBURGER → X */
-        .nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
-        .nav-hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
-        .nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+        /* RESPONSIVE FIX — mobile 640px : hero image réduite, hero content */
+        @media (max-width:640px){
+            /* RESPONSIVE FIX — hauteur hero image 320px sur mobile */
+            .hero-main img{height:320px}
+            .hero-content{padding:16px}
+            /* RESPONSIVE FIX — titre hero plus petit sur mobile */
+            .hero-title{font-size:1.3rem}
+            .hero-sub{font-size:.8rem}
+            .hero{padding:24px 0 28px}
+            .art-title{font-size:2rem}
+            .about-section{padding:48px 0}
+            .newsletter{padding:56px 0}
+        }
+
+        /* RESPONSIVE FIX — mobile 550px : trending 1col, footer newsletter colonne */
+        @media (max-width:550px){
+            /* RESPONSIVE FIX — trending 1 colonne sur petit mobile */
+            .trending-grid{grid-template-columns:1fr}
+            .trend-img{height:200px}
+            /* RESPONSIVE FIX — footer newsletter en colonne */
+            .footer-nl-inner{flex-direction:column;gap:20px;align-items:stretch}
+            .footer-nl-form{flex-direction:column;min-width:unset;width:100%}
+            .footer-nl-form input,.footer-nl-form button{width:100%;min-height:44px}
+            .footer-nl-form button{padding:12px;font-size:.92rem}
+            /* RESPONSIVE FIX — footer grid 1 colonne */
+            .footer-grid{grid-template-columns:1fr}
+            .footer-bottom{flex-direction:column;gap:8px;text-align:center;padding-top:20px}
+            /* RESPONSIVE FIX — articles liés 1 colonne sur très petit écran */
+            .related-grid{grid-template-columns:1fr 1fr}
+            .share-btn{padding:6px 11px;font-size:.76rem}
+        }
+
+        /* RESPONSIVE FIX — petit mobile 480px */
+        @media (max-width:480px){
+            /* RESPONSIVE FIX — ticker ralenti sur très petit écran */
+            .ticker-inner{animation-duration:60s}
+            .art-title{font-size:1.75rem}
+            .art-body{font-size:1.05rem}
+            /* RESPONSIVE FIX — lettrine plus petite sur mobile */
+            .art-body>p:first-of-type::first-letter{font-size:3rem;line-height:.9}
+            .nl-title{font-size:1.7rem}
+            /* RESPONSIVE FIX — padding container réduit */
+            .container{padding:0 16px}
+            #back-top{bottom:70px;right:14px}
+            .bio-photo{width:110px;height:140px}
+        }
+
+        /* RESPONSIVE FIX — très petit mobile 400px : drawer 85% largeur */
+        @media (max-width:400px){
+            .nav-cats{width:85%;max-width:unset}
+            .related-grid{grid-template-columns:1fr}
+            .footer-grid{grid-template-columns:1fr}
+        }
     </style>
 </head>
 <body>
