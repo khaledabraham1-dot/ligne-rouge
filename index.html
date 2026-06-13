@@ -33,17 +33,48 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
 
+    <!-- Schema.org : Organisation + WebSite (Google rich results) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "NewsMediaOrganization",
-      "name": "Ligne Rouge",
-      "description": "Plateforme d'information indépendante en Afrique francophone.",
-      "editor": {
-        "@type": "Person",
-        "name": "Alassane Ibrahima",
-        "jobTitle": "Rédacteur en chef"
-      }
+      "@graph": [
+        {
+          "@type": "NewsMediaOrganization",
+          "@id": "https://khaledabraham1-dot.github.io/ligne-rouge/#organization",
+          "name": "Ligne Rouge",
+          "url": "https://khaledabraham1-dot.github.io/ligne-rouge/",
+          "description": "Média d'information indépendant. Actualité, Politique, Sport, Société, International, Culture en Afrique francophone.",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://khaledabraham1-dot.github.io/ligne-rouge/icon-512.png",
+            "width": 512,
+            "height": 512
+          },
+          "foundingDate": "2025",
+          "founder": { "@type": "Person", "name": "Alassane Ibrahima" },
+          "editor": {
+            "@type": "Person",
+            "name": "Alassane Ibrahima",
+            "jobTitle": "Rédacteur en chef"
+          },
+          "inLanguage": "fr",
+          "areaServed": "Afrique francophone",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+229-01-96-67-01-04",
+            "contactType": "editorial"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://khaledabraham1-dot.github.io/ligne-rouge/#website",
+          "url": "https://khaledabraham1-dot.github.io/ligne-rouge/",
+          "name": "Ligne Rouge",
+          "description": "Média d'information indépendant en Afrique francophone.",
+          "inLanguage": "fr",
+          "publisher": { "@id": "https://khaledabraham1-dot.github.io/ligne-rouge/#organization" }
+        }
+      ]
     }
     </script>
 
@@ -1302,8 +1333,9 @@
                 const navBtn = [...document.querySelectorAll('.nav-cat')].find(b => b.textContent.trim() === text);
                 setNavActive(navBtn || null);
             }
-            // Reset metas SEO vers la page d'accueil
+            // Reset metas SEO + schema article vers la page d'accueil
             updateSEOMeta('', '', '');
+            removeArticleSchema();
             // Reset any stuck transition, then force-navigate to home
             UI._transitioning = false;
             const current = document.querySelector('.page.active');
@@ -1322,6 +1354,43 @@
                 window.scrollTo(0, 0);
                 renderHome(cat);
             }
+        }
+
+        function updateArticleSchema(art) {
+            removeArticleSchema();
+            const words = art.body ? art.body.trim().split(/\s+/).length : 0;
+            const imgUrl = art.img && art.img.startsWith('http') ? art.img : 'https://khaledabraham1-dot.github.io/ligne-rouge/icon-512.png';
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "NewsArticle",
+                "headline": art.title,
+                "description": art.subtitle || art.title,
+                "image": [{ "@type": "ImageObject", "url": imgUrl, "width": 1200, "height": 630 }],
+                "datePublished": art.date || new Date().toISOString().split('T')[0],
+                "dateModified": art.date || new Date().toISOString().split('T')[0],
+                "author": [{ "@type": "Person", "name": "Alassane Ibrahima", "url": "https://khaledabraham1-dot.github.io/ligne-rouge/" }],
+                "publisher": {
+                    "@type": "NewsMediaOrganization",
+                    "@id": "https://khaledabraham1-dot.github.io/ligne-rouge/#organization",
+                    "name": "Ligne Rouge",
+                    "logo": { "@type": "ImageObject", "url": "https://khaledabraham1-dot.github.io/ligne-rouge/icon-512.png", "width": 512, "height": 512 }
+                },
+                "mainEntityOfPage": { "@type": "WebPage", "@id": "https://khaledabraham1-dot.github.io/ligne-rouge/" },
+                "articleSection": art.cat || '',
+                "inLanguage": "fr",
+                "wordCount": words,
+                "isPartOf": { "@id": "https://khaledabraham1-dot.github.io/ligne-rouge/#website" }
+            };
+            const el = document.createElement('script');
+            el.type = 'application/ld+json';
+            el.id = 'article-schema';
+            el.textContent = JSON.stringify(schema);
+            document.head.appendChild(el);
+        }
+
+        function removeArticleSchema() {
+            const el = document.getElementById('article-schema');
+            if (el) el.remove();
         }
 
         function updateSEOMeta(title, description, image) {
@@ -1343,8 +1412,9 @@
             const art = articles.find(a => String(a.id) === String(id));
             if (!art) return;
 
-            // Mettre à jour les metas SEO pour cet article
+            // Mettre à jour les metas SEO + données structurées pour cet article
             updateSEOMeta(art.title, art.subtitle || art.title, art.img || '');
+            updateArticleSchema(art);
 
             // Incrémenter les vues (fire-and-forget)
             _sb.rpc('increment_views', {article_id: art.id}).then(()=>{},()=>{});
