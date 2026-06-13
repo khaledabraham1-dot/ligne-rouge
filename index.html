@@ -1511,8 +1511,7 @@
                         <div class="pl-meta">
                             <span>${Sec.esc(a.cat)}</span>
                             <span>·</span>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            <span>${(a.views || 0).toLocaleString('fr-FR')} vues</span>
+                            <span>${calcReadTime(a.body)}</span>
                         </div>
                     </div>
                     <img src="${Sec.imgUrl(a.img)}" alt="${Sec.esc(a.title)}" class="pl-img" loading="lazy">
