@@ -533,44 +533,6 @@ const Sec = {
     pwdOk: p => { const v=Sec.pwdPolicy(p); return v.len&&v.upper&&v.digit&&v.special; }
 };
 
-// ---- ACCÈS DIRECT (protégé par login/password ci-dessous) ----
-
-// ---- SESSION MANAGEMENT (15min inactivité, 1h absolue) ----
-const SESSION = {
-    INACTIVITY: 15 * 60 * 1000,
-    MAX: 60 * 60 * 1000,
-    KEY: 'lr_session',
-    _timer: null,
-
-    create(username) {
-        const s = { id: Sec.token(), csrf: Sec.token(), user: username, created: Date.now(), active: Date.now() };
-        sessionStorage.setItem(this.KEY, JSON.stringify(s));
-        this._resetTimer();
-        return s;
-    },
-    get() {
-        try {
-            const s = JSON.parse(sessionStorage.getItem(this.KEY));
-            if (!s) return null;
-            const now = Date.now();
-            if (now - s.active > this.INACTIVITY || now - s.created > this.MAX) { this.destroy(); return null; }
-            s.active = now;
-            sessionStorage.setItem(this.KEY, JSON.stringify(s));
-            return s;
-        } catch(e) { return null; }
-    },
-    csrf() { const s = this.get(); return s ? s.csrf : null; },
-    verifyCsrf(token) { const s = this.get(); return s && s.csrf === token; },
-    touch() { this.get(); this._resetTimer(); },
-    destroy() {
-        sessionStorage.removeItem(this.KEY);
-        clearTimeout(this._timer);
-    },
-    _resetTimer() {
-        clearTimeout(this._timer);
-        this._timer = setTimeout(() => { Audit.log('AUTO_LOGOUT','Inactivité 15 min'); logout(); }, this.INACTIVITY);
-    }
-};
 
 // ---- BRUTE FORCE PROTECTION (5 tentatives / 10 min) ----
 const BF = {
@@ -601,9 +563,8 @@ const Audit = {
     KEY: 'lr_audit',
     log(action, detail='') {
         try {
-            const s = SESSION.get();
             const logs = JSON.parse(localStorage.getItem(this.KEY)||'[]');
-            logs.unshift({ action: Sec.txt(action,50), detail: Sec.txt(detail,200), ts: new Date().toISOString(), user: s?.user||'?' });
+            logs.unshift({ action: Sec.txt(action,50), detail: Sec.txt(detail,200), ts: new Date().toISOString(), user: _authUser?.email||'?' });
             localStorage.setItem(this.KEY, JSON.stringify(logs.slice(0,50)));
         } catch(e) {}
     },
