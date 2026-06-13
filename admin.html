@@ -1091,7 +1091,7 @@ async function saveSettings(btn) {
     document.getElementById('set-pass2').value = '';
     reset();
     if (error) { notif('Erreur : ' + Sec.esc(error.message), true); }
-    else { Audit.log('SETTINGS_UPDATE', 'Mot de passe modifié'); notif('Mot de passe mis à jour !'); }
+    else { Audit.log('SETTINGS_UPDATE', 'Mot de passe modifié'); notif('Mot de passe mis à jour ! Déconnexion...'); setTimeout(() => logout(), 1500); }
 }
 
 // Indicateur force mot de passe
