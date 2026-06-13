@@ -8,7 +8,7 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com blob:; connect-src https://pvvwmyrqreizlculgtom.supabase.co wss://pvvwmyrqreizlculgtom.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://images.unsplash.com https://pvvwmyrqreizlculgtom.supabase.co; connect-src https://pvvwmyrqreizlculgtom.supabase.co wss://pvvwmyrqreizlculgtom.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -948,11 +948,15 @@ function resetForm() {
 
 async function handleImg(input) {
     const file = input.files[0]; if (!file) return;
-    notif('Compression de l\'image…');
-    const b64 = await compressImg(file);
-    document.getElementById('img-prev').src = b64;
+    notif('Compression et envoi…');
+    const blob = await compressImgBlob(file);
+    const filename = Date.now() + '.jpg';
+    const { error } = await _sb.storage.from('article-images').upload(filename, blob, { contentType: 'image/jpeg', upsert: false });
+    if (error) { notif('Erreur upload : ' + error.message, true); return; }
+    const { data: { publicUrl } } = _sb.storage.from('article-images').getPublicUrl(filename);
+    document.getElementById('img-prev').src = publicUrl;
     document.getElementById('img-prev-wrap').style.display = 'block';
-    notif('Image chargée !');
+    notif('Image uploadée !');
 }
 
 function removeImg() {
@@ -961,7 +965,7 @@ function removeImg() {
     document.getElementById('img-input').value = '';
 }
 
-function compressImg(file, maxW = 1200, q = 0.78) {
+function compressImgBlob(file, maxW = 1200, q = 0.78) {
     return new Promise(resolve => {
         const reader = new FileReader();
         reader.onload = e => {
@@ -972,7 +976,7 @@ function compressImg(file, maxW = 1200, q = 0.78) {
                 const c = document.createElement('canvas');
                 c.width = w; c.height = h;
                 c.getContext('2d').drawImage(img, 0, 0, w, h);
-                resolve(c.toDataURL('image/jpeg', q));
+                c.toBlob(blob => resolve(blob), 'image/jpeg', q);
             };
             img.src = e.target.result;
         };
