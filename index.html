@@ -1035,8 +1035,10 @@
             return isNew(art) ? '<span class="badge-new">Nouveau</span>' : '';
         }
 
+        let _artsCache = null;
         async function getArticles() {
-            return await supabaseGetArticles();
+            if (!_artsCache) _artsCache = await supabaseGetArticles();
+            return _artsCache;
         }
 
         async function getComments(articleId) {
