@@ -434,6 +434,11 @@
 
         /* RESPONSIVE FIX — tablette portrait 768px */
         @media (max-width:768px){
+            /* Supprimer le blur du nav sur mobile — évite le flou de page et les bugs de pointer-events */
+            #nav{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(255,255,255,.98)!important}
+            body.dark #nav{background:rgba(31,41,55,.98)!important}
+            #nav.scrolled{background:#fff!important}
+            body.dark #nav.scrolled{background:#1F2937!important}
             .art-main-img-wrap{margin-left:0!important;width:100%!important}
             .art-main-img-wrap img{border-radius:var(--radius2)!important}
             /* Reset hover scale sur cartes (pas pertinent au toucher) */
@@ -570,15 +575,45 @@
             .hero-title{font-size:1.15rem}
             .hero-meta{flex-wrap:wrap;gap:6px}
             .share-bar{grid-template-columns:1fr}
-            /* Bio ultra compact */
             .bio-photo-col{padding:16px 14px;gap:10px}
             .bio-text-col{padding:12px 12px 18px}
             .bio-quote{font-size:.95rem}
             .bio-paragraph{font-size:.85rem}
-            /* Newsletter padding réduit */
             .newsletter-inner{padding:0 14px}
-            /* Sections titre plus compact */
             .section-title{font-size:1.05rem}
+        }
+
+        /* RESPONSIVE FIX — ultra petit écran ≤320px */
+        @media (max-width:320px){
+            html,body{overflow-x:hidden}
+            .container{padding:0 10px}
+            .nav-logo{font-size:1.2rem}
+            .dark-toggle{width:34px;height:34px;font-size:.95rem}
+            .nav-hamburger{padding:4px}
+            .hero-main img{height:240px}
+            .hero-title{font-size:1.05rem}
+            .hero-content{padding:12px}
+            .hero{padding:16px 0 20px}
+            .hero-side-item{padding:10px}
+            .side-img-wrap{width:72px;height:58px}
+            .trending{padding:24px 0}
+            .trend-img{height:160px}
+            .section-header{margin-bottom:16px}
+            .section-title{font-size:1rem}
+            .bio-photo-col{padding:12px 10px}
+            .bio-photo{width:80px;height:100px}
+            .bio-photo-name{font-size:1rem}
+            .bio-text-col{padding:10px 10px 14px}
+            .bio-quote{font-size:.88rem;padding-left:10px}
+            .bio-paragraph{font-size:.82rem}
+            .newsletter{padding:32px 0}
+            .nl-title{font-size:1.4rem}
+            .newsletter-inner{padding:0 10px}
+            .art-title{font-size:1.5rem}
+            .art-body{font-size:.95rem}
+            .share-btn{font-size:.72rem;padding:8px 6px}
+            .footer-col-title{font-size:.7rem}
+            footer{padding:40px 0 24px}
         }
     </style>
 </head>
@@ -605,7 +640,7 @@
                 <button class="nav-cat" onclick="filterCategory('Société',this)">Société</button>
                 <button class="nav-cat" onclick="filterCategory('International',this)">International</button>
                 <button class="nav-cat" onclick="filterCategory('Culture',this)">Culture</button>
-                <button class="nav-cat" data-page="page-about" onclick="setNavActive(this);UI.showPage('page-about')">À propos</button>
+                <button class="nav-cat" data-page="page-about" onclick="closeMobileMenu();setNavActive(this);UI.showPage('page-about')">À propos</button>
             </div>
             <div class="nav-actions">
                 <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" aria-label="Basculer mode sombre" title="Mode sombre">🌙</button>
@@ -1187,6 +1222,7 @@
             if (btn) { btn.classList.add('active'); btn.setAttribute('aria-current', 'page'); }
         }
         function filterCategory(cat, btn, label) {
+            closeMobileMenu();
             if (btn) {
                 setNavActive(btn);
             } else {
