@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentions légales — Ligne Rouge</title>
+    <meta name="description" content="Mentions légales du média Ligne Rouge — informations légales, éditeur, hébergeur et propriété intellectuelle.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://khaledabraham1-dot.github.io/ligne-rouge/mentions-legales.html">
+    <link rel="manifest" href="/ligne-rouge/manifest.json">
+    <meta name="theme-color" content="#0D1B2A">
+    <link rel="apple-touch-icon" sizes="180x180" href="/ligne-rouge/icon-180.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy: #0D1B2A;
+            --red:  #C01D35;
+            --bg:   #F2F1EE;
+            --white:#FFFFFF;
+            --text: #1A1A1A;
+            --text2:#4A4A4A;
+            --text3:#7A7A7A;
+            --border:#DEDBD4;
+            --font-h: 'Playfair Display', Georgia, serif;
+            --font-b: 'Source Sans 3', system-ui, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-b);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* NAV */
+        nav {
+            background: var(--navy);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-logo {
+            font-family: var(--font-h);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: -.01em;
+        }
+        .nav-logo span { color: var(--red); }
+        .nav-back {
+            font-size: .85rem;
+            color: rgba(255,255,255,.7);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color .15s;
+        }
+        .nav-back:hover { color: #fff; }
+
+        /* RED BAND */
+        .red-band { height: 3px; background: var(--red); }
+
+        /* HERO */
+        .page-hero {
+            background: var(--navy);
+            color: #fff;
+            padding: 56px 24px 48px;
+            text-align: center;
+        }
+        .page-hero-tag {
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--red);
+            margin-bottom: 16px;
+        }
+        .page-hero h1 {
+            font-family: var(--font-h);
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 12px;
+        }
+        .page-hero p {
+            font-size: .92rem;
+            color: rgba(255,255,255,.6);
+        }
+
+        /* CONTENT */
+        .container {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        main {
+            padding: 56px 0 80px;
+        }
+
+        .section {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 36px 40px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .section-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--red);
+            color: #fff;
+            font-size: .72rem;
+            font-weight: 700;
+            border-radius: 50%;
+            margin-bottom: 14px;
+        }
+
+        h2 {
+            font-family: var(--font-h);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        p { margin-bottom: 12px; color: var(--text2); font-size: .95rem; }
+        p:last-child { margin-bottom: 0; }
+
+        .info-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+            font-size: .95rem;
+            color: var(--text2);
+        }
+        .info-label {
+            font-weight: 600;
+            color: var(--text);
+            min-width: 160px;
+            flex-shrink: 0;
+        }
+
+        .badge-todo {
+            display: inline-block;
+            background: #FEF3C7;
+            color: #92400E;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            letter-spacing: .04em;
+        }
+
+        a { color: var(--red); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .last-updated {
+            text-align: center;
+            font-size: .8rem;
+            color: var(--text3);
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--navy);
+            color: rgba(255,255,255,.5);
+            text-align: center;
+            padding: 28px 24px;
+            font-size: .8rem;
+        }
+        footer a { color: rgba(255,255,255,.7); text-decoration: none; }
+        footer a:hover { color: #fff; }
+
+        @media (max-width: 600px) {
+            .section { padding: 24px 20px; }
+            .info-row { flex-direction: column; gap: 2px; }
+            .info-label { min-width: unset; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a class="nav-logo" href="/ligne-rouge/">LIGNE <span>ROUGE</span></a>
+        <a class="nav-back" href="/ligne-rouge/">← Retour au site</a>
+    </nav>
+    <div class="red-band"></div>
+
+    <div class="page-hero">
+        <div class="page-hero-tag">Transparence & Légalité</div>
+        <h1>Mentions légales</h1>
+        <p>Conformément aux dispositions légales en vigueur en République du Bénin</p>
+    </div>
+
+    <main>
+        <div class="container">
+
+            <!-- 1. Éditeur -->
+            <div class="section">
+                <div class="section-num">1</div>
+                <h2>Éditeur du site</h2>
+                <div class="info-row"><span class="info-label">Nom du site</span><span>Ligne Rouge</span></div>
+                <div class="info-row"><span class="info-label">Propriétaire</span><span>Alassane Ibrahima</span></div>
+                <div class="info-row"><span class="info-label">Statut</span><span>Personne physique — Journaliste indépendant</span></div>
+                <div class="info-row"><span class="info-label">Pays</span><span>République du Bénin</span></div>
+                <div class="info-row"><span class="info-label">Ville</span><span>Djougou, Bénin</span></div>
+                <div class="info-row"><span class="info-label">Téléphone</span><span>+229 01 96 67 01 04</span></div>
+                <div class="info-row"><span class="info-label">Email</span><span><a href="mailto:redaction@lignerougemedia.com">redaction@lignerougemedia.com</a> <span class="badge-todo">À activer après déploiement</span></span></div>
+            </div>
+
+            <!-- 2. Directeur de publication -->
+            <div class="section">
+                <div class="section-num">2</div>
+                <h2>Directeur de la publication</h2>
+                <div class="info-row"><span class="info-label">Nom</span><span>Alassane Ibrahima</span></div>
+                <div class="info-row"><span class="info-label">Qualité</span><span>Rédacteur en chef — Ligne Rouge</span></div>
+                <div class="info-row"><span class="info-label">Contact</span><span>+229 01 96 67 01 04</span></div>
+            </div>
+
+            <!-- 3. Hébergeur -->
+            <div class="section">
+                <div class="section-num">3</div>
+                <h2>Hébergeur</h2>
+                <div class="info-row"><span class="info-label">Société</span><span>GitHub Inc. (Microsoft Corporation)</span></div>
+                <div class="info-row"><span class="info-label">Service</span><span>GitHub Pages</span></div>
+                <div class="info-row"><span class="info-label">Adresse</span><span>88 Colin P Kelly Jr Street, San Francisco, CA 94107, États-Unis</span></div>
+                <div class="info-row"><span class="info-label">Site web</span><span><a href="https://pages.github.com" target="_blank" rel="noopener">pages.github.com</a></span></div>
+                <div class="info-row"><span class="info-label">URL du site</span><span><span class="badge-todo">À mettre à jour après déploiement domaine custom</span></span></div>
+            </div>
+
+            <!-- 4. Propriété intellectuelle -->
+            <div class="section">
+                <div class="section-num">4</div>
+                <h2>Propriété intellectuelle</h2>
+                <p>L'ensemble des contenus publiés sur le site <strong>Ligne Rouge</strong> — articles, textes, photographies, illustrations, logos, vidéos et tout autre élément — sont la propriété exclusive de Alassane Ibrahima ou font l'objet d'une autorisation d'utilisation accordée par leurs auteurs respectifs.</p>
+                <p>Toute reproduction, représentation, modification, publication, adaptation ou exploitation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est strictement interdite sans l'autorisation écrite préalable de l'éditeur.</p>
+                <p>Toute exploitation non autorisée du site ou de l'un quelconque des éléments qu'il contient est constitutive d'une contrefaçon et sera poursuivie conformément aux dispositions des textes en vigueur.</p>
+            </div>
+
+            <!-- 5. Données personnelles -->
+            <div class="section">
+                <div class="section-num">5</div>
+                <h2>Protection des données personnelles</h2>
+                <p>Dans le cadre de l'utilisation du site <strong>Ligne Rouge</strong>, des données personnelles peuvent être collectées (adresse email dans le cadre de l'abonnement à la newsletter, commentaires).</p>
+                <p>Conformément à la <strong>Loi n°2009-09 du 22 mai 2009</strong> portant protection des données à caractère personnel en République du Bénin, vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles.</p>
+                <p>Pour exercer ces droits ou pour toute question relative à la protection de vos données, vous pouvez contacter l'éditeur par téléphone au <strong>+229 01 96 67 01 04</strong>.</p>
+                <p>Les données collectées ne sont ni vendues, ni cédées, ni louées à des tiers.</p>
+            </div>
+
+            <!-- 6. Cookies -->
+            <div class="section">
+                <div class="section-num">6</div>
+                <h2>Cookies</h2>
+                <p>Le site <strong>Ligne Rouge</strong> utilise des cookies techniques strictement nécessaires au bon fonctionnement du site (préférences d'affichage, mode sombre). Ces cookies ne collectent aucune donnée personnelle à des fins publicitaires ou de traçage.</p>
+                <p>En continuant à naviguer sur ce site, vous acceptez l'utilisation de ces cookies techniques.</p>
+            </div>
+
+            <!-- 7. Responsabilité -->
+            <div class="section">
+                <div class="section-num">7</div>
+                <h2>Limitation de responsabilité</h2>
+                <p><strong>Ligne Rouge</strong> s'efforce d'assurer l'exactitude et la mise à jour des informations diffusées sur ce site. Toutefois, l'éditeur ne peut garantir l'exactitude, la complétude et l'actualité des informations diffusées.</p>
+                <p>L'éditeur décline toute responsabilité pour tout dommage direct ou indirect résultant de l'accès ou de l'utilisation du site, y compris l'inaccessibilité, les pertes de données ou tout préjudice lié à l'utilisation d'informations issues du site.</p>
+                <p>Le site peut contenir des liens hypertextes vers d'autres sites internet. Ces liens sont fournis à titre informatif uniquement. <strong>Ligne Rouge</strong> n'est pas responsable du contenu de ces sites externes.</p>
+            </div>
+
+            <!-- 8. Droit applicable -->
+            <div class="section">
+                <div class="section-num">8</div>
+                <h2>Droit applicable et juridiction</h2>
+                <p>Les présentes mentions légales sont régies par le droit béninois. En cas de litige relatif à l'interprétation ou à l'exécution des présentes, et à défaut de résolution amiable, les tribunaux compétents de la République du Bénin seront seuls compétents.</p>
+            </div>
+
+            <p class="last-updated">Dernière mise à jour : juin 2026</p>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 Ligne Rouge · Tous droits réservés ·
+            <a href="/ligne-rouge/mentions-legales.html">Mentions légales</a>
+        </p>
+    </footer>
+
+</body>
+</html>
