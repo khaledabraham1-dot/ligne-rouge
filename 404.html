@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Page introuvable · Ligne Rouge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --red: #c0392b;
+            --bg: #ffffff;
+            --text1: #0a0a0a;
+            --text2: #444;
+            --text3: #888;
+            --border: #e8e8e8;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f0f;
+                --text1: #f5f5f5;
+                --text2: #bbb;
+                --text3: #666;
+                --border: #222;
+            }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text1);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .band {
+            width: 48px;
+            height: 4px;
+            background: var(--red);
+            margin: 0 auto 2.5rem;
+            border-radius: 2px;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--text1);
+            margin-bottom: 3rem;
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--red); }
+
+        .code {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(6rem, 20vw, 10rem);
+            font-weight: 700;
+            line-height: 1;
+            color: var(--red);
+            letter-spacing: -.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text1);
+        }
+
+        p {
+            font-size: 1rem;
+            color: var(--text2);
+            line-height: 1.7;
+            max-width: 420px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .6rem;
+            background: var(--red);
+            color: #fff;
+            text-decoration: none;
+            padding: .85rem 2rem;
+            border-radius: 4px;
+            font-size: .92rem;
+            font-weight: 600;
+            letter-spacing: .03em;
+            transition: opacity .2s, transform .2s;
+        }
+
+        .btn:hover { opacity: .88; transform: translateY(-2px); }
+
+        footer {
+            position: absolute;
+            bottom: 2rem;
+            font-size: .75rem;
+            color: var(--text3);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <a class="logo" href="/ligne-rouge/">LIGNE <span>ROUGE</span></a>
+    <div class="band"></div>
+    <div class="code">404</div>
+    <h1>Page introuvable</h1>
+    <p>La page que vous recherchez n'existe pas ou a été déplacée. Retournez à l'accueil pour continuer votre lecture.</p>
+    <a class="btn" href="/ligne-rouge/">← Retour à l'accueil</a>
+    <footer>© 2026 Ligne Rouge · Tous droits réservés</footer>
+</body>
+</html>
