@@ -1147,6 +1147,11 @@
         function newBadge(art) {
             return isNew(art) ? '<span class="badge-new">Nouveau</span>' : '';
         }
+        function calcReadTime(body) {
+            const words = body ? body.trim().split(/\s+/).length : 0;
+            const mins = Math.max(1, Math.ceil(words / 200));
+            return `${mins} min de lecture`;
+        }
 
         let _artsCache = null;
         async function getArticles() {
@@ -1368,7 +1373,7 @@
                     <div class="art-meta-top">
                         <div class="art-author">
                             <img src="Capture d'écran 2026-05-15 220637.png" alt="Alassane Ibrahima" class="author-img" width="44" height="44" loading="lazy">
-                            <div><div class="author-name">Alassane Ibrahima</div><div class="author-date">${art.date} · ${art.read_time}</div></div>
+                            <div><div class="author-name">Alassane Ibrahima</div><div class="author-date">${art.date} · ${calcReadTime(art.body)}</div></div>
                         </div>
                         <button onclick="showPage('page-home')" style="font-size:.8rem;color:var(--text3);border:1px solid var(--border);padding:6px 14px;border-radius:20px;cursor:pointer;">← Retour</button>
                     </div>
@@ -1445,7 +1450,7 @@
                             <span class="hero-cat-badge">${Sec.esc(main.cat)}</span>
                             <h2 class="hero-title">${Sec.esc(main.title)}</h2>
                             <p class="hero-sub">${Sec.esc(main.subtitle || '')}</p>
-                            <div class="hero-meta">${Sec.esc(main.date)}</div>
+                            <div class="hero-meta">${Sec.esc(main.date)} · <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;opacity:.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${calcReadTime(main.body)}</div>
                         </div>
                     </div>
                     <div class="hero-sidebar">${side.map(a => `
@@ -1463,7 +1468,7 @@
                     <div class="trend-img-wrap"><img src="${Sec.imgUrl(a.img)}" alt="${Sec.esc(a.title)}" class="trend-img" width="300" height="190" loading="lazy"></div>
                     <div class="trend-num">#${i + 1}</div>
                     <h3 class="trend-title">${Sec.esc(a.title)}${newBadge(a)}</h3>
-                    <div class="trend-meta">${Sec.esc(a.date)}</div>
+                    <div class="trend-meta">${Sec.esc(a.date)} · ${calcReadTime(a.body)}</div>
                 </div>
             `).join('');
             document.getElementById('ticker-inner').innerHTML = articles.map(a =>
