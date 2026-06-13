@@ -934,8 +934,16 @@
                 const navBtn = [...document.querySelectorAll('.nav-cat')].find(b => b.textContent.trim() === text);
                 setNavActive(navBtn || null);
             }
-            UI.showPage('page-home');
-            renderHome(cat);
+            const current = document.querySelector('.page.active');
+            if (current && current.id === 'page-home') {
+                // Déjà sur l'accueil : filtre + remonte sans transition
+                renderHome(cat);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                // Vient d'une autre page : transition puis filtre
+                UI.showPage('page-home');
+                renderHome(cat);
+            }
         }
 
         function openArticle(id) {
