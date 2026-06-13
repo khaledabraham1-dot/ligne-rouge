@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Politique de confidentialité — Ligne Rouge</title>
+    <meta name="description" content="Politique de confidentialité de Ligne Rouge — comment vos données personnelles sont collectées, utilisées et protégées.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://khaledabraham1-dot.github.io/ligne-rouge/politique-confidentialite.html">
+    <link rel="manifest" href="/ligne-rouge/manifest.json">
+    <meta name="theme-color" content="#0D1B2A">
+    <link rel="apple-touch-icon" sizes="180x180" href="/ligne-rouge/icon-180.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy: #0D1B2A;
+            --red:  #C01D35;
+            --bg:   #F2F1EE;
+            --white:#FFFFFF;
+            --text: #1A1A1A;
+            --text2:#4A4A4A;
+            --text3:#7A7A7A;
+            --border:#DEDBD4;
+            --font-h: 'Playfair Display', Georgia, serif;
+            --font-b: 'Source Sans 3', system-ui, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-b);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        nav {
+            background: var(--navy);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-logo { font-family: var(--font-h); font-size: 1.4rem; font-weight: 800; color: #fff; text-decoration: none; }
+        .nav-logo span { color: var(--red); }
+        .nav-back { font-size: .85rem; color: rgba(255,255,255,.7); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color .15s; }
+        .nav-back:hover { color: #fff; }
+
+        .red-band { height: 3px; background: var(--red); }
+
+        .page-hero {
+            background: var(--navy);
+            color: #fff;
+            padding: 56px 24px 48px;
+            text-align: center;
+        }
+        .page-hero-tag { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin-bottom: 16px; }
+        .page-hero h1 { font-family: var(--font-h); font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.15; margin-bottom: 12px; }
+        .page-hero p { font-size: .92rem; color: rgba(255,255,255,.6); }
+
+        .container { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+        main { padding: 56px 0 80px; }
+
+        .section { background: var(--white); border-radius: 8px; padding: 36px 40px; margin-bottom: 24px; border: 1px solid var(--border); }
+        .section-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--red); color: #fff; font-size: .72rem; font-weight: 700; border-radius: 50%; margin-bottom: 14px; }
+
+        h2 { font-family: var(--font-h); font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+        h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 8px; }
+
+        p { margin-bottom: 12px; color: var(--text2); font-size: .95rem; }
+        p:last-child { margin-bottom: 0; }
+
+        ul { margin: 8px 0 14px 20px; color: var(--text2); font-size: .95rem; }
+        ul li { margin-bottom: 6px; }
+
+        .data-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: .88rem; }
+        .data-table th { background: var(--bg); color: var(--navy); font-weight: 700; text-align: left; padding: 10px 14px; border: 1px solid var(--border); }
+        .data-table td { padding: 10px 14px; border: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+        .data-table tr:nth-child(even) td { background: #FAFAF9; }
+
+        .highlight-box { background: #F0F9FF; border-left: 3px solid #0EA5E9; padding: 16px 20px; border-radius: 0 6px 6px 0; margin: 16px 0; }
+        .highlight-box p { color: #0C4A6E; margin: 0; font-size: .9rem; }
+
+        .rights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+        .right-item { background: var(--bg); border-radius: 6px; padding: 14px 16px; border: 1px solid var(--border); }
+        .right-item-title { font-weight: 700; color: var(--navy); font-size: .88rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .right-item-title::before { content: '✓'; color: var(--red); font-weight: 900; }
+        .right-item p { font-size: .82rem; margin: 0; }
+
+        .badge-todo { display: inline-block; background: #FEF3C7; color: #92400E; font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+
+        a { color: var(--red); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .last-updated { text-align: center; font-size: .8rem; color: var(--text3); margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); }
+
+        footer { background: var(--navy); color: rgba(255,255,255,.5); text-align: center; padding: 28px 24px; font-size: .8rem; }
+        footer a { color: rgba(255,255,255,.7); text-decoration: none; }
+        footer a:hover { color: #fff; }
+
+        @media (max-width: 600px) {
+            .section { padding: 24px 20px; }
+            .rights-grid { grid-template-columns: 1fr; }
+            .data-table { font-size: .8rem; }
+            .data-table th, .data-table td { padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a class="nav-logo" href="/ligne-rouge/">LIGNE <span>ROUGE</span></a>
+        <a class="nav-back" href="/ligne-rouge/">← Retour au site</a>
+    </nav>
+    <div class="red-band"></div>
+
+    <div class="page-hero">
+        <div class="page-hero-tag">Transparence & Protection</div>
+        <h1>Politique de confidentialité</h1>
+        <p>Comment nous collectons, utilisons et protégeons vos données personnelles</p>
+    </div>
+
+    <main>
+        <div class="container">
+
+            <!-- Intro -->
+            <div class="section">
+                <p>La présente politique de confidentialité décrit la manière dont <strong>Ligne Rouge</strong>, média d'information indépendant édité par <strong>Alassane Ibrahima</strong>, collecte, utilise et protège les données personnelles des utilisateurs de son site internet.</p>
+                <p>Elle est conforme à la <strong>Loi n°2009-09 du 22 mai 2009</strong> portant protection des données à caractère personnel en République du Bénin, ainsi qu'aux principes du <strong>Règlement Général sur la Protection des Données (RGPD)</strong> applicable aux résidents de l'Union Européenne.</p>
+                <div class="highlight-box">
+                    <p>Nous ne vendons, ne louons et ne cédons jamais vos données personnelles à des tiers à des fins commerciales.</p>
+                </div>
+            </div>
+
+            <!-- 1. Responsable du traitement -->
+            <div class="section">
+                <div class="section-num">1</div>
+                <h2>Responsable du traitement des données</h2>
+                <p><strong>Alassane Ibrahima</strong><br>
+                Rédacteur en chef — Ligne Rouge<br>
+                Djougou, République du Bénin<br>
+                Téléphone : +229 01 96 67 01 04<br>
+                Email : <a href="mailto:redaction@lignerougemedia.com">redaction@lignerougemedia.com</a> <span class="badge-todo">À activer après déploiement</span></p>
+            </div>
+
+            <!-- 2. Données collectées -->
+            <div class="section">
+                <div class="section-num">2</div>
+                <h2>Données collectées</h2>
+                <p>Ligne Rouge collecte uniquement les données strictement nécessaires au fonctionnement des services proposés :</p>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Données collectées</th>
+                            <th>Caractère</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Newsletter</strong></td>
+                            <td>Adresse email</td>
+                            <td>Volontaire</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Commentaires</strong></td>
+                            <td>Nom affiché, adresse email, contenu du commentaire</td>
+                            <td>Volontaire</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Navigation</strong></td>
+                            <td>Données techniques (adresse IP, navigateur, pages visitées) via hébergeur</td>
+                            <td>Automatique</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Préférences</strong></td>
+                            <td>Mode sombre (stocké localement sur votre appareil)</td>
+                            <td>Automatique</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>Nous ne collectons pas de données sensibles (origine ethnique, opinions politiques, données de santé, etc.).</p>
+            </div>
+
+            <!-- 3. Finalités -->
+            <div class="section">
+                <div class="section-num">3</div>
+                <h2>Finalités du traitement</h2>
+                <p>Vos données sont utilisées exclusivement pour les finalités suivantes :</p>
+                <ul>
+                    <li><strong>Newsletter</strong> : envoi de la lettre d'information Ligne Rouge (actualités sélectionnées par la rédaction)</li>
+                    <li><strong>Commentaires</strong> : publication et modération des commentaires sous les articles</li>
+                    <li><strong>Amélioration du service</strong> : analyse statistique anonyme de la fréquentation du site</li>
+                    <li><strong>Sécurité</strong> : protection contre les abus et tentatives d'intrusion</li>
+                </ul>
+            </div>
+
+            <!-- 4. Durée de conservation -->
+            <div class="section">
+                <div class="section-num">4</div>
+                <h2>Durée de conservation des données</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Données</th>
+                            <th>Durée de conservation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Adresse email (newsletter)</td>
+                            <td>Jusqu'au désabonnement ou demande de suppression</td>
+                        </tr>
+                        <tr>
+                            <td>Commentaires</td>
+                            <td>Durée de vie de l'article + 3 ans</td>
+                        </tr>
+                        <tr>
+                            <td>Logs de navigation</td>
+                            <td>13 mois maximum (politique GitHub Pages)</td>
+                        </tr>
+                        <tr>
+                            <td>Préférences locales</td>
+                            <td>Stockées sur votre appareil, supprimables à tout moment</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 5. Vos droits -->
+            <div class="section">
+                <div class="section-num">5</div>
+                <h2>Vos droits</h2>
+                <p>Conformément à la loi béninoise n°2009-09 et au RGPD, vous disposez des droits suivants sur vos données personnelles :</p>
+                <div class="rights-grid">
+                    <div class="right-item">
+                        <div class="right-item-title">Droit d'accès</div>
+                        <p>Obtenir une copie de vos données personnelles détenues par Ligne Rouge.</p>
+                    </div>
+                    <div class="right-item">
+                        <div class="right-item-title">Droit de rectification</div>
+                        <p>Corriger vos données inexactes ou incomplètes.</p>
+                    </div>
+                    <div class="right-item">
+                        <div class="right-item-title">Droit à l'effacement</div>
+                        <p>Demander la suppression de vos données personnelles.</p>
+                    </div>
+                    <div class="right-item">
+                        <div class="right-item-title">Droit d'opposition</div>
+                        <p>Vous opposer au traitement de vos données à tout moment.</p>
+                    </div>
+                    <div class="right-item">
+                        <div class="right-item-title">Désabonnement</div>
+                        <p>Vous désabonner de la newsletter à tout moment.</p>
+                    </div>
+                    <div class="right-item">
+                        <div class="right-item-title">Portabilité</div>
+                        <p>Recevoir vos données dans un format structuré et lisible.</p>
+                    </div>
+                </div>
+                <p style="margin-top:20px;">Pour exercer ces droits, contactez-nous au <strong>+229 01 96 67 01 04</strong>. Nous répondons dans un délai maximum de <strong>30 jours</strong>.</p>
+            </div>
+
+            <!-- 6. Cookies -->
+            <div class="section">
+                <div class="section-num">6</div>
+                <h2>Cookies et stockage local</h2>
+                <h3>Cookies techniques (nécessaires)</h3>
+                <p>Le site utilise uniquement le stockage local (<em>localStorage</em>) de votre navigateur pour mémoriser votre préférence d'affichage (mode clair / mode sombre). Aucun cookie publicitaire ou de traçage n'est déposé.</p>
+                <h3>Cookies tiers</h3>
+                <p>Le site utilise les polices Google Fonts (chargées depuis les serveurs Google). Google peut collecter des données techniques lors de ce chargement. Consultez la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">politique de confidentialité de Google</a> pour plus d'informations.</p>
+                <h3>Supprimer les données locales</h3>
+                <p>Vous pouvez supprimer à tout moment les données stockées sur votre appareil via les paramètres de votre navigateur (Paramètres → Confidentialité → Effacer les données de navigation).</p>
+            </div>
+
+            <!-- 7. Transferts internationaux -->
+            <div class="section">
+                <div class="section-num">7</div>
+                <h2>Transferts de données hors Bénin</h2>
+                <p>Le site <strong>Ligne Rouge</strong> est hébergé sur <strong>GitHub Pages</strong> (GitHub Inc., San Francisco, États-Unis). Vos données de navigation transitent donc par des serveurs situés aux États-Unis.</p>
+                <p>GitHub Inc. est certifié conforme au cadre de transfert de données UE-États-Unis et dispose de garanties contractuelles appropriées pour assurer la protection de vos données.</p>
+                <p>Les données de la newsletter et des commentaires sont stockées sur <strong>Supabase</strong> (serveurs UE disponibles). Pour plus d'informations : <a href="https://supabase.com/privacy" target="_blank" rel="noopener">politique de confidentialité Supabase</a>.</p>
+            </div>
+
+            <!-- 8. Sécurité -->
+            <div class="section">
+                <div class="section-num">8</div>
+                <h2>Sécurité des données</h2>
+                <p>Ligne Rouge met en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données :</p>
+                <ul>
+                    <li>Connexion sécurisée HTTPS sur l'ensemble du site</li>
+                    <li>Protection contre les injections XSS et CSRF</li>
+                    <li>Politique de sécurité du contenu (CSP) stricte</li>
+                    <li>Accès à l'administration protégé par authentification</li>
+                    <li>Mots de passe hashés (SHA-256)</li>
+                    <li>Limitation du nombre de tentatives de connexion (anti-brute force)</li>
+                </ul>
+                <p>En cas de violation de données susceptible d'affecter vos droits, vous serez notifié dans les délais prévus par la loi.</p>
+            </div>
+
+            <!-- 9. Modifications -->
+            <div class="section">
+                <div class="section-num">9</div>
+                <h2>Modifications de cette politique</h2>
+                <p>Ligne Rouge se réserve le droit de modifier la présente politique de confidentialité à tout moment, notamment pour se conformer aux évolutions législatives et réglementaires.</p>
+                <p>Les modifications entrent en vigueur dès leur publication sur cette page. La date de mise à jour indiquée en bas de page vous permet de suivre les évolutions.</p>
+                <p>En continuant à utiliser le site après toute modification, vous acceptez la politique de confidentialité mise à jour.</p>
+            </div>
+
+            <!-- 10. Contact -->
+            <div class="section">
+                <div class="section-num">10</div>
+                <h2>Contact & Réclamations</h2>
+                <p>Pour toute question relative à vos données personnelles ou pour exercer vos droits :</p>
+                <p>
+                    <strong>Alassane Ibrahima — Ligne Rouge</strong><br>
+                    Djougou, République du Bénin<br>
+                    Téléphone : <a href="tel:+22901966701 04">+229 01 96 67 01 04</a><br>
+                    Email : <a href="mailto:redaction@lignerougemedia.com">redaction@lignerougemedia.com</a> <span class="badge-todo">À activer après déploiement</span>
+                </p>
+                <p style="margin-top:16px;">Si vous estimez que vos droits ne sont pas respectés, vous pouvez introduire une réclamation auprès de l'autorité de protection des données compétente en République du Bénin.</p>
+            </div>
+
+            <p class="last-updated">Dernière mise à jour : juin 2026</p>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 Ligne Rouge · Tous droits réservés ·
+            <a href="/ligne-rouge/mentions-legales.html">Mentions légales</a> ·
+            <a href="/ligne-rouge/politique-confidentialite.html">Politique de confidentialité</a>
+        </p>
+    </footer>
+
+</body>
+</html>
