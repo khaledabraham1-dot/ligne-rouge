@@ -362,6 +362,10 @@
         .nav-hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
         .nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
+        /* SIGNATURE — bande rouge sous le header */
+        #red-band{position:sticky;top:var(--nav-h);width:100%;height:3px;background:var(--red);z-index:199;transform-origin:left center;animation:redBandSlide .4s ease-out both;pointer-events:none;flex-shrink:0}
+        @keyframes redBandSlide{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
         /* =============================================
            RESPONSIVE FIXES
         ============================================= */
@@ -514,6 +518,7 @@
             </div>
         </div>
     </nav>
+    <div id="red-band" aria-hidden="true"></div>
 
     <div id="mobile-backdrop" onclick="closeMobileMenu()" aria-hidden="true"></div>
 

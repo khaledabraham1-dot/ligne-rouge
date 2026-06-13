@@ -46,7 +46,12 @@
 
         /* MAIN */
         #main-wrapper{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-        #topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+        #topbar{height:var(--topbar-h);background:var(--white);border-bottom:none;display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+        /* SIGNATURE — bande rouge sous topbar admin + indicateur section */
+        #admin-red-band{height:3px;background:var(--red);flex-shrink:0;transform-origin:left center;animation:redBandSlide .4s ease-out both}
+        #admin-red-band.sweep{animation:none}
+        #admin-red-band.sweep-active{animation:redBandSlide .35s ease-out both}
+        @keyframes redBandSlide{from{transform:scaleX(0)}to{transform:scaleX(1)}}
         #topbar-title{font-family:var(--font-h);font-size:1.05rem;font-weight:700;color:var(--navy)}
         .topbar-user{font-size:.8rem;font-weight:600;color:var(--text3);background:var(--bg);padding:5px 12px;border-radius:20px}
         #content{flex:1;overflow-y:auto;padding:28px;background:var(--bg)}
@@ -260,6 +265,7 @@
             <span id="topbar-title">Tableau de bord</span>
             <span class="topbar-user" id="topbar-user">admin</span>
         </header>
+        <div id="admin-red-band" aria-hidden="true"></div>
         <main id="content">
 
             <!-- DASHBOARD -->
@@ -678,7 +684,10 @@ function closeSidebar() {
 // ---- NAV ----
 function nav(sec) {
     if (!_checkSession() && sec !== 'dashboard') return;
-    closeSidebar(); // RESPONSIVE FIX — ferme le drawer sur mobile après navigation
+    closeSidebar();
+    // SIGNATURE — sweep de la bande rouge sur changement de section
+    const band = document.getElementById('admin-red-band');
+    if (band) { band.className = 'sweep'; void band.offsetWidth; band.className = 'sweep-active'; }
     document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
     document.getElementById('sec-' + sec).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
