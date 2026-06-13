@@ -405,7 +405,7 @@
         #read-progress.visible{opacity:1}
 
         /* MOBILE DRAWER BACKDROP */
-        #mobile-backdrop{position:fixed;inset:0;background:rgba(13,27,42,.55);backdrop-filter:blur(2px);z-index:350;opacity:0;pointer-events:none;transition:opacity .3s}
+        #mobile-backdrop{position:fixed;inset:0;background:rgba(13,27,42,.55);z-index:350;opacity:0;pointer-events:none;transition:opacity .3s}
         #mobile-backdrop.open{opacity:1;pointer-events:all}
 
         /* HAMBURGER → X */
@@ -485,18 +485,27 @@
             .nav-cat:hover{background:var(--bg)}
         }
 
-        /* RESPONSIVE FIX — mobile 640px : hero image réduite, hero content */
+        /* RESPONSIVE FIX — mobile 640px : hero, bio section */
         @media (max-width:640px){
-            /* RESPONSIVE FIX — hauteur hero image 320px sur mobile */
             .hero-main img{height:320px}
             .hero-content{padding:16px}
-            /* RESPONSIVE FIX — titre hero plus petit sur mobile */
             .hero-title{font-size:1.3rem}
             .hero-sub{font-size:.8rem}
             .hero{padding:24px 0 28px}
             .art-title{font-size:2rem}
-            .about-section{padding:48px 0}
-            .newsletter{padding:56px 0}
+            .about-section{padding:40px 0}
+            .newsletter{padding:48px 0}
+            /* Bio/Rédacteur — colonne sur téléphone */
+            .bio-photo-col{flex-direction:column;text-align:center;gap:12px;padding:28px 20px}
+            .bio-photo{width:120px;height:150px}
+            .bio-photo-name{font-size:1.1rem}
+            .bio-photo-role{margin-bottom:12px}
+            .bio-text-col{padding:20px 20px 24px}
+            .bio-quote{font-size:1.1rem;padding-left:14px;margin-bottom:20px}
+            .bio-paragraph{font-size:.92rem;margin-bottom:16px}
+            .bio-section-label{margin-bottom:8px}
+            .bio-timeline-item{gap:12px}
+            .bio-event{font-size:.85rem}
         }
 
         /* RESPONSIVE FIX — mobile 550px : trending 1col, footer newsletter colonne */
@@ -520,39 +529,56 @@
 
         /* RESPONSIVE FIX — petit mobile 480px */
         @media (max-width:480px){
-            /* RESPONSIVE FIX — ticker ralenti sur très petit écran */
             .ticker-inner{animation-duration:60s}
             .art-title{font-size:1.75rem}
             .art-body{font-size:1.05rem}
-            /* RESPONSIVE FIX — lettrine plus petite sur mobile */
             .art-body>p:first-of-type::first-letter{font-size:3rem;line-height:.9}
             .nl-title{font-size:1.7rem}
-            /* RESPONSIVE FIX — padding container réduit */
-            .container{padding:0 16px}
+            .container{padding:0 14px}
             #back-top{bottom:70px;right:14px}
-            .bio-photo{width:110px;height:140px}
-            /* RESPONSIVE FIX — meta article en colonne sur très petit mobile */
+            /* Nav — icône de recherche seulement, plus de texte */
+            .nav-search-btn span{display:none}
+            .nav-search-btn{padding:7px 10px}
+            /* Bio section — plus compact */
+            .bio-photo{width:100px;height:128px}
+            .bio-text-col{padding:14px 14px 20px}
+            .bio-quote{font-size:1rem;padding-left:12px;margin-bottom:16px}
+            .bio-paragraph{font-size:.88rem;margin-bottom:14px}
+            .bio-value-title{font-size:.8rem}
+            .bio-value-text{font-size:.75rem}
+            .bio-photo-col{padding:20px 16px}
+            /* Article meta en colonne */
             .art-meta-top{flex-direction:column;align-items:flex-start;gap:12px}
-            /* RESPONSIVE FIX — share buttons en grille 2 colonnes */
+            /* Share buttons grille 2 colonnes */
             .share-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px}
             .share-label{grid-column:1/-1;margin:0 0 2px}
             .share-btn{min-width:unset;width:100%;justify-content:center;min-height:44px;padding:9px 8px;font-size:.79rem}
-            /* RESPONSIVE FIX — articles liés 1 colonne */
+            /* Articles liés 1 colonne */
             .related-grid{grid-template-columns:1fr}
-            /* RESPONSIVE FIX — image article pleine largeur sans overflow */
+            /* Image article pleine largeur */
             .art-main-img-wrap{margin-left:0!important;width:100%!important}
+            /* Footer bottom aligné */
+            .footer-bottom{flex-direction:column;gap:8px;text-align:center}
         }
 
-        /* RESPONSIVE FIX — très petit mobile 400px : drawer 85% largeur */
+        /* RESPONSIVE FIX — très petit mobile 400px */
         @media (max-width:400px){
             .nav-cats{width:85%;max-width:unset}
+            .nav-logo{font-size:1.35rem}
             .related-grid{grid-template-columns:1fr}
             .footer-grid{grid-template-columns:1fr}
-            /* Hero text plus compact sur très petit écran */
             .hero-title{font-size:1.15rem}
             .hero-meta{flex-wrap:wrap;gap:6px}
-            /* Share bar 1 colonne sur écrans < 400px */
             .share-bar{grid-template-columns:1fr}
+            /* Bio ultra compact */
+            .bio-photo-col{padding:16px 14px;gap:10px}
+            .bio-text-col{padding:12px 12px 18px}
+            .bio-quote{font-size:.95rem}
+            .bio-paragraph{font-size:.85rem}
+            /* Newsletter padding réduit */
+            .newsletter-inner{padding:0 14px}
+            /* Sections titre plus compact */
+            .section-title{font-size:1.05rem}
         }
     </style>
 </head>
