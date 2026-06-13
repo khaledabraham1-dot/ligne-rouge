@@ -8,7 +8,7 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com blob:; connect-src https://pvvwmyrqreizlculgtom.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com blob:; connect-src https://pvvwmyrqreizlculgtom.supabase.co wss://pvvwmyrqreizlculgtom.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -422,15 +422,14 @@
                 <div style="max-width:460px">
                     <div class="card">
                         <h4>Compte administrateur</h4>
-                        <div class="form-group"><label>Nom d'utilisateur</label><input type="text" id="set-user"></div>
                         <div class="form-group">
                             <label>Nouveau mot de passe</label>
-                            <input type="password" id="set-pass" placeholder="Laisser vide pour conserver l'actuel" oninput="checkPwdStrength()">
+                            <input type="password" id="set-pass" placeholder="Nouveau mot de passe" oninput="checkPwdStrength()">
                             <div id="pwd-strength" style="display:none;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
                             <p style="font-size:.72rem;color:var(--text3);margin-top:5px">8 car. min · 1 majuscule · 1 chiffre · 1 caractère spécial</p>
                         </div>
                         <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" id="set-pass2"></div>
-                        <button class="btn btn-primary" onclick="saveSettings(this)">Sauvegarder</button>
+                        <button class="btn btn-primary" onclick="saveSettings(this)">Mettre à jour</button>
                     </div>
                     <div class="card">
                         <h4>Zone de danger</h4>
@@ -701,6 +700,7 @@ async function login() {
         document.getElementById('admin-app').style.display = 'flex';
         document.getElementById('topbar-user').textContent = Sec.esc(email);
         Audit.log('LOGIN', 'Connexion réussie — ' + email);
+        _setupRealtime();
         renderDash(); updateBadges();
     } else {
         const d = BF.fail();
@@ -725,6 +725,25 @@ async function logout() {
 function _checkSession() {
     if (!_authUser) { notif('Session expirée — reconnectez-vous.', true); logout(); return false; }
     return true;
+}
+
+// ---- SUPABASE REALTIME — dashboard dynamique ----
+function _setupRealtime() {
+    _sb.channel('lr-admin')
+        .on('postgres_changes', {event:'*', schema:'public', table:'articles'}, () => {
+            updateBadges();
+            if (document.getElementById('sec-dashboard').classList.contains('active')) renderDash();
+            if (document.getElementById('sec-articles').classList.contains('active')) renderArts();
+        })
+        .on('postgres_changes', {event:'*', schema:'public', table:'comments'}, () => {
+            updateBadges();
+            if (document.getElementById('sec-comments').classList.contains('active')) renderCmts(cmtFilter);
+        })
+        .on('postgres_changes', {event:'*', schema:'public', table:'newsletter_subscribers'}, () => {
+            updateBadges();
+            if (document.getElementById('sec-subscribers').classList.contains('active')) renderSubscribers();
+        })
+        .subscribe();
 }
 
 // ---- RESPONSIVE FIX — SIDEBAR MOBILE ----
@@ -1061,27 +1080,18 @@ async function delCmt(id) {
 // ---- SETTINGS ----
 async function saveSettings(btn) {
     if (!_checkSession()) return;
-    const u = Sec.txt(document.getElementById('set-user').value.trim(), 50);
-    if (!u || u.length < 3) { notif('Nom d\'utilisateur requis (3 car. min)', true); return; }
     const p1 = document.getElementById('set-pass').value;
     const p2 = document.getElementById('set-pass2').value;
-
-    if (p1) {
-        if (!Sec.pwdOk(p1)) { notif('Mot de passe : 8 car. min, 1 majuscule, 1 chiffre, 1 spécial', true); return; }
-        if (p1 !== p2) { notif('Les mots de passe ne correspondent pas', true); return; }
-    }
-
+    if (!p1) { notif('Saisissez un nouveau mot de passe.', true); return; }
+    if (!Sec.pwdOk(p1)) { notif('Mot de passe : 8 car. min, 1 majuscule, 1 chiffre, 1 spécial', true); return; }
+    if (p1 !== p2) { notif('Les mots de passe ne correspondent pas', true); return; }
     const reset = btnLoad(btn);
-    const cfg = DB.cfg.get();
-    cfg.username = u;
-    if (p1) cfg.password = await Sec.sha256(p1);
-    DB.cfg.save(cfg);
-    document.getElementById('topbar-user').textContent = Sec.esc(u);
+    const { error } = await _sb.auth.updateUser({ password: p1 });
     document.getElementById('set-pass').value = '';
     document.getElementById('set-pass2').value = '';
-    Audit.log('SETTINGS_UPDATE','Compte mis à jour: '+u);
     reset();
-    notif('Réglages sauvegardés !');
+    if (error) { notif('Erreur : ' + Sec.esc(error.message), true); }
+    else { Audit.log('SETTINGS_UPDATE', 'Mot de passe modifié'); notif('Mot de passe mis à jour !'); }
 }
 
 // Indicateur force mot de passe
@@ -1119,6 +1129,7 @@ function notif(msg, err = false) {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('admin-app').style.display = 'flex';
         document.getElementById('topbar-user').textContent = Sec.esc(session.user.email);
+        _setupRealtime();
         renderDash(); updateBadges();
     }
 })();
