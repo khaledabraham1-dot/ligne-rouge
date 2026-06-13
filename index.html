@@ -108,6 +108,7 @@
         body.dark footer{background:#1F2937;border-top-color:var(--border)}
         body.dark .hero{background:var(--white)}
         body.dark .trending{background:var(--white)}
+        body.dark .plus-lus{background:var(--bg)}
         body.dark .about-section{background:var(--white)}
         body.dark .bio-photo-col{background:#0D1B2A}
         body.dark .bio-value-item{background:#111827}
@@ -222,6 +223,21 @@
         .trend-num{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin-bottom:6px}
         .trend-title{font-family:var(--font-h);font-size:1rem;font-weight:700;line-height:1.3;color:var(--text);margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
         .trend-meta{font-size:.72rem;color:var(--text3)}
+
+        /* LES PLUS LUS */
+        .plus-lus{padding:40px 0;background:var(--bg)}
+        .plus-lus-list{list-style:none;display:flex;flex-direction:column;gap:0}
+        .pl-item{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+        .pl-item:last-child{border-bottom:none}
+        .pl-item:hover .pl-title{color:var(--red)}
+        .pl-rank{font-family:var(--font-h);font-size:2rem;font-weight:800;color:var(--border);min-width:36px;text-align:center;line-height:1}
+        .pl-rank-1{color:var(--red)!important}
+        .pl-rank-2{color:#c07000!important}
+        .pl-rank-3{color:var(--navy)!important}
+        .pl-info{flex:1;min-width:0}
+        .pl-title{font-family:var(--font-h);font-size:.97rem;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+        .pl-meta{font-size:.72rem;color:var(--text3);display:flex;align-items:center;gap:6px}
+        .pl-img{width:76px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0}
 
         /* ABOUT / BIOGRAPHIE */
         .about-section{padding:80px 0;background:var(--white);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
@@ -760,6 +776,20 @@
                         <div class="skel-trend"><div class="skel" style="height:190px"></div><div class="skel" style="height:11px;width:35%"></div><div class="skel" style="height:16px"></div><div class="skel" style="height:16px;width:80%"></div></div>
                         <div class="skel-trend"><div class="skel" style="height:190px"></div><div class="skel" style="height:11px;width:35%"></div><div class="skel" style="height:16px"></div><div class="skel" style="height:16px;width:80%"></div></div>
                     </div>
+                </div>
+            </section>
+            <section class="plus-lus">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">Les plus lus</h2>
+                    </div>
+                    <ol class="plus-lus-list" id="plus-lus-list">
+                        <li class="pl-item"><div class="pl-rank">1</div><div class="pl-info"><div class="skel" style="height:14px;width:65%;margin-bottom:8px"></div><div class="skel" style="height:11px;width:35%"></div></div><div class="skel pl-img"></div></li>
+                        <li class="pl-item"><div class="pl-rank">2</div><div class="pl-info"><div class="skel" style="height:14px;width:70%;margin-bottom:8px"></div><div class="skel" style="height:11px;width:30%"></div></div><div class="skel pl-img"></div></li>
+                        <li class="pl-item"><div class="pl-rank">3</div><div class="pl-info"><div class="skel" style="height:14px;width:55%;margin-bottom:8px"></div><div class="skel" style="height:11px;width:40%"></div></div><div class="skel pl-img"></div></li>
+                        <li class="pl-item"><div class="pl-rank">4</div><div class="pl-info"><div class="skel" style="height:14px;width:75%;margin-bottom:8px"></div><div class="skel" style="height:11px;width:28%"></div></div><div class="skel pl-img"></div></li>
+                        <li class="pl-item"><div class="pl-rank">5</div><div class="pl-info"><div class="skel" style="height:14px;width:60%;margin-bottom:8px"></div><div class="skel" style="height:11px;width:33%"></div></div><div class="skel pl-img"></div></li>
+                    </ol>
                 </div>
             </section>
             <section class="newsletter fade-up">
@@ -1471,6 +1501,22 @@
                     <div class="trend-meta">${Sec.esc(a.date)} · ${calcReadTime(a.body)}</div>
                 </div>
             `).join('');
+            // Les plus lus — top 5 par nombre de vues
+            const topRead = [...articles].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+            document.getElementById('plus-lus-list').innerHTML = topRead.length ? topRead.map((a, i) => `
+                <li class="pl-item fade-up" onclick="openArticle('${Sec.esc(a.id)}')" style="transition-delay:${i * 60}ms">
+                    <div class="pl-rank${i < 3 ? ' pl-rank-' + (i + 1) : ''}">${i + 1}</div>
+                    <div class="pl-info">
+                        <div class="pl-title">${Sec.esc(a.title)}</div>
+                        <div class="pl-meta">
+                            <span>${Sec.esc(a.cat)}</span>
+                            <span>·</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>${(a.views || 0).toLocaleString('fr-FR')} vues</span>
+                        </div>
+                    </div>
+                    <img src="${Sec.imgUrl(a.img)}" alt="${Sec.esc(a.title)}" class="pl-img" loading="lazy">
+                </li>`).join('') : '<li style="padding:20px 0;color:var(--text3);font-size:.9rem">Aucun article disponible.</li>';
             document.getElementById('ticker-inner').innerHTML = articles.map(a =>
                 `<div class="ticker-item"><div class="ticker-dot"></div> ${a.title}</div>`
             ).join('').repeat(2);
