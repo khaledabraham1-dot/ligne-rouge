@@ -234,6 +234,8 @@
 
         /* FOOTER NEWSLETTER BAND */
         .footer-nl-band{padding:44px 0;border-bottom:1px solid var(--border);margin-bottom:56px}
+        /* Masquer la newsletter footer sur l'accueil : page-home a déjà son propre bloc newsletter */
+        body:has(#page-home.active) .footer-nl-band{display:none}
         .footer-nl-inner{display:flex;align-items:center;gap:40px;flex-wrap:wrap}
         .footer-nl-text{flex:1;min-width:200px}
         .footer-nl-title{font-family:var(--font-h);font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:4px}
