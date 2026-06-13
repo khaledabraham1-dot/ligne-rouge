@@ -411,7 +411,7 @@
         #read-progress.visible{opacity:1}
 
         /* MOBILE DRAWER BACKDROP */
-        #mobile-backdrop{position:fixed;inset:0;background:rgba(13,27,42,.55);z-index:350;opacity:0;pointer-events:none;transition:opacity .3s}
+        #mobile-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:350;opacity:0;pointer-events:none;transition:opacity .25s}
         #mobile-backdrop.open{opacity:1;pointer-events:all}
 
         /* HAMBURGER → X */
@@ -477,14 +477,14 @@
                 align-items:flex-start;
                 position:fixed;
                 top:0;left:0;
-                width:75%;max-width:320px;
+                width:88%;max-width:320px;
                 height:100vh;
                 background:var(--white);
                 z-index:400;
                 padding:calc(var(--nav-h) + var(--ticker-h) + 8px) 0 32px;
                 box-shadow:6px 0 32px rgba(0,0,0,.18);
                 transform:translateX(-105%);
-                transition:transform .32s cubic-bezier(.4,0,.2,1);
+                transition:transform .28s cubic-bezier(.4,0,.2,1);
                 overflow-y:auto;
                 gap:0;
             }
@@ -574,7 +574,9 @@
 
         /* RESPONSIVE FIX — très petit mobile 400px */
         @media (max-width:400px){
-            .nav-cats{width:85%;max-width:unset}
+            /* Supprime GPU layers sur petits écrans pour éviter artefacts visuels */
+            .hero-main,.hero-main img,.hero-side-item,.trend-card,.related-card{will-change:auto}
+            .nav-cats{width:90%;max-width:unset}
             .nav-logo{font-size:1.35rem}
             .related-grid{grid-template-columns:1fr}
             .footer-grid{grid-template-columns:1fr}
@@ -1236,14 +1238,22 @@
                 const navBtn = [...document.querySelectorAll('.nav-cat')].find(b => b.textContent.trim() === text);
                 setNavActive(navBtn || null);
             }
+            // Reset any stuck transition, then force-navigate to home
+            UI._transitioning = false;
             const current = document.querySelector('.page.active');
             if (current && current.id === 'page-home') {
-                // Déjà sur l'accueil : filtre + remonte sans transition
                 renderHome(cat);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                // Vient d'une autre page : transition puis filtre
-                UI.showPage('page-home');
+                // Bypass UI.showPage transition — directly swap pages
+                document.querySelectorAll('.page').forEach(p => {
+                    p.classList.remove('active');
+                    p.style.opacity = '';
+                    p.style.transition = '';
+                });
+                const home = document.getElementById('page-home');
+                if (home) home.classList.add('active');
+                window.scrollTo(0, 0);
                 renderHome(cat);
             }
         }
@@ -1397,6 +1407,8 @@
                         </div>`).join('')}
                     </div>
                 `;
+            } else {
+                heroGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text3)"><p style="font-size:1.1rem;font-family:var(--font-h);margin-bottom:8px;color:var(--text2)">Aucun article dans cette rubrique</p><p style="font-size:.9rem">Revenez bientôt pour découvrir nos prochaines publications.</p></div>`;
             }
             document.getElementById('trending-grid').innerHTML = filtered.slice(0, 4).map((a, i) => `
                 <div class="trend-card fade-up" onclick="openArticle('${Sec.esc(a.id)}')" style="transition-delay:${i * 80}ms">
