@@ -108,9 +108,15 @@
         .ticker-dot{width:4px;height:4px;background:var(--red);border-radius:50%;flex-shrink:0}
         @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-        /* NAV — glassmorphism */
-        #nav{background:rgba(255,255,255,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(222,219,212,.4);position:sticky;top:0;z-index:200;height:var(--nav-h);transition:background .35s ease,backdrop-filter .35s ease,-webkit-backdrop-filter .35s ease,box-shadow .35s ease,height .2s ease}
-        body.dark #nav{background:rgba(17,24,39,.7);border-bottom-color:rgba(255,255,255,.06)}
+        /* NAV */
+        #nav{background:#fff;border-bottom:1px solid rgba(222,219,212,.4);position:sticky;top:0;z-index:200;height:var(--nav-h);transition:background .35s ease,box-shadow .35s ease,height .2s ease}
+        @media(min-width:769px){
+            #nav{background:rgba(255,255,255,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:background .35s ease,backdrop-filter .35s ease,-webkit-backdrop-filter .35s ease,box-shadow .35s ease,height .2s ease}
+        }
+        body.dark #nav{background:#1F2937;border-bottom-color:rgba(255,255,255,.06)}
+        @media(min-width:769px){
+            body.dark #nav{background:rgba(17,24,39,.7)}
+        }
         .nav-inner{display:flex;align-items:center;height:100%;gap:0;position:relative}
         .nav-logo{font-family:var(--font-h);font-size:1.6rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;flex-shrink:0;cursor:pointer;display:flex;align-items:center;gap:4px;transition:font-size .2s ease}
         .nav-logo .logo-ligne{color:var(--navy)}
@@ -1464,13 +1470,11 @@
             const open = document.querySelector('.nav-cats').classList.toggle('drawer-open');
             document.getElementById('mobile-backdrop').classList.toggle('open', open);
             document.querySelector('.nav-hamburger').classList.toggle('open', open);
-            document.body.style.overflow = open ? 'hidden' : '';
         }
         function closeMobileMenu() {
             document.querySelector('.nav-cats').classList.remove('drawer-open');
             document.getElementById('mobile-backdrop').classList.remove('open');
             document.querySelector('.nav-hamburger').classList.remove('open');
-            document.body.style.overflow = '';
         }
         // Fermer le drawer quand on clique un lien de nav
         document.querySelectorAll('.nav-cat').forEach(el =>
