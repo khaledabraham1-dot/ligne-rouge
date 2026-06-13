@@ -1169,7 +1169,7 @@
             if (!art) return;
 
             // Incrémenter les vues (fire-and-forget)
-            _sb.from('articles').update({views:(art.views||0)+1}).eq('id',art.id).catch(()=>{});
+            _sb.from('articles').update({views:(art.views||0)+1}).eq('id',art.id).then(()=>{},()=>{});
 
             // Commentaires approuvés
             const approvedCmts = await getComments(id);
