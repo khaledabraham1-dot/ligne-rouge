@@ -14,7 +14,7 @@
     <style>
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         :root{--navy:#0D1B2A;--navy2:#162233;--red:#C01D35;--red2:#A01728;--bg:#F5F6F8;--white:#fff;--text:#1A1A1A;--text2:#4A4A4A;--text3:#7A7A7A;--border:#E5E7EB;--success:#27a745;--warning:#f0ad4e;--danger:#dc3545;--sidebar-w:240px;--topbar-h:60px;--font:'Source Sans 3',system-ui,sans-serif;--font-h:'Playfair Display',Georgia,serif}
-        html,body{height:100%;font-family:var(--font);font-size:15px;color:var(--text)}
+        html,body{height:100%;font-family:var(--font);font-size:15px;color:var(--text);overflow-x:hidden;max-width:100vw}
 
         /* LOGIN */
         #login-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:1000}
@@ -153,20 +153,25 @@
         .admin-notif.err{border-left-color:var(--red)}
 
         /* =============================================
-           RESPONSIVE FIXES — admin.html
+           RESPONSIVE — admin.html (all devices)
         ============================================= */
 
-        /* RESPONSIVE FIX — bouton hamburger sidebar (caché sur desktop) */
+        /* Hamburger sidebar button — hidden on desktop */
         #sb-toggle{display:none;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1.15rem;color:var(--navy);transition:background .15s;font-family:var(--font);line-height:1;margin-right:8px}
         #sb-toggle:hover{background:var(--bg)}
-        /* RESPONSIVE FIX — backdrop sidebar overlay mobile */
+        /* Sidebar overlay backdrop */
         #sb-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:149;opacity:0;pointer-events:none;transition:opacity .3s}
         #sb-backdrop.open{opacity:1;pointer-events:all}
-        /* RESPONSIVE FIX — scroll horizontal pour les tableaux */
-        .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-        /* RESPONSIVE FIX — boutons actions articles (flex en ligne par défaut) */
+        /* Table scroll containers — always full width and horizontally scrollable */
+        .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;display:block}
+        /* Article action buttons — inline row by default */
         .arts-actions{display:flex;gap:4px;flex-wrap:nowrap;align-items:center}
+        /* Stat label overflow guard for long strings like "Commentaires en attente" */
+        .stat-label{overflow-wrap:break-word;word-break:break-word;hyphens:auto}
+        /* Card headers must wrap on narrow screens */
+        .card-header{flex-wrap:wrap;gap:8px}
 
+        /* ── Tablette large ≤1024px ── */
         @media(max-width:1024px){
             .stat-cards{grid-template-columns:repeat(2,1fr)}
             .dash-grid{grid-template-columns:1fr}
@@ -174,54 +179,69 @@
             .form-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:14px}
         }
 
-        /* RESPONSIVE FIX — tablette 768px : sidebar en drawer overlay */
+        /* ── Tablette ≤768px : sidebar en drawer overlay ── */
         @media(max-width:768px){
             #sb-toggle{display:inline-flex}
-            /* RESPONSIVE FIX — sidebar devient drawer fixe */
-            #sidebar{
-                position:fixed;
-                top:0;left:0;
-                height:100vh;
-                z-index:150;
-                width:var(--sidebar-w);
-                transform:translateX(-100%);
-                transition:transform .3s cubic-bezier(.4,0,.2,1);
-            }
+            #sidebar{position:fixed;top:0;left:0;height:100vh;z-index:150;width:var(--sidebar-w);transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
             #sidebar.sb-open{transform:translateX(0)}
-            /* RESPONSIVE FIX — topbar : hamburger à gauche, title flex-1 */
             #topbar{gap:0;justify-content:flex-start;padding:0 14px}
-            #topbar-title{flex:1;margin-left:4px}
-            #content{padding:16px}
+            #topbar-title{flex:1;margin-left:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+            .topbar-user{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            #content{padding:14px;overflow-x:hidden;width:100%;box-sizing:border-box}
+            #main-wrapper{overflow-x:hidden;min-width:0}
             .section-head{flex-direction:column;align-items:flex-start;gap:10px}
+            .card{overflow:hidden}
         }
 
-        /* RESPONSIVE FIX — mobile 600px : stat 2x2, boutons actions en colonne */
+        /* ── Mobile ≤600px ── */
         @media(max-width:600px){
             .stat-cards{grid-template-columns:1fr 1fr;gap:10px}
             .stat-card{padding:14px 12px}
-            .stat-value{font-size:1.5rem}
-            /* RESPONSIVE FIX — boutons actions en colonne sur mobile */
+            .stat-value{font-size:1.4rem}
+            .stat-label{font-size:.7rem;line-height:1.3}
             .arts-actions{flex-direction:column;gap:6px;align-items:stretch}
             .arts-actions .btn-sm{margin-right:0;text-align:center;justify-content:center;display:flex;padding:8px 10px;min-height:36px;width:100%}
             #content{padding:12px}
-            .login-card{padding:32px 20px;margin:0 12px;max-width:100%}
-            .filter-group{gap:4px}
+            .login-card{padding:32px 20px;margin:0 12px;max-width:100%;width:auto}
+            .filter-group{gap:4px;flex-wrap:wrap}
             .filter-btn{padding:5px 10px;font-size:.75rem}
             .form-sidebar{grid-template-columns:1fr}
+            .topbar-user{max-width:120px;font-size:.78rem}
+            .card{padding:16px}
+            .section-head h2{font-size:1.05rem}
+            .card-header h3{font-size:.95rem}
         }
 
-        /* RESPONSIVE FIX — petit mobile 480px */
+        /* ── Petit mobile ≤480px ── */
         @media(max-width:480px){
-            .stat-cards{grid-template-columns:1fr 1fr}
-            .stat-value{font-size:1.3rem}
-            .section-head h2{font-size:1.1rem}
-            .admin-table{font-size:.78rem}
-            .admin-table td,.admin-table th{padding:8px 8px}
-            .admin-notif{left:12px;right:12px;bottom:12px;font-size:.82rem}
-            .topbar-user{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.72rem}
-            .btn{padding:9px 14px;font-size:.83rem}
-            .card{padding:14px}
+            .stat-cards{grid-template-columns:1fr 1fr;gap:8px}
+            .stat-card{padding:12px 10px}
+            .stat-value{font-size:1.25rem}
             .stat-label{font-size:.65rem}
+            .section-head h2{font-size:1rem}
+            .admin-table{font-size:.76rem}
+            .admin-table td,.admin-table th{padding:7px 8px}
+            .admin-notif{left:10px;right:10px;bottom:10px;font-size:.81rem}
+            .topbar-user{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.7rem}
+            .btn{padding:9px 14px;font-size:.83rem}
+            .card{padding:12px}
+            #content{padding:10px}
+            .card-header{gap:6px}
+            .section-head{gap:8px}
+            .filter-btn{font-size:.72rem;padding:4px 9px}
+        }
+
+        /* ── Très petit mobile ≤380px ── */
+        @media(max-width:380px){
+            .stat-cards{grid-template-columns:1fr}
+            .stat-card{padding:14px 16px;display:flex;flex-direction:row;align-items:center;gap:14px}
+            .stat-value{font-size:1.6rem;min-width:fit-content}
+            .stat-label{font-size:.72rem}
+            .topbar-user{display:none}
+            #content{padding:8px}
+            .card{padding:10px}
+            .admin-table{font-size:.72rem}
+            .admin-table td,.admin-table th{padding:6px 6px}
         }
     </style>
 </head>
