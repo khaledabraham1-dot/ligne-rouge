@@ -1,0 +1,41 @@
+{
+  "name": "Ligne Rouge",
+  "short_name": "Ligne Rouge",
+  "description": "Média d'information indépendant. Actualité, Politique, Sport, Société, International, Culture en Afrique francophone.",
+  "start_url": "/ligne-rouge/",
+  "scope": "/ligne-rouge/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0D1B2A",
+  "background_color": "#0D1B2A",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["news"],
+  "icons": [
+    {
+      "src": "/ligne-rouge/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/ligne-rouge/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Actualité",
+      "url": "/ligne-rouge/",
+      "description": "Dernières actualités"
+    },
+    {
+      "name": "Politique",
+      "url": "/ligne-rouge/",
+      "description": "Politique"
+    }
+  ]
+}
