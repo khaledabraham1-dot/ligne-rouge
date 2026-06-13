@@ -206,9 +206,14 @@
         .search-close{color:var(--text3);font-size:.85rem;margin-top:14px;cursor:pointer;display:flex;align-items:center;gap:6px;width:fit-content;padding:4px 0;transition:color .15s}
         .search-close:hover{color:var(--text)}
         .search-results{margin-top:20px;display:flex;flex-direction:column;gap:12px}
-        .search-result-item{padding:12px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:border-color .15s,background .15s}
+        .search-result-item{padding:14px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:border-color .15s,background .15s}
         .search-result-item:hover{border-color:var(--border2);background:var(--bg)}
+        .sri-meta{font-size:.7rem;color:var(--text3);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+        .sri-cat{background:var(--red);color:#fff;font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px}
         .sri-title{font-family:var(--font-h);font-size:1rem;font-weight:600;color:var(--text);line-height:1.3}
+        .sri-excerpt{font-size:.82rem;color:var(--text3);margin-top:5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .search-result-item mark{background:#FEF08A;color:var(--text);border-radius:2px;padding:0 1px}
+        body.dark .search-result-item mark{background:#854D0E;color:#FEF3C7}
 
         /* HERO */
         .hero{padding:40px 0 48px;background:var(--white);border-bottom:1px solid var(--border)}
@@ -1691,10 +1696,46 @@
             const res = document.getElementById('search-results');
             if (!q || q.length < 2) { res.innerHTML = ''; return; }
             const articles = await getArticles();
-            const hits = articles.filter(a => a.title.toLowerCase().includes(q.toLowerCase()));
-            res.innerHTML = hits.length
-                ? hits.map(a => `<div class="search-result-item" onclick="openArticle('${a.id}');toggleSearch()"><div class="sri-title">${a.title}</div></div>`).join('')
-                : '<p style="padding:12px;color:var(--text3)">Aucun résultat trouvé</p>';
+            const ql = q.toLowerCase().trim();
+
+            const stripHtml = s => s ? s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+
+            // Score : titre=3, sous-titre=2, catégorie=2, corps=1
+            const scored = articles.map(a => {
+                const bodyPlain = stripHtml(a.body);
+                let score = 0;
+                if ((a.title || '').toLowerCase().includes(ql)) score += 3;
+                if ((a.subtitle || '').toLowerCase().includes(ql)) score += 2;
+                if ((a.cat || '').toLowerCase().includes(ql)) score += 2;
+                if (bodyPlain.toLowerCase().includes(ql)) score += 1;
+                return { ...a, score, bodyPlain };
+            }).filter(a => a.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
+
+            if (!scored.length) {
+                res.innerHTML = `<p style="padding:16px;color:var(--text3);text-align:center">Aucun résultat pour « ${Sec.esc(q)} »</p>`;
+                return;
+            }
+
+            const esc4re = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const highlight = txt => txt ? Sec.esc(txt).replace(new RegExp('(' + esc4re(Sec.esc(q)) + ')', 'gi'), '<mark>$1</mark>') : '';
+
+            res.innerHTML = scored.map(a => {
+                // Extrait contextuel autour du mot trouvé dans le corps
+                let excerpt = '';
+                const bodyL = a.bodyPlain.toLowerCase();
+                const idx = bodyL.indexOf(ql);
+                if (idx !== -1) {
+                    const s = Math.max(0, idx - 45), e = Math.min(a.bodyPlain.length, idx + ql.length + 80);
+                    excerpt = (s > 0 ? '…' : '') + a.bodyPlain.slice(s, e) + (e < a.bodyPlain.length ? '…' : '');
+                } else if (a.subtitle) {
+                    excerpt = a.subtitle;
+                }
+                return `<div class="search-result-item" onclick="openArticle('${Sec.esc(String(a.id))}');toggleSearch()">
+                    <div class="sri-meta"><span class="sri-cat">${Sec.esc(a.cat)}</span>${calcReadTime(a.body)}</div>
+                    <div class="sri-title">${highlight(a.title)}</div>
+                    ${excerpt ? `<div class="sri-excerpt">${highlight(excerpt)}</div>` : ''}
+                </div>`;
+            }).join('');
         }
 
         // DARK MODE
