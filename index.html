@@ -943,7 +943,7 @@
                 article_title: comment.articleTitle,
                 author: comment.author,
                 email: comment.email || '',
-                text: comment.text,
+                content: comment.text,
                 status: 'pending',
                 date: comment.date
             }]);
@@ -1021,11 +1021,11 @@
 
         // ---- ARTICLES : charge depuis localStorage (admin) ou fallback hardcodé ----
         const DEFAULT_ARTS = [
-            {id:'d1',cat:'Politique',title:"Nouveaux enjeux géopolitiques en Afrique de l'Ouest",subtitle:'Une analyse profonde des changements récents.',date:'12 Juin 2026',read:'6 min',views:12450,status:'published',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop',body:"<p>L'Afrique de l'Ouest traverse une période de transformation politique majeure, marquée par de nouvelles alliances et des reconfigurations du pouvoir.</p>"},
-            {id:'d2',cat:'Sport',title:"Lions de la Téranga : Préparatifs pour la Coupe du Monde",subtitle:'Le Sénégal affine sa stratégie.',date:'11 Juin 2026',read:'4 min',views:8900,status:'published',img:'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop',body:"<p>L'équipe nationale du Sénégal se prépare intensivement pour le prochain tournoi mondial.</p>"},
-            {id:'d3',cat:'Actualité',title:"Innovation technologique : Le hub numérique de Dakar",subtitle:"La capitale sénégalaise s'affirme comme leader tech.",date:'10 Juin 2026',read:'5 min',views:5600,status:'published',img:'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',body:"<p>Dakar continue d'attirer les investissements technologiques de toute l'Afrique et au-delà.</p>"},
-            {id:'d4',cat:'Culture',title:"Biennale de Dakar : Un succès retentissant",subtitle:"L'art contemporain africain à l'honneur.",date:'09 Juin 2026',read:'7 min',views:4200,status:'published',img:'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=800&auto=format&fit=crop',body:"<p>L'édition de cette année a battu tous les records d'affluence, confirmant le rayonnement de l'art africain.</p>"},
-            {id:'d5',cat:'International',title:"Sommet sur le climat : Les engagements de l'Afrique",subtitle:'Vers une transition énergétique durable.',date:'08 Juin 2026',read:'8 min',views:3100,status:'published',img:'https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=800&auto=format&fit=crop',body:"<p>Les dirigeants africains ont porté une voix unie lors du sommet international sur le changement climatique.</p>"}
+            {id:'d1',cat:'Politique',title:"Nouveaux enjeux géopolitiques en Afrique de l'Ouest",subtitle:'Une analyse profonde des changements récents.',date:'12 Juin 2026',read_time:'6 min',views:12450,status:'published',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop',body:"<p>L'Afrique de l'Ouest traverse une période de transformation politique majeure, marquée par de nouvelles alliances et des reconfigurations du pouvoir.</p>"},
+            {id:'d2',cat:'Sport',title:"Lions de la Téranga : Préparatifs pour la Coupe du Monde",subtitle:'Le Sénégal affine sa stratégie.',date:'11 Juin 2026',read_time:'4 min',views:8900,status:'published',img:'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop',body:"<p>L'équipe nationale du Sénégal se prépare intensivement pour le prochain tournoi mondial.</p>"},
+            {id:'d3',cat:'Actualité',title:"Innovation technologique : Le hub numérique de Dakar",subtitle:"La capitale sénégalaise s'affirme comme leader tech.",date:'10 Juin 2026',read_time:'5 min',views:5600,status:'published',img:'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',body:"<p>Dakar continue d'attirer les investissements technologiques de toute l'Afrique et au-delà.</p>"},
+            {id:'d4',cat:'Culture',title:"Biennale de Dakar : Un succès retentissant",subtitle:"L'art contemporain africain à l'honneur.",date:'09 Juin 2026',read_time:'7 min',views:4200,status:'published',img:'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=800&auto=format&fit=crop',body:"<p>L'édition de cette année a battu tous les records d'affluence, confirmant le rayonnement de l'art africain.</p>"},
+            {id:'d5',cat:'International',title:"Sommet sur le climat : Les engagements de l'Afrique",subtitle:'Vers une transition énergétique durable.',date:'08 Juin 2026',read_time:'8 min',views:3100,status:'published',img:'https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=800&auto=format&fit=crop',body:"<p>Les dirigeants africains ont porté une voix unie lors du sommet international sur le changement climatique.</p>"}
         ];
 
         function isNew(art) {
@@ -1176,7 +1176,7 @@
             const cmtsHtml = approvedCmts.length ? approvedCmts.map(c => `
                 <div style="padding:16px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--bg)">
                     <div style="font-weight:700;font-size:.88rem;margin-bottom:4px">${Sec.esc(c.author)} <span style="font-weight:400;color:var(--text3);font-size:.78rem">· ${Sec.esc(c.date)}</span></div>
-                    <div style="font-size:.92rem;color:var(--text2);line-height:1.6">${Sec.esc(c.text)}</div>
+                    <div style="font-size:.92rem;color:var(--text2);line-height:1.6">${Sec.esc(c.content)}</div>
                 </div>
             `).join('') : '<p style="color:var(--text3);font-size:.9rem">Aucun commentaire pour cet article.</p>';
 
@@ -1225,7 +1225,7 @@
                     <div class="art-meta-top">
                         <div class="art-author">
                             <img src="Capture d'écran 2026-05-15 220637.png" alt="Alassane Ibrahima" class="author-img" width="44" height="44" loading="lazy">
-                            <div><div class="author-name">Alassane Ibrahima</div><div class="author-date">${art.date} · ${art.read}</div></div>
+                            <div><div class="author-name">Alassane Ibrahima</div><div class="author-date">${art.date} · ${art.read_time}</div></div>
                         </div>
                         <button onclick="showPage('page-home')" style="font-size:.8rem;color:var(--text3);border:1px solid var(--border);padding:6px 14px;border-radius:20px;cursor:pointer;">← Retour</button>
                     </div>

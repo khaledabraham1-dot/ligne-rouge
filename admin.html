@@ -641,11 +641,11 @@ const KEY = 'lr_';
 const SECTION_NAMES = {dashboard:'Tableau de bord',articles:'Articles',new:'Nouvel article',comments:'Commentaires',audit:'Journal d\'audit',subscribers:'Abonnés newsletter',settings:'Réglages'};
 
 const DEFAULT_ARTS = [
-    {id:'d1',cat:'Politique',title:'Nouveaux enjeux géopolitiques en Afrique de l\'Ouest',subtitle:'Une analyse profonde des changements récents.',date:'12 Juin 2026',read:'6 min',views:12450,status:'published',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop',body:'<p>L\'Afrique de l\'Ouest traverse une période de transformation politique majeure, marquée par de nouvelles alliances et des reconfigurations du pouvoir.</p>',createdAt:1718150400000},
-    {id:'d2',cat:'Sport',title:'Lions de la Téranga : Préparatifs pour la Coupe du Monde',subtitle:'Le Sénégal affine sa stratégie.',date:'11 Juin 2026',read:'4 min',views:8900,status:'published',img:'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop',body:'<p>L\'équipe nationale du Sénégal se prépare intensivement pour le prochain tournoi mondial.</p>',createdAt:1718064000000},
-    {id:'d3',cat:'Actualité',title:'Innovation technologique : Le hub numérique de Dakar',subtitle:'La capitale sénégalaise s\'affirme comme leader tech.',date:'10 Juin 2026',read:'5 min',views:5600,status:'published',img:'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',body:'<p>Dakar continue d\'attirer les investissements technologiques de toute l\'Afrique et au-delà.</p>',createdAt:1717977600000},
-    {id:'d4',cat:'Culture',title:'Biennale de Dakar : Un succès retentissant',subtitle:'L\'art contemporain africain à l\'honneur.',date:'09 Juin 2026',read:'7 min',views:4200,status:'published',img:'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=800&auto=format&fit=crop',body:'<p>L\'édition de cette année a battu tous les records d\'affluence, confirmant le rayonnement de l\'art africain.</p>',createdAt:1717891200000},
-    {id:'d5',cat:'International',title:'Sommet sur le climat : Les engagements de l\'Afrique',subtitle:'Vers une transition énergétique durable.',date:'08 Juin 2026',read:'8 min',views:3100,status:'published',img:'https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=800&auto=format&fit=crop',body:'<p>Les dirigeants africains ont porté une voix unie lors du sommet international sur le changement climatique.</p>',createdAt:1717804800000}
+    {id:'d1',cat:'Politique',title:'Nouveaux enjeux géopolitiques en Afrique de l\'Ouest',subtitle:'Une analyse profonde des changements récents.',date:'12 Juin 2026',read_time:'6 min',views:12450,status:'published',img:'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=800&auto=format&fit=crop',body:'<p>L\'Afrique de l\'Ouest traverse une période de transformation politique majeure, marquée par de nouvelles alliances et des reconfigurations du pouvoir.</p>',createdAt:1718150400000},
+    {id:'d2',cat:'Sport',title:'Lions de la Téranga : Préparatifs pour la Coupe du Monde',subtitle:'Le Sénégal affine sa stratégie.',date:'11 Juin 2026',read_time:'4 min',views:8900,status:'published',img:'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop',body:'<p>L\'équipe nationale du Sénégal se prépare intensivement pour le prochain tournoi mondial.</p>',createdAt:1718064000000},
+    {id:'d3',cat:'Actualité',title:'Innovation technologique : Le hub numérique de Dakar',subtitle:'La capitale sénégalaise s\'affirme comme leader tech.',date:'10 Juin 2026',read_time:'5 min',views:5600,status:'published',img:'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',body:'<p>Dakar continue d\'attirer les investissements technologiques de toute l\'Afrique et au-delà.</p>',createdAt:1717977600000},
+    {id:'d4',cat:'Culture',title:'Biennale de Dakar : Un succès retentissant',subtitle:'L\'art contemporain africain à l\'honneur.',date:'09 Juin 2026',read_time:'7 min',views:4200,status:'published',img:'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=800&auto=format&fit=crop',body:'<p>L\'édition de cette année a battu tous les records d\'affluence, confirmant le rayonnement de l\'art africain.</p>',createdAt:1717891200000},
+    {id:'d5',cat:'International',title:'Sommet sur le climat : Les engagements de l\'Afrique',subtitle:'Vers une transition énergétique durable.',date:'08 Juin 2026',read_time:'8 min',views:3100,status:'published',img:'https://images.unsplash.com/photo-1444653300305-64505342738d?q=80&w=800&auto=format&fit=crop',body:'<p>Les dirigeants africains ont porté une voix unie lors du sommet international sur le changement climatique.</p>',createdAt:1717804800000}
 ];
 
 // ---- DB ----
@@ -847,7 +847,7 @@ async function renderDash() {
     document.getElementById('dash-cmts').innerHTML = cmts.slice(0,5).map(c => `
         <div class="comment-preview">
             <div class="cp-meta">${Sec.esc(c.author)} <span class="badge badge-${c.status === 'approved' ? 'approved' : c.status === 'rejected' ? 'rejected' : 'pending'}">${c.status === 'approved' ? 'Approuvé' : c.status === 'rejected' ? 'Rejeté' : 'En attente'}</span></div>
-            <div class="cp-text">${Sec.esc((c.text||'').substring(0,90))}${c.text && c.text.length > 90 ? '…' : ''}</div>
+            <div class="cp-text">${Sec.esc((c.content||'').substring(0,90))}${c.content && c.content.length > 90 ? '…' : ''}</div>
         </div>
     `).join('') || '<p style="color:#aaa;font-size:.85rem;padding:8px 0">Aucun commentaire</p>';
 }
@@ -999,7 +999,7 @@ async function saveArticle(status, btn) {
         body: htmlBody,
         img: img || (existing ? existing.img : ''),
         date: existing ? existing.date : dateFr,
-        read: readTime,
+        read_time: readTime,
         views: existing ? (existing.views || 0) : 0,
         status
     };
@@ -1027,7 +1027,7 @@ async function renderCmts(filter) {
     document.getElementById('cmts-tbody').innerHTML = cmts.map(c => `
         <tr>
             <td><strong>${Sec.esc(c.author)}</strong>${c.email ? `<br><small style="color:#aaa">${Sec.esc(c.email)}</small>` : ''}</td>
-            <td style="max-width:260px"><span style="font-size:.84rem">${Sec.esc((c.text||'').substring(0,110))}${c.text && c.text.length > 110 ? '…' : ''}</span></td>
+            <td style="max-width:260px"><span style="font-size:.84rem">${Sec.esc((c.content||'').substring(0,110))}${c.content && c.content.length > 110 ? '…' : ''}</span></td>
             <td style="font-size:.8rem;color:var(--text3)">${Sec.esc(c.article_title || c.articleTitle || '—')}</td>
             <td style="font-size:.8rem;color:var(--text3);white-space:nowrap">${Sec.esc(c.date || '')}</td>
             <td><span class="badge badge-${c.status === 'approved' ? 'approved' : c.status === 'rejected' ? 'rejected' : 'pending'}">${c.status === 'approved' ? 'Approuvé' : c.status === 'rejected' ? 'Rejeté' : 'En attente'}</span></td>
