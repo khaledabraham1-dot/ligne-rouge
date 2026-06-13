@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Bloquer l'accès à l'administration
+Disallow: /ligne-rouge/admin.html
+
+# Sitemap
+Sitemap: https://khaledabraham1-dot.github.io/ligne-rouge/sitemap.xml
