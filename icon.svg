@@ -1,21 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#0D1B2A"/>
-  <rect y="432" width="512" height="80" fill="#C01D35"/>
-  <text x="108" y="390"
+  <rect y="440" width="512" height="72" fill="#C01D35"/>
+  <text x="256" y="390"
         font-family="Georgia,'Times New Roman',serif"
-        font-size="310"
+        font-size="280"
         font-weight="700"
-        fill="#FFFFFF">L</text>
-  <text x="248" y="390"
-        font-family="Georgia,'Times New Roman',serif"
-        font-size="310"
-        font-weight="700"
-        fill="#C01D35">R</text>
+        text-anchor="middle">
+    <tspan fill="#FFFFFF">L</tspan><tspan fill="#C01D35" dx="4">R</tspan>
+  </text>
   <text x="256" y="496"
         font-family="Arial,Helvetica,sans-serif"
-        font-size="46"
+        font-size="44"
         font-weight="700"
         fill="#FFFFFF"
         text-anchor="middle"
-        letter-spacing="4">LIGNE ROUGE</text>
+        letter-spacing="3">LIGNE ROUGE</text>
 </svg>
