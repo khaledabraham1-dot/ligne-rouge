@@ -247,33 +247,63 @@
 
             /* ── AUDIT TABLE → CARD LAYOUT ── */
             #sec-audit .table-scroll{overflow-x:visible}
-            #sec-audit .admin-table{min-width:unset;width:100%}
+            #sec-audit .admin-table{min-width:unset!important;width:100%!important}
             #sec-audit .admin-table thead{display:none}
-            #sec-audit .admin-table tbody tr{display:block;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;padding:12px;background:var(--white)}
-            #sec-audit .admin-table tbody td{display:block;border:none;padding:0 0 4px;font-size:.81rem}
-            #sec-audit .admin-table tbody td:first-child{color:var(--text3);font-size:.74rem}
+            #sec-audit .admin-table tbody tr{display:block;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;padding:14px;background:var(--white);animation:slideInRow .3s ease both}
+            #sec-audit .admin-table tbody tr:last-child{margin-bottom:0}
+            #sec-audit .admin-table tbody td{display:block;border:none;padding:0 0 8px;font-size:.84rem;line-height:1.4}
             #sec-audit .admin-table tbody td:last-child{padding-bottom:0}
+            /* Labels pseudo-éléments — CSS pur, zéro JS */
+            #sec-audit .admin-table tbody td::before{display:block;font-size:.6rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
+            #sec-audit .admin-table tbody td:first-child::before{content:"Horodatage"}
+            #sec-audit .admin-table tbody td:nth-child(2)::before{content:"Action"}
+            #sec-audit .admin-table tbody td:nth-child(3)::before{content:"Détail"}
+            #sec-audit .admin-table tbody td:nth-child(4)::before{content:"Utilisateur"}
 
             /* ── DASHBOARD ARTICLES TABLE → CARD LAYOUT ── */
             #sec-dashboard .table-scroll{overflow-x:visible}
-            #sec-dashboard .admin-table{min-width:unset;width:100%}
+            #sec-dashboard .admin-table{min-width:unset!important;width:100%!important}
             #sec-dashboard .admin-table thead{display:none}
             #sec-dashboard .admin-table tbody tr{display:block;border-bottom:1px solid var(--border);padding:10px 0}
             #sec-dashboard .admin-table tbody tr:last-child{border-bottom:none}
             #sec-dashboard .admin-table tbody td{display:inline-block;border:none;padding:2px 6px 4px 0;vertical-align:middle;font-size:.83rem}
             #sec-dashboard .admin-table tbody td:first-child{display:block;font-weight:500;padding:0 0 4px;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-            /* ── SUBSCRIBERS TABLE → HORIZONTAL LIST (# · email · supprimer) ── */
+            /* ── SUBSCRIBERS TABLE → CARD LAYOUT (# · email · supprimer) ── */
             #sec-subscribers .table-scroll{overflow-x:visible}
-            #sec-subscribers .admin-table{min-width:unset;width:100%}
+            #sec-subscribers .admin-table{min-width:unset!important;width:100%!important}
             #sec-subscribers .admin-table thead{display:none}
-            #sec-subscribers .admin-table tbody tr{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;padding:11px 14px;background:var(--white)}
+            #sec-subscribers .admin-table tbody tr{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;padding:12px 14px;background:var(--white);animation:slideInRow .3s ease both}
             #sec-subscribers .admin-table tbody tr:last-child{margin-bottom:0}
-            #sec-subscribers .admin-table tbody td{display:block;border:none;padding:0;font-size:.85rem;min-height:44px;display:flex;align-items:center}
-            #sec-subscribers .admin-table tbody td:first-child{color:var(--text3);font-size:.76rem;min-width:22px;flex-shrink:0}
-            #sec-subscribers .admin-table tbody td:nth-child(2){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            #sec-subscribers .admin-table tbody td{display:flex;align-items:center;border:none;padding:0}
+            #sec-subscribers .admin-table tbody td:first-child{background:var(--bg);color:var(--text3);font-size:.7rem;font-weight:700;width:24px;height:24px;border-radius:50%;flex-shrink:0;justify-content:center;min-width:24px}
+            #sec-subscribers .admin-table tbody td:nth-child(2){flex:1;min-width:0;font-size:.88rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
             #sec-subscribers .admin-table tbody td:last-child{flex-shrink:0;margin-left:auto}
-            #sec-subscribers .admin-table tbody td:last-child .btn-sm{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center}
+            #sec-subscribers .admin-table tbody td:last-child .btn-sm{min-height:36px;min-width:36px;display:inline-flex;align-items:center;justify-content:center;padding:4px 10px}
+        }
+
+        /* ── Petit mobile ≤480px : affinages audit + subscribers ── */
+        @media(max-width:480px){
+            #sec-audit .admin-table tbody tr{padding:12px}
+            #sec-audit .admin-table tbody td{font-size:.8rem;padding-bottom:7px}
+            #sec-audit .admin-table tbody td::before{font-size:.58rem}
+            #sec-subscribers .admin-table tbody tr{padding:10px 12px;gap:10px}
+            #sec-subscribers .admin-table tbody td:nth-child(2){font-size:.82rem}
+            #sec-subscribers .admin-table tbody td:last-child .btn-sm{font-size:.72rem;padding:4px 8px}
+            .stat-cards{grid-template-columns:1fr 1fr}
+            .section-head{gap:8px}
+            .filter-btn{padding:4px 8px;font-size:.72rem}
+        }
+
+        /* ── Ultra-petit ≤320px ── */
+        @media(max-width:320px){
+            #content{padding:8px}
+            .card{padding:12px}
+            .section-head h2{font-size:.95rem}
+            #sec-audit .admin-table tbody tr,
+            #sec-subscribers .admin-table tbody tr{padding:10px}
+            #sec-subscribers .admin-table tbody td:first-child{display:none}
+            .stat-cards{grid-template-columns:1fr}
         }
 
         /* ── Petit mobile ≤480px ── */
@@ -496,7 +526,7 @@
                     <button class="btn btn-danger" style="font-size:.8rem;padding:7px 14px" onclick="if(confirm('Effacer le journal ?')){localStorage.removeItem('lr_audit');renderAudit();notif('Journal effacé')}">Effacer</button>
                 </div>
                 <div class="card" style="padding:0;overflow:hidden">
-                    <div class="table-scroll"><table class="admin-table" style="min-width:520px">
+                    <div class="table-scroll"><table class="admin-table" style="min-width:520px;width:100%">
                         <thead><tr><th>Horodatage</th><th>Action</th><th>Détail</th><th>Utilisateur</th></tr></thead>
                         <tbody id="audit-tbody"></tbody>
                     </table></div>
@@ -510,7 +540,7 @@
                     <button class="btn btn-primary" onclick="exportSubscribers()">⬇ Exporter CSV</button>
                 </div>
                 <div class="card" style="padding:0;overflow:hidden">
-                    <div class="table-scroll"><table class="admin-table w-full" style="min-width:320px;margin-bottom:0">
+                    <div class="table-scroll"><table class="admin-table w-full" style="margin-bottom:0">
                         <thead><tr><th>#</th><th>Email</th><th>Actions</th></tr></thead>
                         <tbody id="subs-tbody"></tbody>
                     </table></div>
