@@ -1160,6 +1160,31 @@
             return {success:true};
         }
 
+        // Image de fallback — affichée quand un article n'a pas de photo
+        const FALLBACK_IMG = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <pattern id="g" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <circle cx="30" cy="30" r="1.2" fill="rgba(255,255,255,0.04)"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#0D1B2A"/>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <rect x="0" y="0" width="1200" height="5" fill="#C01D35"/>
+  <rect x="0" y="625" width="1200" height="5" fill="#C01D35"/>
+  <rect x="0" y="195" width="1200" height="1" fill="rgba(255,255,255,0.05)"/>
+  <rect x="0" y="435" width="1200" height="1" fill="rgba(255,255,255,0.05)"/>
+  <rect x="200" y="0" width="1" height="630" fill="rgba(255,255,255,0.03)"/>
+  <rect x="1000" y="0" width="1" height="630" fill="rgba(255,255,255,0.03)"/>
+  <circle cx="600" cy="285" r="112" fill="rgba(255,255,255,0.025)" stroke="rgba(192,29,53,0.25)" stroke-width="1"/>
+  <text x="538" y="334" font-family="Georgia,'Times New Roman',serif" font-size="114" font-weight="700" fill="#FFFFFF" text-anchor="middle">L</text>
+  <rect x="597" y="222" width="2" height="124" fill="rgba(192,29,53,0.55)"/>
+  <text x="664" y="334" font-family="Georgia,'Times New Roman',serif" font-size="114" font-weight="700" fill="#C01D35" text-anchor="middle">R</text>
+  <rect x="358" y="378" width="192" height="1" fill="rgba(255,255,255,0.14)"/>
+  <rect x="650" y="378" width="192" height="1" fill="rgba(255,255,255,0.14)"/>
+  <text x="600" y="412" font-family="Georgia,'Times New Roman',serif" font-size="23" fill="rgba(255,255,255,0.58)" text-anchor="middle" letter-spacing="12">LIGNE ROUGE</text>
+  <text x="600" y="442" font-family="Arial,Helvetica,sans-serif" font-size="11" fill="rgba(255,255,255,0.22)" text-anchor="middle" letter-spacing="4">MÉDIA INDÉPENDANT · AFRIQUE FRANCOPHONE</text>
+</svg>`);
+
         // ======================================================
         // MODULE SÉCURITÉ — NE PAS MODIFIER
         // ======================================================
@@ -1184,11 +1209,11 @@
                 return u;
             },
 
-            // Pour les <img src> : autorise data: (base64 admin uploads), bloque javascript:/vbscript:
+            // Pour les <img src> : retourne le fallback brandé si vide, bloque javascript:/vbscript:
             imgUrl: u => {
-                if (!u) return '';
+                if (!u) return FALLBACK_IMG;
                 const lower = String(u).trim().toLowerCase();
-                if (/^(javascript|vbscript):/.test(lower)) return '';
+                if (/^(javascript|vbscript):/.test(lower)) return FALLBACK_IMG;
                 return u;
             },
 
@@ -1401,7 +1426,7 @@
         function updateArticleSchema(art) {
             removeArticleSchema();
             const words = art.body ? art.body.trim().split(/\s+/).length : 0;
-            const imgUrl = art.img && art.img.startsWith('http') ? art.img : 'https://khaledabraham1-dot.github.io/ligne-rouge/icon-512.png';
+            const imgUrl = art.img && art.img.startsWith('http') ? art.img : 'https://khaledabraham1-dot.github.io/ligne-rouge/icon-512.png'; // Schema.org requiert une URL absolue (pas data:)
             const schema = {
                 "@context": "https://schema.org",
                 "@type": "NewsArticle",
@@ -1534,7 +1559,7 @@
                         </div>
                         <button onclick="showPage('page-home')" style="font-size:.8rem;color:var(--text3);border:1px solid var(--border);padding:6px 14px;border-radius:20px;cursor:pointer;">← Retour</button>
                     </div>
-                    ${art.img ? `<div class="art-main-img-wrap" style="cursor:zoom-in" onclick="openImgModal(this.querySelector('img').src,this.querySelector('img').alt)"><img src="${art.img}" alt="${Sec.esc(art.title)}" loading="lazy"></div>` : ''}
+                    <div class="art-main-img-wrap" style="cursor:zoom-in" onclick="openImgModal(this.querySelector('img').src,this.querySelector('img').alt)"><img src="${Sec.imgUrl(art.img)}" alt="${Sec.esc(art.title)}" loading="lazy"></div>
                     <div class="art-body">${art.body}</div>
                     ${shareBar}
                     ${relatedHtml}
