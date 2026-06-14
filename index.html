@@ -1879,6 +1879,14 @@
             }
         });
 
+        // Service Worker — offline + cache instantané
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/ligne-rouge/sw.js')
+                    .catch(e => console.warn('[SW]', e));
+            });
+        }
+
     </script>
 </body>
 </html>
