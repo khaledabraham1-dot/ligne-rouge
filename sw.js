@@ -1,6 +1,6 @@
 // Ligne Rouge — Service Worker
 // Mettre à jour CACHE_VER à chaque déploiement majeur pour invalider les caches
-const CACHE_VER   = 'lr-v2';
+const CACHE_VER   = 'lr-v3';
 const STATIC      = `${CACHE_VER}-static`;
 const DYNAMIC     = `${CACHE_VER}-dynamic`;
 const IMG         = `${CACHE_VER}-images`;
