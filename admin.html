@@ -209,8 +209,8 @@
             .stat-card{padding:14px 12px}
             .stat-value{font-size:1.4rem}
             .stat-label{font-size:.7rem;line-height:1.3}
-            .arts-actions{flex-direction:row;flex-wrap:wrap;gap:6px;align-items:center}
-            .arts-actions .btn-sm{flex:1;min-width:70px;text-align:center;justify-content:center;display:inline-flex;padding:9px 8px;min-height:36px;margin:0}
+            .arts-actions{flex-direction:column;gap:6px;align-items:stretch}
+            .arts-actions .btn-sm{width:100%;text-align:center;justify-content:center;display:flex;padding:10px 8px;min-height:40px;margin:0}
             #content{padding:12px}
             .login-card{padding:32px 20px;margin:0 12px;max-width:100%;width:auto}
             .filter-group{gap:4px;flex-wrap:wrap}
@@ -982,7 +982,7 @@ async function renderArts() {
                 <div class="arts-actions">
                     <button class="btn-sm" onclick="editArt('${Sec.esc(String(a.id))}')">✏ Modifier</button>
                     <button class="btn-sm ${a.status === 'published' ? 'btn-warning' : 'btn-success'}" onclick="togglePub('${Sec.esc(String(a.id))}')">${a.status === 'published' ? '⏸ Dépublier' : '▶ Publier'}</button>
-                    <button class="btn-sm btn-danger" onclick="delArt('${Sec.esc(String(a.id))}')">✕</button>
+                    <button class="btn-sm btn-danger" onclick="delArt('${Sec.esc(String(a.id))}')">✕ Supprimer</button>
                 </div>
             </td>
         </tr>
